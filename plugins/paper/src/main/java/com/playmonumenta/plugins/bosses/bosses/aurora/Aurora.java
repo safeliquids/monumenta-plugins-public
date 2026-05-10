@@ -222,7 +222,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 		if (mRage >= 100) {
 			phase2Actives.add(new SpellStardustDetonation(plugin, boss, spawnLoc, 7, mRage >= 200 ? this::destroyBlocksHarsh : this::destroyBlocks));
 			phase3Actives.add(new SpellStardustDetonation(plugin, boss, spawnLoc, 7, mRage >= 200 ? this::destroyBlocksHarsh : this::destroyBlocks));
-			phase4Actives.add(new SpellStardustDetonation(plugin, boss, spawnLoc, mRage >= 200 ? 3 : 4.5, this::destroyBlocks));
+			phase4Actives.add(new SpellStardustDetonation(plugin, boss, spawnLoc, mRage >= 200 ? 5 : 4, this::destroyBlocks));
 		}
 		if (mRage >= 160) {
 			phase1Actives.add(rageStarShower);

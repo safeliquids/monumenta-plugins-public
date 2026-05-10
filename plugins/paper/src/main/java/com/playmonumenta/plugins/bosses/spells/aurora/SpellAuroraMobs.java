@@ -46,7 +46,7 @@ public class SpellAuroraMobs extends Spell {
 		}
 		mSpellCooldownManager.setOnCooldown();
 
-		for (int i = 0; i < (mRage >= 200 ? NORMAL_COUNT : NORMAL_COUNT_200_RAGE); i++) {
+		for (int i = 0; i < (mRage >= 200 ? NORMAL_COUNT_200_RAGE : NORMAL_COUNT); i++) {
 			spawnMob();
 		}
 	}
