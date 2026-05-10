@@ -115,7 +115,9 @@ public class SpellSpatialShattering extends Spell implements CooldownReducible {
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
 				super.cancel();
-				mBoss.setPose(Pose.STANDING);
+				if (mBoss.isValid()) {
+					mBoss.setPose(Pose.STANDING);
+				}
 			}
 		};
 		mActiveRunnables.add(runnable);
