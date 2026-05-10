@@ -148,7 +148,9 @@ public class SpellMagmaticConvergence extends Spell implements CoreElemental.Cor
 						direction.setY(Math.abs(direction.getY()));
 						Location finalLocation = mCenterLoc.clone().add(direction);
 						b.location(finalLocation);
-						mBoss.getWorld().playSound(finalLocation, Sound.ENTITY_GENERIC_EXPLODE, SoundCategory.HOSTILE, 0.6f, 0.5f + (float) (1 - mRadius / RADIUS) / 2);
+						float pitch = 0.5f + (float) (1 - mRadius / RADIUS) / 2;
+						Bukkit.getScheduler().runTask(mPlugin, () ->
+							mBoss.getWorld().playSound(finalLocation, Sound.ENTITY_GENERIC_EXPLODE, SoundCategory.HOSTILE, 0.6f, pitch));
 					})
 						.count(15)
 						.spawnAsEntityActive(mBoss);
