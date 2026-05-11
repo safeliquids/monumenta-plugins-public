@@ -469,7 +469,7 @@ public class EntityUtils {
 
 	public static boolean isStillLoaded(Entity entity) {
 		Location loc = entity.getLocation();
-		if (!loc.isChunkLoaded()) {
+		if (!loc.isWorldLoaded() || !loc.isChunkLoaded()) {
 			return false;
 		}
 

@@ -39,6 +39,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -222,6 +223,15 @@ public class WorldListener implements Listener {
 		for (Entity entity : entities) {
 			saveEntityScores(entity, true, "world unload");
 		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onWorldUnloadClearTracked(WorldUnloadEvent event) {
+		World world = event.getWorld();
+		mPlugin.mTrackingManager.mBoats.clearWorld(world);
+		mPlugin.mTrackingManager.mCreepers.clearWorld(world);
+		mPlugin.mTrackingManager.mMinecarts.clearWorld(world);
+		mPlugin.mTrackingManager.mSilverfish.clearWorld(world);
 	}
 
 	private void saveEntityScores(Entity entity, boolean deleteFromScoreboard, String reason) {
