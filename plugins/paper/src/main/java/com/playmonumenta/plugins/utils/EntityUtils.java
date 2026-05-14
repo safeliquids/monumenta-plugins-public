@@ -1566,7 +1566,7 @@ public class EntityUtils {
 		return getAdjustedBlastDamage(power, originalDamage, baseDamage);
 	}
 
-	private static double getAdjustedBlastDamage(double power, double originalDamage, double baseDamage) {
+	public static double getAdjustedBlastDamage(double power, double originalDamage, double baseDamage) {
 		//Vanilla formula for maximum damage taken
 		double maxOriginalDamage = 2 * 7 * power + 1;
 

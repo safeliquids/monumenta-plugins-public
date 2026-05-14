@@ -258,6 +258,7 @@ public class BossManager implements Listener {
 		registerStatelessBoss(DummyDecoyBoss.identityTag, DummyDecoyBoss::new);
 		registerStatelessBoss(EarthshakeBoss.identityTag, EarthshakeBoss::new, new EarthshakeBoss.Parameters());
 		registerStatelessBoss(EruptionBoss.identityTag, EruptionBoss::new, new EruptionBoss.Parameters());
+		registerStatelessBoss(ExplosionBoss.identityTag, ExplosionBoss::new, new ExplosionBoss.Parameters());
 		registerStatelessBoss(FacelessOneBoss.identityTag, FacelessOneBoss::new);
 		registerStatelessBoss(FacingBoss.identityTag, FacingBoss::new, new FacingBoss.Parameters());
 		registerStatelessBoss(FakePlayerBoss.identityTag, FakePlayerBoss::new, new FakePlayerBoss.Parameters());
