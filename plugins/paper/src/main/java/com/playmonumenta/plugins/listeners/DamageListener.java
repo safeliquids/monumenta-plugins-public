@@ -272,7 +272,10 @@ public class DamageListener implements Listener {
 		if (event.getDamagee() instanceof Player player && player.getScoreboardTags().contains(DamageTraceCommand.TAG)) {
 			sendDebugMessage(player, event);
 		}
+	}
 
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void monitorDamage(DamageEvent event) {
 		ShowMyDpsCommand.onDamage(event);
 	}
 
