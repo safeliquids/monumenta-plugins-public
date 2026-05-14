@@ -716,6 +716,10 @@ public class CursedListener extends PacketAdapter {
 		Bukkit.getScheduler().runTask(Plugin.getInstance(), () -> PlayerData.removeEntity(entityId));
 	}
 
+	public static boolean seesFakePlayer(Player player) {
+		return PlayerData.containsPlayer(player.getUniqueId());
+	}
+
 	/**
 	 * Updates the fake player for CustomName or Skin changes
 	 * @param entity  the fake player entity

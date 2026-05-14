@@ -376,6 +376,7 @@ public class BossManager implements Listener {
 		registerStatelessBoss(ResistanceBoss.identityTag, ResistanceBoss::new, new ResistanceBoss.Parameters());
 		registerStatelessBoss(RestlessSoulsBoss.identityTag, RestlessSoulsBoss::new);
 		registerStatelessBoss(RiftBoss.identityTag, RiftBoss::new, new RiftBoss.Parameters());
+		registerStatelessBoss(RiptideBoss.identityTag, RiptideBoss::new, new RiptideBoss.Parameters());
 		registerStatelessBoss(RunAwayBoss.identityTag, RunAwayBoss::new);
 		registerStatelessBoss(RushDownMobBoss.identityTag, RushDownMobBoss::new);
 		registerStatelessBoss(ScoutVolleyBoss.identityTag, ScoutVolleyBoss::new, new ScoutVolleyBoss.Parameters());
