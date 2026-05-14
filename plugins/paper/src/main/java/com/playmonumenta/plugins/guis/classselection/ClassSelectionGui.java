@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.abilities.AbilityInfo;
 import com.playmonumenta.plugins.abilities.AbilityManager;
 import com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder;
+import com.playmonumenta.plugins.classes.MonumentaClasses;
 import com.playmonumenta.plugins.classes.PlayerClass;
 import com.playmonumenta.plugins.classes.PlayerSpec;
 import com.playmonumenta.plugins.effects.AbilitySilence;
@@ -63,7 +64,17 @@ public class ClassSelectionGui extends Gui {
 		mFromYellowTess = fromYellowTess;
 		mWasYellowTessOnCooldown = fromYellowTess && YellowTesseractOverride.getCooldown(player) > 0;
 		mGuiTextures = GUIUtils.getGuiTextureObjective(player);
-		mPage = new ClassPage(this);
+
+		// this is awkward but once flowey's class cleanup pr gets merged it'll be cleaner
+		// whoever is resolving the inevitable merge conflict here, check branch `lucy/playerabilities2`
+		int classid = AbilityUtils.getClassNum(playerToView);
+		MonumentaClasses monumentaClasses = new MonumentaClasses();
+		PlayerClass pclass = monumentaClasses.getClassById(classid);
+		if (readOnly && pclass != null) {
+			mPage = new SkillPage(this, pclass);
+		} else {
+			mPage = new ClassPage(this);
+		}
 		mPlayerToView = playerToView;
 		mReadOnly = readOnly;
 	}
@@ -615,17 +626,17 @@ public class ClassSelectionGui extends Gui {
 	}
 
 	protected boolean hasClass() {
-		return AbilityUtils.getClassNum(mPlayer) != 0;
+		return AbilityUtils.getClassNum(mPlayerToView) != 0;
 	}
 
 	protected boolean hasSpec() {
-		return AbilityUtils.getSpecNum(mPlayer) != 0;
+		return AbilityUtils.getSpecNum(mPlayerToView) != 0;
 	}
 
 	protected boolean isClass(PlayerClass displayedClass, @Nullable PlayerSpec displayedSpec) {
-		boolean isThisClass = displayedClass.mClass == AbilityUtils.getClassNum(mPlayer);
+		boolean isThisClass = displayedClass.mClass == AbilityUtils.getClassNum(mPlayerToView);
 		if (isThisClass && displayedSpec != null) {
-			isThisClass = displayedSpec.mSpecialization == AbilityUtils.getSpecNum(mPlayer);
+			isThisClass = displayedSpec.mSpecialization == AbilityUtils.getSpecNum(mPlayerToView);
 		}
 		return isThisClass;
 	}
