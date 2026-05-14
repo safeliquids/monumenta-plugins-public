@@ -1,5 +1,4 @@
 repositories {
-	mavenLocal()
 	maven("https://maven.playpro.com/")
 }
 
@@ -32,7 +31,7 @@ dependencies {
 	compileOnly("com.playmonumenta:redissync:6.1.0:all")
 	compileOnly("com.playmonumenta:monumenta-network-chat:2.13")
 	compileOnly("com.playmonumenta:monumenta-network-relay:2.13")
-	compileOnly("com.playmonumenta:structure-management:10.11.0")
+	compileOnly("com.playmonumenta:structure-management:10.7.0")
 	compileOnly("com.playmonumenta:worlds:2.3.1")
 	compileOnly("com.playmonumenta:libraryofsouls:5.3.1")
 	compileOnly("com.bergerkiller.bukkit:BKCommonLib:1.20.6-v1")

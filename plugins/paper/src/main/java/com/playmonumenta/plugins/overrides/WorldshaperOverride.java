@@ -308,9 +308,6 @@ public class WorldshaperOverride {
 					new PartialParticle(Particle.SMOKE_NORMAL, location, 10, 0.15, 0.15, 0.15).spawnAsPlayerActive(player);
 					world.playSound(player.getLocation(), Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1f, 0.75f);
 					CoreProtectIntegration.logPlacement(player, location, blockData.getMaterial(), blockData);
-					if (ServerProperties.lootingLimiterEnabled()) {
-						Plugin.getInstance().mPlacedBlocksListener.placeBlock(player, block);
-					}
 				} else {
 					if (blocksPlaced == 0) {
 						player.sendMessage(Component.text("There are no valid blocks to place in the shulker!", NamedTextColor.RED));

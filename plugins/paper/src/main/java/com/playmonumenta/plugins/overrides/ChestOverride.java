@@ -2,6 +2,7 @@ package com.playmonumenta.plugins.overrides;
 
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.delves.DelveLootTableGroup;
+import com.playmonumenta.plugins.listeners.LootingLimiter;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.ChestUtils;
 import com.playmonumenta.plugins.utils.MessagingUtils;
@@ -202,8 +203,7 @@ public class ChestOverride extends BaseOverride {
 		} else if (!breakable(block)) {
 			return false;
 		} else if (!ServerProperties.getLootingLimiterIgnoreBreakingChests()
-			&& Plugin.getInstance().mLootingLimiter != null
-			&& !Plugin.getInstance().mLootingLimiter.checkChest(block, null)) { // must be the last check, as this subtracts from players' activity scores if successful
+			&& !LootingLimiter.checkChest(block, null)) { // must be the last check, as this subtracts from players' activity scores if successful
 			return false;
 		}
 
