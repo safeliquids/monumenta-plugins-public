@@ -221,6 +221,7 @@ public class Plugin extends JavaPlugin {
 	public HuntsManager mHuntsManager;
 	public BalanceModeManager mBalanceModeManager;
 	public @Nullable ProtocolLibIntegration mProtocolLibIntegration = null;
+	public PlayerSkinManager mPlayerSkinManager;
 
 	// INSTANCE is set if the plugin is properly enabled
 	@Nullable
@@ -373,7 +374,6 @@ public class Plugin extends JavaPlugin {
 		AddSpawnerEffectMarkersCommand.register();
 		SiriusNPCBoss.register();
 		EffectListCommand.register();
-		PlayerSkinManagerCommand.register();
 		ScanMobsCommand.register();
 		WhatTableCommand.register();
 		StatTrackAdd.register();
@@ -418,6 +418,7 @@ public class Plugin extends JavaPlugin {
 		ItemStatCommands.registerNameCommand();
 		ItemStatCommands.registerRemoveCommand();
 		ItemStatCommands.registerCopyCommand();
+		PlayerSkinManagerCommand.register(this);
 
 		mJunkItemsListener = new JunkItemListener();
 		mItemDropListener = new ItemDropListener();
@@ -446,7 +447,7 @@ public class Plugin extends JavaPlugin {
 		MMLog.info("Setting $IsPlay const = " + (IS_PLAY_SERVER ? 1 : 0) + " (" + (IS_PLAY_SERVER ? "play" : "build") + " server)");
 
 		PluginManager manager = getServer().getPluginManager();
-		PlayerSkinManager playerSkinManager = new PlayerSkinManager();
+		mPlayerSkinManager = new PlayerSkinManager(this);
 
 		if (mHttpManager != null) {
 			mHttpManager.start();
@@ -631,7 +632,7 @@ public class Plugin extends JavaPlugin {
 		manager.registerEvents(new GuiListener(), this);
 		manager.registerEvents(mHuntsManager, this);
 		PlayerTitleManager.getInstance().onEnable(this, manager);
-		manager.registerEvents(playerSkinManager, this);
+		manager.registerEvents(mPlayerSkinManager, this);
 		manager.registerEvents(mDoubleJumpManager, this);
 
 		if (ServerProperties.getDepthsEnabled()) {

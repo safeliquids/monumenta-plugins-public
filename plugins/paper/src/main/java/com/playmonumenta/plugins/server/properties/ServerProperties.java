@@ -84,6 +84,7 @@ public class ServerProperties {
 	private boolean mDepthsEnabled = false;
 	private boolean mTrickyCreepersEnabled = true;
 	private @Nullable String mGameplayDataExportPath = null;
+	private boolean mSkinManagerReadonly = true;
 
 	private JsonObject mDebugParameters = new JsonObject();
 
@@ -286,6 +287,10 @@ public class ServerProperties {
 		return INSTANCE.mTrickyCreepersEnabled;
 	}
 
+	public static boolean getSkinManagerWritable() {
+		return !INSTANCE.mSkinManagerReadonly;
+	}
+
 	public static boolean getMasterworkRefundEnabled() {
 		return INSTANCE.mMasterworkRefundEnabled;
 	}
@@ -457,6 +462,7 @@ public class ServerProperties {
 
 			mDepthsEnabled = getPropertyValueBool(object, "depthsEnabled", mDepthsEnabled);
 			mTrickyCreepersEnabled = getPropertyValueBool(object, "trickyCreepersEnabled", mTrickyCreepersEnabled);
+			mSkinManagerReadonly = getPropertyValueBool(object, "skinManagerReadonly", mSkinManagerReadonly);
 
 			if (!(object.get("debugParameters") instanceof JsonObject debugParameters)) {
 				mDebugParameters = new JsonObject();
