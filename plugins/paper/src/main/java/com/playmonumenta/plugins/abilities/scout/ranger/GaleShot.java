@@ -147,9 +147,9 @@ public class GaleShot extends Ability implements AbilityWithChargesOrStacks, Abi
 
 		mCastTime = currTick;
 		mCount--;
-		mPlugin.mEffectManager.clearEffects(mPlayer, GALE_SHOT_IMBUEMENT);
-		if (mCount > 0) {
-			galeShotImbuement();
+
+		if (mCount <= 0) {
+			mPlugin.mEffectManager.clearEffects(mPlayer, GALE_SHOT_IMBUEMENT);
 		}
 
 		ItemStack mainHand = mPlayer.getInventory().getItemInMainHand();
@@ -334,11 +334,9 @@ public class GaleShot extends Ability implements AbilityWithChargesOrStacks, Abi
 		mPlugin.mEffectManager.addEffect(mPlayer, GALE_SHOT_IMBUEMENT, new Aesthetics(mDuration,
 			(entity, fourHertz, twoHertz, oneHertz) -> mCosmetic.tick(mPlayer, mPlayer.getLocation()),
 			entity -> Bukkit.getScheduler().runTask(mPlugin, () -> {
-				if (mCount <= 0) {
-					mAbilityCount = 0;
-					mCount = 0;
-					updateAbility();
-				}
+				mAbilityCount = 0;
+				mCount = 0;
+				updateAbility();
 			})
 		).deleteOnAbilityUpdate(true));
 	}
