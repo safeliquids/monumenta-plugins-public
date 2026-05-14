@@ -270,9 +270,21 @@ public class DailiesGui extends Gui {
 						iconLore.add(Component.text("Completed ", NamedTextColor.BLUE)
 							.append(Component.text(String.format("%d", ScoreboardUtils.getScoreboardValue(mPlayer, dailyEntry.mCompletionScore).orElse(0)), NamedTextColor.GOLD)
 								.append(Component.text(" time(s).", NamedTextColor.BLUE))).decoration(TextDecoration.ITALIC, false));
-						iconMeta.lore(iconLore);
-						editedIcon.setItemMeta(iconMeta);
-						setItem(editingRow, editingColumn, editedIcon);
+						if (dailyEntry.equals(TrackedDailies.DAILY3)) { // Special case for Ring Bounties allowing opening of weekly clear list
+							iconLore.add(Component.text("Click to view Points of Interest weekly clear list.", NamedTextColor.DARK_GRAY));
+							iconMeta.lore(iconLore);
+							editedIcon.setItemMeta(iconMeta);
+							setItem(editingRow, editingColumn, editedIcon)
+								.onLeftClick(() -> {
+									mPlayer.playSound(mPlayer, Sound.BLOCK_DISPENSER_DISPENSE, SoundCategory.PLAYERS, 0.5f, 1.0f);
+									runConsoleCommand("weeklypoi list @S");
+									close();
+								});
+						} else {
+							iconMeta.lore(iconLore);
+							editedIcon.setItemMeta(iconMeta);
+							setItem(editingRow, editingColumn, editedIcon);
+						}
 						// Step 2: Place the glass item for the daily entry
 						if (dailyEntry.equals(TrackedDailies.SNOWSPIRIT) && !mPlayer.hasPermission("monumenta.event.winter")) { // Hardcoded glass for snow spirit permission locked
 							setItem(editingRow + 1, editingColumn, GUIUtils.createBasicItem(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "Daily Unavailable", NamedTextColor.DARK_AQUA, true,
