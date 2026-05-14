@@ -175,7 +175,7 @@ public class DamageListener implements Listener {
 		LivingEntity source = event.getSource();
 
 		// Why does this exist?
-		event.updateDamageWithMultiplier(EntityUtils.vulnerabilityMult(damagee), DamageEvent.DamageType.getScalableDamageType());
+		event.updateDamageWithMultiplier(EntityUtils.vulnerabilityMult(damagee), DamageEvent.DamageType.getScalableDamageTypes());
 
 		// If this event was caused by /kill, the entity should immediately die with no further processing
 		if (event.getCause().equals(DamageCause.KILL)) {

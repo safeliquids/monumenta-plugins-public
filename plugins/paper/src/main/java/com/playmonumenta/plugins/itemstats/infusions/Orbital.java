@@ -42,7 +42,7 @@ public class Orbital implements Infusion {
 	@Override
 	public void onHurt(Plugin plugin, Player player, double value, DamageEvent event, @Nullable Entity damager, @Nullable LivingEntity source) {
 		if (source != null && !source.isOnGround()) {
-			event.updateDamageWithMultiplier(getDamageTakenMultiplier(value), DamageEvent.DamageType.getScalableDamageType());
+			event.updateDamageWithMultiplier(getDamageTakenMultiplier(value), DamageEvent.DamageType.getScalableDamageTypes());
 			knockDown(player, source);
 		}
 	}

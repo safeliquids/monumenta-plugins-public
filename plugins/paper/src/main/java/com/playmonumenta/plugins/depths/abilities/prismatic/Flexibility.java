@@ -45,7 +45,7 @@ public class Flexibility extends DepthsAbility {
 
 	@Override
 	public boolean onDamage(DamageEvent event, LivingEntity enemy) {
-		event.updateDamageWithMultiplier(mDamage, DamageEvent.DamageType.getScalableDamageType());
+		event.updateDamageWithMultiplier(mDamage, DamageEvent.DamageType.getScalableDamageTypes());
 		return false;
 	}
 

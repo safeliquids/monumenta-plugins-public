@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Outrage implements Enchantment {
 	private static final double DAMAGE_INCREASE = 0.002;
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
 
 	@Override
 	public EnchantmentType getEnchantmentType() {

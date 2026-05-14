@@ -1,7 +1,6 @@
 package com.playmonumenta.plugins.bosses.bosses;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.abilities.mage.ElementalArrows;
 import com.playmonumenta.plugins.bosses.SpellManager;
 import com.playmonumenta.plugins.bosses.parameters.BossParam;
 import com.playmonumenta.plugins.bosses.parameters.SoundsList;
@@ -73,8 +72,6 @@ public class IdolatryBoss extends BossAbilityGroup {
 		LivingEntity damagedEntity = event.getDamagee();
 		if (mBoss == null || mBoss.isDead()
 			|| damagedEntity.equals(mBoss)
-			|| event.getType() == DamageEvent.DamageType.PROJECTILE // Prevents doubled Projectile damage
-			|| ElementalArrows.isElementalArrowDamage(event) // Prevents doubled EArrows damage
 			|| event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION
 			|| damagedEntity instanceof Player
 			|| damagedEntity instanceof Creeper

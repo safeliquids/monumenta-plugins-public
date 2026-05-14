@@ -36,7 +36,7 @@ public class FlatDamageDealt extends Effect {
 	}
 
 	public EnumSet<DamageType> getAffectedDamageTypes() {
-		return mAffectedDamageTypes == null ? DamageType.getScalableDamageType() : mAffectedDamageTypes;
+		return mAffectedDamageTypes == null ? DamageType.getScalableDamageTypes() : mAffectedDamageTypes;
 	}
 
 	@Override

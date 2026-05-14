@@ -21,7 +21,7 @@ public class CurseOfLust extends DepthsAbility {
 	public static final int MIN_BLOCKS = 7;
 	public static final int MAX_BLOCKS = 17;
 	public static final double DAMAGE_REDUCTION_PER_BLOCK = 0.08;
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
 
 	public static final DepthsAbilityInfo<CurseOfLust> INFO =
 		new DepthsAbilityInfo<>(CurseOfLust.class, ABILITY_NAME, CurseOfLust::new, DepthsTree.CURSE, DepthsTrigger.PASSIVE)

@@ -29,7 +29,7 @@ public class PercentDamageDealt extends Effect {
 							  final String effectID, final boolean deleteOnAbilityRefresh) {
 		super(duration, effectID, deleteOnAbilityRefresh);
 		mAmount = amount;
-		mAffectedDamageTypes = affectedDamageTypes == null ? DamageType.getScalableDamageType() : affectedDamageTypes;
+		mAffectedDamageTypes = affectedDamageTypes == null ? DamageType.getScalableDamageTypes() : affectedDamageTypes;
 		mPriority = priority;
 		mPredicate = predicate;
 	}
@@ -59,7 +59,7 @@ public class PercentDamageDealt extends Effect {
 	 * @return Modified PercentDamageDealt instance
 	 */
 	public PercentDamageDealt damageTypes(final @Nullable EnumSet<DamageType> affectedDamageTypes) {
-		mAffectedDamageTypes = affectedDamageTypes == null ? DamageType.getScalableDamageType() : affectedDamageTypes;
+		mAffectedDamageTypes = affectedDamageTypes == null ? DamageType.getScalableDamageTypes() : affectedDamageTypes;
 		return this;
 	}
 

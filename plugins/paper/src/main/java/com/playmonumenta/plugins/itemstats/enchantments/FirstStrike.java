@@ -42,6 +42,13 @@ public class FirstStrike implements Enchantment {
 		DamageType.PROJECTILE_SKILL
 	);
 
+	private static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = EnumSet.noneOf(DamageEvent.DamageType.class);
+
+	static {
+		AFFECTED_TYPES.addAll(ACTIVATION_DAMAGE_TYPES);
+		AFFECTED_TYPES.addAll(SAME_TICK_DAMAGE_TYPES);
+	}
+
 	private static final EnumSet<ClassAbility> IGNORED_ABILITIES = EnumSet.of(
 		ClassAbility.HUNTING_COMPANION
 	);
@@ -103,7 +110,7 @@ public class FirstStrike implements Enchantment {
 	}
 
 	public void triggerFirstStrike(Plugin plugin, Player player, double bonus, DamageEvent event, LivingEntity enemy) {
-		event.updateGearDamageWithMultiplier(1 + bonus, SAME_TICK_DAMAGE_TYPES);
+		event.updateGearDamageWithMultiplier(1 + bonus, AFFECTED_TYPES);
 
 		double widthDelta = PartialParticle.getWidthDelta(enemy);
 		double doubleWidthDelta = widthDelta * 2;

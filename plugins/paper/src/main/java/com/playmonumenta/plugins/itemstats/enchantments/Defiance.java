@@ -40,6 +40,6 @@ public class Defiance implements Enchantment {
 				mult += damagePerAilment;
 			}
 		}
-		event.updateGearDamageWithMultiplier(mult, DamageEvent.DamageType.getScalableDamageType());
+		event.updateGearDamageWithMultiplier(mult, DamageEvent.DamageType.getScalableDamageTypes());
 	}
 }

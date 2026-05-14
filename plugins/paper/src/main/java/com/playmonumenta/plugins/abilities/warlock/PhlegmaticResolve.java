@@ -176,7 +176,7 @@ public class PhlegmaticResolve extends Ability {
 
 	@Override
 	public void onHurt(DamageEvent event, @Nullable Entity damager, @Nullable LivingEntity source) {
-		if (isEnhanced() && !DamageEvent.DamageType.getUnscalableDamageType().contains(event.getType())
+		if (isEnhanced() && !DamageEvent.DamageType.getUnscalableDamageTypes().contains(event.getType())
 			&& event.getCause() != EntityDamageEvent.DamageCause.FIRE_TICK &&
 			!event.isBlocked()) {
 

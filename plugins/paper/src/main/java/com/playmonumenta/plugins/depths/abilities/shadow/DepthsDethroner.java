@@ -22,7 +22,7 @@ public class DepthsDethroner extends DepthsAbility {
 	public static final String ABILITY_NAME = "Dethroner";
 	public static final double[] ELITE_DAMAGE = {0.14, 0.21, 0.28, 0.35, 0.42, 0.56};
 	public static final double[] BOSS_DAMAGE = {0.10, 0.15, 0.20, 0.25, 0.30, 0.40};
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
 
 	public static final DepthsAbilityInfo<DepthsDethroner> INFO =
 		new DepthsAbilityInfo<>(DepthsDethroner.class, ABILITY_NAME, DepthsDethroner::new, DepthsTree.SHADOWDANCER, DepthsTrigger.PASSIVE)
