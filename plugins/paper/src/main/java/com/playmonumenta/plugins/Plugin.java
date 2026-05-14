@@ -91,6 +91,7 @@ import com.playmonumenta.plugins.network.ClientModHandler;
 import com.playmonumenta.plugins.network.HttpManager;
 import com.playmonumenta.plugins.nodeplanner.NodePlanner;
 import com.playmonumenta.plugins.overrides.ItemOverrides;
+import com.playmonumenta.plugins.overrides.LucidityOverride;
 import com.playmonumenta.plugins.parrots.ParrotManager;
 import com.playmonumenta.plugins.particle.ParticleManager;
 import com.playmonumenta.plugins.player.PlayerSaturationTracker;
@@ -915,6 +916,7 @@ public class Plugin extends JavaPlugin {
 		MonumentaNetworkRelayIntegration.disable();
 		MetadataUtils.removeAllMetadata(this);
 		PlayerTitleManager.getInstance().onDisable();
+		LucidityOverride.removeAllDisplays();
 
 		// Log any async threads that haven't finished yet; these need to be handled before this point!
 		for (BukkitWorker worker : Bukkit.getScheduler().getActiveWorkers()) {

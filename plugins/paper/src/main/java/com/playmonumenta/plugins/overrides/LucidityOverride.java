@@ -3,14 +3,16 @@ package com.playmonumenta.plugins.overrides;
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.effects.ItemCooldown;
-import com.playmonumenta.plugins.listeners.SpawnerListener;
 import com.playmonumenta.plugins.utils.BlockUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,8 +23,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,8 +44,22 @@ public class LucidityOverride extends BaseOverride {
 	private static final TextColor TEXT_COLOR = TextColor.color(COLOR.asRGB());
 	private static final BlockData SPAWNER_BLOCK_DATA = Material.SPAWNER.createBlockData();
 
+	private static final Map<Location, UUID> mLuciditySpawners = new HashMap<>();
+
 	@Override
 	public boolean rightClickItemInteraction(Plugin plugin, Player player, Action action, ItemStack item, @Nullable Block ignored) {
+		return tryLucidity(plugin, player, item);
+	}
+
+	@Override
+	public boolean inventoryClickInteraction(Plugin plugin, Player player, ItemStack item, InventoryClickEvent event) {
+		if (event.getClick() == ClickType.RIGHT) {
+			return tryLucidity(plugin, player, item);
+		}
+		return true;
+	}
+
+	private static boolean tryLucidity(Plugin plugin, Player player, ItemStack item) {
 		if (!ItemUtils.getPlainName(item).equals(LUCIDITY_NAME)) {
 			return true;
 		}
@@ -52,6 +71,8 @@ public class LucidityOverride extends BaseOverride {
 			player.sendMessage(Component.text("Lucidity is still on cooldown.", NamedTextColor.RED));
 			return false;
 		}
+		// Prevent spamming Lucidity
+		plugin.mEffectManager.addEffect(player, COOLDOWN_SOURCE, new ItemCooldown(COOLDOWN, item, item.getType(), plugin));
 
 		World world = player.getWorld();
 		Location playerLocation = player.getLocation();
@@ -68,7 +89,7 @@ public class LucidityOverride extends BaseOverride {
 	}
 
 	private static boolean revealSpawners(Location playerLocation, World world) {
-		HashMap<Location, BlockDisplay> displays = new HashMap<>(40);
+		HashMap<Location, UUID> displays = new HashMap<>(40);
 		for (Block block : BlockUtils.getBlocksInCube(playerLocation, RANGE)) {
 			if (block.getState() instanceof CreatureSpawner spawner) {
 				if (spawner.getRequiredPlayerRange() <= 0) {
@@ -80,12 +101,36 @@ public class LucidityOverride extends BaseOverride {
 					display.setGlowColorOverride(COLOR);
 					display.setGlowing(true);
 				});
-				displays.put(loc, blockDisplay);
+				displays.put(loc, blockDisplay.getUniqueId());
 			}
 		}
-		SpawnerListener.addLucidityDisplays(displays);
+		mLuciditySpawners.putAll(displays);
 
 		return !displays.isEmpty();
 	}
 
+	public static void removeDisplay(Block block) {
+		@Nullable
+		UUID remove = mLuciditySpawners.remove(block.getLocation());
+		if (remove == null) {
+			return;
+		}
+		@Nullable
+		Entity displayEntity = Bukkit.getEntity(remove);
+		if (displayEntity != null) {
+			displayEntity.remove();
+		}
+	}
+
+	// Runs if the server stops3
+	public static void removeAllDisplays() {
+		mLuciditySpawners.forEach((location, uuid) -> {
+			@Nullable
+			Entity displayEntity = Bukkit.getEntity(uuid);
+			if (displayEntity != null) {
+				displayEntity.remove();
+			}
+		});
+		mLuciditySpawners.clear();
+	}
 }
