@@ -8,9 +8,11 @@ import com.playmonumenta.plugins.bosses.spells.SpellCooldownManager;
 import com.playmonumenta.plugins.effects.PercentDamageReceived;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -25,13 +27,15 @@ public class SpellAuroraMobs extends Spell {
 
 	private final Plugin mPlugin;
 	private final Location mCenter;
+	private final List<Player> mPlayers;
 	private final double mRage;
 
-	public SpellAuroraMobs(Plugin plugin, LivingEntity boss, Location center, double spellCooldownMult, double rage) {
+	public SpellAuroraMobs(Plugin plugin, LivingEntity boss, Location center, List<Player> players, double rage) {
 		mPlugin = plugin;
 		mCenter = center;
+		mPlayers = players;
 		mRage = rage;
-		mSpellCooldownManager = new SpellCooldownManager((int) (20 * 20 * spellCooldownMult), 5 * 10, boss::isValid, boss::hasAI);
+		mSpellCooldownManager = new SpellCooldownManager(20 * 20, 5 * 10, boss::isValid, boss::hasAI);
 	}
 
 	@Override
@@ -44,7 +48,8 @@ public class SpellAuroraMobs extends Spell {
 		if (!canRun()) {
 			return;
 		}
-		mSpellCooldownManager.setOnCooldown();
+		mPlayers.removeIf(Aurora::isDead);
+		mSpellCooldownManager.setOnCooldown(20 * 20 * 3 / (2 + mPlayers.size()));
 
 		for (int i = 0; i < (mRage >= 200 ? NORMAL_COUNT_200_RAGE : NORMAL_COUNT); i++) {
 			spawnMob();

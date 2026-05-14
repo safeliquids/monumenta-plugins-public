@@ -14,6 +14,7 @@ import com.playmonumenta.plugins.effects.EffectManager;
 import com.playmonumenta.plugins.effects.PercentDamageDealt;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.managers.GlowingManager;
+import com.playmonumenta.plugins.managers.PlayerSkinManager;
 import com.playmonumenta.plugins.particle.PPCircle;
 import com.playmonumenta.plugins.particle.PPLine;
 import com.playmonumenta.plugins.particle.PPPillar;
@@ -76,8 +77,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
-import static com.playmonumenta.plugins.bosses.spells.aurora.SpellMoonlightSlash.COOLDOWN_REDUCTION;
-
 
 public class Aurora extends SerializedLocationBossAbilityGroup {
 	public static final String identityTag = "boss_aurora";
@@ -113,6 +112,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 	private final SpellPulsarRadiation mPulsarRadiation;
 	private final SpellCollapsingConnection mCollapsingConnection;
 	private final int mRage;
+	private final int mMoonbladeCDR;
 
 	private boolean mLastPhase = false;
 
@@ -151,6 +151,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 			.map(player -> ScoreboardUtils.getScoreboardValue(player, "AuroraRage").orElse(0))
 			.max(Comparator.comparingInt(Integer::intValue))
 			.orElse(0);
+		mMoonbladeCDR = SpellMoonlightSlash.COOLDOWN_REDUCTION * (mRage >= 200 ? 2 : 1);
 
 		players.forEach(player -> {
 			boolean foundWorldshaper = false;
@@ -178,7 +179,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 		mPulsarRadiation = new SpellPulsarRadiation(plugin, boss, mRage >= 140 ? 1.5 : 1, spawnLoc);
 		mSupernova = new SpellSupernova(plugin, boss, spawnLoc);
 		mAuroraMinis = new SpellAuroraMinis(plugin, boss, spawnLoc, mRage, mRage >= 80, this::destroyBlocks);
-		mCollapsingConnection = new SpellCollapsingConnection(plugin, boss, spawnLoc, mRage >= 200 ? (mRage / 10 - 15) : 3, this::destroyBlocks);
+		mCollapsingConnection = new SpellCollapsingConnection(plugin, boss, spawnLoc, mRage >= 200 ? (mRage / 10 - 12) : 5, this::destroyBlocks);
 
 		SpellMeteorRain rageStarShower = new SpellMeteorRain(plugin, boss, spawnLoc);
 		SpellScorchingStar spellScorchingStar = new SpellScorchingStar(plugin, boss, mRage >= 200 ? 0.003 : 0);
@@ -186,7 +187,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 		SpellQuasarStep quasarStep = new SpellQuasarStep(plugin, boss, spawnLoc);
 		SpellGalacticThunderstorm galacticThunderstorm = new SpellGalacticThunderstorm(plugin, boss, spawnLoc);
 		// rage spells
-		SpellSpatialShattering spatialShattering = new SpellSpatialShattering(plugin, boss, spawnLoc);
+		SpellSpatialShattering spatialShattering = new SpellSpatialShattering(plugin, boss, spawnLoc, (mRage >= 140 ? 60 : 35) * 20);
 		SpellAstralGreatsword astralGreatsword = new SpellAstralGreatsword(plugin, boss, spawnLoc, mRage, this::destroyBlocks);
 
 		phase1Actives.add(mStarShower);
@@ -246,13 +247,12 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 				.spawnAsBoss();
 		});
 
-
 		List<Spell> mBasePassives = List.of(
 			mAdvancements,
 			blockPlacer,
 			new AuroraConditionalTp(boss, spawnLoc, location -> fancyTp(location, 15)),
 			voidSpell,
-			new SpellAuroraMobs(plugin, boss, spawnLoc, 3.0 / (2 + players.size()), mRage),
+			new SpellAuroraMobs(plugin, boss, spawnLoc, new ArrayList<>(players), mRage),
 			shieldStun
 		);
 
@@ -355,9 +355,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 
 							mWorld.playSound(boss.getLocation(), Sound.BLOCK_END_PORTAL_SPAWN, SoundCategory.HOSTILE, 5.0f, 1.25f);
 
-							mBoss.addScoreboardTag("boss_player[skinname=aurora2]");
 							players.forEach(player -> player.hideEntity(mPlugin, mBoss));
-							CursedListener.updateFakePlayer(mBoss);
 
 							this.cancel();
 							return;
@@ -391,6 +389,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 					// start miniboss only after dialogue from the 2 remaining sisters
 					mAuroraMinis.summonMinibosses(raisedCenter, () -> {
 						mBoss.setAI(true);
+
 						auroraBossBar.setVisible(true);
 						voidSpell.setSupernova(true);
 						changePhase(SpellManager.EMPTY, mPassivesMinis, null);
@@ -426,6 +425,8 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 								voidSpell.setSupernova(false);
 							}, delay));
 						});
+
+						CursedListener.updateFakePlayer(mBoss, PlayerSkinManager.textureMap.get("aurora2"));
 						// show players after tp to not show the tp animation
 						players.forEach(player -> player.showEntity(mPlugin, mBoss));
 					});
@@ -825,7 +826,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 	public static void rageBuff(LivingEntity entity, double rage, boolean elite) {
 		double multiplier = getMultiplier(rage);
 		EffectManager.getInstance().addEffect(entity, "RageDamage", new PercentDamageDealt(999999999, multiplier / 2));
-		EntityUtils.setMaxHealthAndHealth(entity, EntityUtils.getMaxHealth(entity) * (1 + Math.min(multiplier, 1.3) * (elite ? 0.5 : 1)));
+		EntityUtils.setMaxHealthAndHealth(entity, EntityUtils.getMaxHealth(entity) * (1 + Math.min(multiplier, 1.3) * (elite ? 0.4 : 1)));
 	}
 
 	public static void bossRageBuff(LivingEntity entity, double health, double rage, int playerCount) {
@@ -1041,7 +1042,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 
 	public static List<Player> playersInRange(Location bossLoc, boolean includeDead) {
 		List<Player> players = new ArrayList<>();
-		PlayerUtils.playersInRange(bossLoc, DETECTION_RANGE, true).forEach(player -> {
+		PlayerUtils.playersInRange(bossLoc, DETECTION_RANGE, true, includeDead).forEach(player -> {
 			if (includeDead || player.getScoreboardTags().contains(ALIVE_TAG)) {
 				players.add(player);
 			}
@@ -1049,8 +1050,8 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 		return players;
 	}
 
-	public static boolean isAlive(Player player) {
-		return player.getScoreboardTags().contains(ALIVE_TAG);
+	public static boolean isDead(Player player) {
+		return PlayerUtils.isDead(player) || !player.getScoreboardTags().contains(ALIVE_TAG);
 	}
 
 	public static void onPickupPillarMatter(Player player) {
@@ -1092,14 +1093,14 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 		);
 		if (mCdrWarned.add(player)) { // first time seeing this
 			player.sendMessage(MessagingUtils.fromMiniMessage(String.format(
-				"<color:gray>As Aurora's Moonlight Slash hits you, she reduces her <color:white>active spell cooldowns</color> by %s seconds!</color>", COOLDOWN_REDUCTION * (mRage >= 200 ? 2 : 1) / 20
+				"<color:gray>As Aurora's Moonlight Slash hits you, she reduces her <color:white>active spell cooldowns</color> by %s seconds!</color>", mMoonbladeCDR / 20
 			)));
 		}
 
-		reduceActiveCooldown((mRage >= 200 ? 2 : 1) * COOLDOWN_REDUCTION);
+		reduceActiveCooldown(mMoonbladeCDR);
 		getActiveSpells().forEach(spell -> {
 			if (spell instanceof CooldownReducible s) {
-				s.reduceCooldown((mRage >= 200 ? 2 : 1) * COOLDOWN_REDUCTION);
+				s.reduceCooldown(mMoonbladeCDR);
 			}
 		});
 	}

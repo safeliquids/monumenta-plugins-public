@@ -991,7 +991,7 @@ public class LocationUtils {
 		Vector p = point.clone().subtract(center);
 		var pd = p.dot(direction);
 
-		double ans = -pd + Math.sqrt(pd - p.lengthSquared() + radius * radius);
+		double ans = -pd + Math.sqrt(pd * pd - p.lengthSquared() + radius * radius);
 		return Double.isFinite(ans) ? ans : 0.05;
 	}
 }

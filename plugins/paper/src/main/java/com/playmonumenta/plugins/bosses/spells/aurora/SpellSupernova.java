@@ -270,7 +270,7 @@ public class SpellSupernova extends Spell {
 						BossUtils.bossDamagePercent(mBoss, player, DAMAGE_PERCENT, SPELL_NAME);
 						MovementUtils.knockAway(mRaisedCenter, player, 0.2f, 0, false);
 					});
-					players.removeIf(p -> !Aurora.isAlive(p));
+					players.removeIf(p -> Aurora.isDead(p));
 
 					if (tick % BLAST_INTERVAL == 0) {
 						mStardustBlaster.run();
@@ -344,7 +344,7 @@ public class SpellSupernova extends Spell {
 					mBoss.setGravity(true);
 					mBoss.setInvulnerable(false);
 
-					players.forEach(player -> player.hideBossBar(mFocusBar));
+					Aurora.playersInRange(mCenter, true).forEach(player -> player.hideBossBar(mFocusBar));
 				}
 			};
 			runnable.runTaskTimer(mPlugin, START_DELAY, 2);

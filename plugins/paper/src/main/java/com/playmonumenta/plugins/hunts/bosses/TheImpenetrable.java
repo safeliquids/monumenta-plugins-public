@@ -29,6 +29,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -192,7 +193,7 @@ public class TheImpenetrable extends Quarry {
 				}
 
 				char stateCharacter = mIsClosing ? '▄' : (mIsOpen ? '█' : '▁');
-				mBossBar.setTitle("§4§l" + stateCharacter + " - The Impenetrable - " + stateCharacter);
+				mBossBar.setTitle(Component.text(stateCharacter + " - The Impenetrable - " + stateCharacter, NamedTextColor.DARK_RED, TextDecoration.BOLD));
 
 				updateVisibleShellState();
 
