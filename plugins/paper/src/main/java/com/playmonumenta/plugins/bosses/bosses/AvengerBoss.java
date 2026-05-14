@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.bosses.parameters.ParticlesList;
 import com.playmonumenta.plugins.bosses.parameters.SoundsList;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
+import com.playmonumenta.plugins.utils.BossUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import java.util.Collections;
@@ -147,8 +148,10 @@ public final class AvengerBoss extends BossAbilityGroup {
 
 						if (mParam.HEAL_PERCENT > 0) {
 							EntityUtils.healMob(mBoss, EntityUtils.getMaxHealth(mBoss) * mParam.HEAL_PERCENT);
-							mParam.PARTICLE_HEAL.spawn(mBoss, bossLoc.clone().add(0, 0.5, 0), 1, 1, 1);
+						} else {
+							BossUtils.bossDamagePercent(null, mBoss, -mParam.HEAL_PERCENT);
 						}
+						mParam.PARTICLE_HEAL.spawn(mBoss, bossLoc.clone().add(0, 0.5, 0), 1, 1, 1);
 					}
 					this.cancel();
 				}

@@ -11,6 +11,7 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.particle.PPCircle;
 import com.playmonumenta.plugins.utils.BossUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
+import com.playmonumenta.plugins.utils.VectorUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -19,6 +20,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 
 public class SwingBoss extends BossAbilityGroup {
@@ -28,7 +30,9 @@ public class SwingBoss extends BossAbilityGroup {
 		@BossParam(help = "Range in blocks that the launcher searches for players to target with this spell")
 		public int DETECTION = 30;
 		@BossParam(help = "Radius in blocks in which players are damaged when the launcher completes casting")
-		public int RADIUS = 3;
+		public double RADIUS = 3;
+		@BossParam(help = "Angle in degrees of the arc, centered on the direction the boss faces")
+		public double ANGLE = 360;
 		@BossParam(help = "Time in ticks between the launcher spawning and the first attempt to cast this spell")
 		public int DELAY = 5 * 20;
 		@BossParam(help = "Time in ticks it takes for this spell to complete its cast")
@@ -76,15 +80,28 @@ public class SwingBoss extends BossAbilityGroup {
 		Parameters p = BossParameters.getParameters(boss, identityTag, new Parameters());
 
 		Spell spell = new SpellBaseAoE(plugin, boss, p.RADIUS, p.DURATION, p.COOLDOWN, true, p.SOUND) {
+			private Vector mDirection = new Vector(1, 0, 0);
+
+			@Override
+			public void run() {
+				mDirection = mBoss.getLocation().getDirection();
+				super.run();
+			}
+
 			@Override
 			protected void chargeAuraAction(Location loc) {
 				boss.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 1, 2));
-				p.PARTICLE_CHARGE.spawn(boss, loc, ((double) p.RADIUS) / 3, ((double) p.RADIUS) / 3, ((double) p.RADIUS) / 3, 0.05);
+				p.PARTICLE_CHARGE.spawn(boss, loc, p.RADIUS / 3, p.RADIUS / 3, p.RADIUS / 3, 0.05);
 			}
 
 			@Override
 			protected void chargeCircleAction(Location loc, double radius) {
-				p.PARTICLE_CIRCLE.spawn(boss, particle -> new PPCircle(particle, loc, radius).delta(0.25).extra(0.05));
+				double yaw = VectorUtils.vectorToRotation(mDirection)[0] + 90;
+				p.PARTICLE_CIRCLE.spawn(boss, particle -> new PPCircle(particle, loc, radius)
+					.delta(0.25)
+					.extra(0.05)
+					.arcDegree(yaw - p.ANGLE / 2, yaw + p.ANGLE / 2)
+				);
 			}
 
 			@Override
@@ -94,14 +111,24 @@ public class SwingBoss extends BossAbilityGroup {
 
 			@Override
 			protected void circleOutburstAction(Location loc, double radius) {
-				p.PARTICLE_CIRCLE_EXPLODE.spawn(boss, particle -> new PPCircle(particle, loc, radius).delta(0.2).extra(0.2));
+				double yaw = VectorUtils.vectorToRotation(mDirection)[0] + 90;
+				p.PARTICLE_CIRCLE_EXPLODE.spawn(boss, particle -> new PPCircle(particle, loc, radius)
+					.delta(0.2)
+					.extra(0.2)
+					.arcDegree(yaw - p.ANGLE / 2, yaw + p.ANGLE / 2)
+				);
 			}
 
 			@Override
 			protected void dealDamageAction(Location loc) {
 				double bossY = boss.getLocation().getY();
+				Vector direction = mDirection.setY(0).normalize();
 				for (Player player : PlayerUtils.playersInRange(boss.getLocation(), p.RADIUS, true)) {
-					double playerY = player.getLocation().getY();
+					Location location = player.getLocation();
+					if (p.ANGLE >= 360 || direction.angle(location.clone().subtract(loc).toVector()) > Math.toRadians(p.ANGLE / 2)) {
+						continue;
+					}
+					double playerY = location.getY();
 					//if the player is on ground increase the size of the swing to avoid slab cheating
 					if ((playerY + player.getHeight() < bossY) || (PlayerUtils.isOnGround(player) ? bossY + 0.7 < playerY : bossY + 0.1 < playerY)) {
 						continue;

@@ -17,15 +17,15 @@ import org.bukkit.potion.PotionEffectType;
 
 public class SpellForce extends SpellBaseAoE {
 
-	public SpellForce(Plugin plugin, LivingEntity launcher, int radius, int time, int cooldown, boolean needNearPlayers) {
+	public SpellForce(Plugin plugin, LivingEntity launcher, double radius, int time, int cooldown, boolean needNearPlayers) {
 		super(plugin, launcher, radius, time, cooldown, true, needNearPlayers, Sound.ENTITY_IRON_GOLEM_ATTACK, 1, 1);
 	}
 
-	public SpellForce(Plugin plugin, LivingEntity launcher, int radius, int time, int cooldown) {
+	public SpellForce(Plugin plugin, LivingEntity launcher, double radius, int time, int cooldown) {
 		this(plugin, launcher, radius, time, cooldown, true);
 	}
 
-	public SpellForce(Plugin plugin, LivingEntity launcher, int radius, int time) {
+	public SpellForce(Plugin plugin, LivingEntity launcher, double radius, int time) {
 		this(plugin, launcher, radius, time, 160);
 	}
 

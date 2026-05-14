@@ -101,7 +101,7 @@ public final class NovaBoss extends BossAbilityGroup {
 			p.NEED_LINE_OF_SIGHT = false;
 		}
 
-		Spell spell = new SpellBaseAoE(plugin, boss, (int) p.TARGETS.getRange(), p.DURATION, p.COOLDOWN, p.CAN_MOVE, p.NEED_LINE_OF_SIGHT, p.SOUND_CHARGE, p.SOUND_CHARGE_VOLUME, p.SOUND_CHARGE_FREQUENCY) {
+		Spell spell = new SpellBaseAoE(plugin, boss, p.TARGETS.getRange(), p.DURATION, p.COOLDOWN, p.CAN_MOVE, p.NEED_LINE_OF_SIGHT, p.SOUND_CHARGE, p.SOUND_CHARGE_VOLUME, p.SOUND_CHARGE_FREQUENCY) {
 			@Override
 			protected void chargeAuraAction(Location loc) {
 				p.PARTICLE_AIR.spawn(boss, loc, p.TARGETS.getRange() / 2, p.TARGETS.getRange() / 2, p.TARGETS.getRange() / 2, 0.05);
