@@ -130,9 +130,11 @@ public class FileUtils {
 	}
 
 	public static File getChunkMonumentaFolder(Location location) {
-		File worldMonumentaFolder = getWorldMonumentaFolder(location.getWorld());
-		Chunk chunk = location.getChunk();
+		return getChunkMonumentaFolder(location.getChunk());
+	}
 
+	public static File getChunkMonumentaFolder(Chunk chunk) {
+		File worldMonumentaFolder = getWorldMonumentaFolder(chunk.getWorld());
 		int cx = chunk.getX();
 		int cz = chunk.getZ();
 
@@ -144,7 +146,11 @@ public class FileUtils {
 	}
 
 	public static File getChunkMonumentaFile(Location location, String fileName) {
-		File chunkMonumentaFolder = getChunkMonumentaFolder(location);
+		return getChunkMonumentaFile(location.getChunk(), fileName);
+	}
+
+	public static File getChunkMonumentaFile(Chunk chunk, String fileName) {
+		File chunkMonumentaFolder = getChunkMonumentaFolder(chunk);
 
 		File file = new File(chunkMonumentaFolder, fileName);
 		File tempFile = new File(chunkMonumentaFolder, fileName + ".tmp");

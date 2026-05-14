@@ -7,9 +7,10 @@ import com.google.gson.JsonParser;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
+import com.playmonumenta.plugins.utils.ChestUtils;
 import com.playmonumenta.plugins.utils.MMLog;
-import com.playmonumenta.structures.StructureConquerEvent;
 import com.playmonumenta.structures.StructuresPlugin;
+import com.playmonumenta.structures.events.StructureConquerEvent;
 import com.playmonumenta.structures.managers.RespawningStructure;
 import java.util.HashMap;
 import org.bukkit.Bukkit;
@@ -104,6 +105,7 @@ public class StructureConqueredListener implements Listener {
 			Chest chest = (Chest) block.getState();
 
 			chest.setLootTable(lootTable);
+			ChestUtils.setNonLootLimitedChest(block, true);
 			chest.update();
 		}, 1);
 	}

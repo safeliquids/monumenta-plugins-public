@@ -887,6 +887,19 @@ public class LocationUtils {
 		}
 	}
 
+	public static boolean isInPoI(Location location) {
+		StructuresPlugin structuresPlugin = StructuresPlugin.getInstance();
+		if (structuresPlugin.mRespawnManager != null) {
+			List<RespawningStructure> structures = structuresPlugin.mRespawnManager.getStructures(location.toVector(), false);
+			for (RespawningStructure structure : structures) {
+				if (structure.isWithin(location)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static @Nullable String getPoiNameFromLocation(Location location) {
 		StructuresPlugin structuresPlugin = StructuresPlugin.getInstance();
 		if (structuresPlugin.mRespawnManager != null) {

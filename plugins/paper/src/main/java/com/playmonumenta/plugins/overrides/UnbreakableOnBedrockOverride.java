@@ -30,9 +30,9 @@ public class UnbreakableOnBedrockOverride extends BaseOverride {
 		return breakable(block);
 	}
 
-	private boolean breakable(Block block) {
+	public static boolean breakable(Block block) {
 		Block blockUnder = block.getLocation().add(0, -1, 0).getBlock();
-		return blockUnder == null || (blockUnder.getType() != Material.BEDROCK &&
-			blockUnder.getType() != Material.BARRIER) || ZoneUtils.isInPlot(block.getLocation());
+		return (blockUnder.getType() != Material.BEDROCK && blockUnder.getType() != Material.BARRIER)
+			|| ZoneUtils.isInPlot(block.getLocation());
 	}
 }
