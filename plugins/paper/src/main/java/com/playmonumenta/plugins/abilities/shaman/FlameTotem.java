@@ -173,7 +173,7 @@ public class FlameTotem extends TotemAbility {
 	@Override
 	public boolean onDamage(DamageEvent event, LivingEntity enemy) {
 		// Handle enhancement damage boost
-		if (isEnhanced() && mTotem != null && !TOTEM_ABILITY_LIST.contains(event.getAbility())) {
+		if (isEnhanced() && mTotem != null && event.getAbility() != null && !TOTEM_ABILITY_LIST.contains(event.getAbility())) {
 			if (new Hitbox.SphereHitbox(mTotem.getLocation(), getTotemRadius()).getHitMobs().contains(enemy)) {
 				event.updateDamageWithMultiplier(1 + mEnhanceDamageAmplifier, EnumSet.of(DamageEvent.DamageType.MAGIC));
 			}
