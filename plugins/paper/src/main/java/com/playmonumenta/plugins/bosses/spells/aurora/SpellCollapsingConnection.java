@@ -201,7 +201,7 @@ public class SpellCollapsingConnection extends Spell {
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
 				player1.sendMessage(Component.text(String.format("You feel the presence of %s's mind leave... Your binds are broken!", player2.getName()), NamedTextColor.AQUA));
-				player2.sendMessage(Component.text(String.format("You feel the Presence of %s's mind leave... Your binds are broken!", player1.getName()), NamedTextColor.AQUA));
+				player2.sendMessage(Component.text(String.format("You feel the presence of %s's mind leave... Your binds are broken!", player1.getName()), NamedTextColor.AQUA));
 				super.cancel();
 			}
 		};
@@ -257,7 +257,7 @@ public class SpellCollapsingConnection extends Spell {
 
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
-				player1.sendMessage("You feel the presence of Aurora's mind leave... Your bind is is broken!");
+				player1.sendMessage("You feel the presence of Aurora's mind leave... Your binds are broken!");
 				super.cancel();
 			}
 		};
