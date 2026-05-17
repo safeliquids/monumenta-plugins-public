@@ -739,6 +739,15 @@ public class LocationUtils {
 		return center.clone().add(r * FastUtils.cos(theta), 0, r * FastUtils.sin(theta));
 	}
 
+	public static Location randomLocationInPrism(Location center, double xLengthHalf, double yLengthHalf, double zLengthHalf) {
+		return new Location(
+			center.getWorld(),
+			FastUtils.randomDoubleInRange(center.x() - xLengthHalf, center.x() + xLengthHalf),
+			FastUtils.randomDoubleInRange(center.y() - yLengthHalf, center.y() + yLengthHalf),
+			FastUtils.randomDoubleInRange(center.z() - zLengthHalf, center.z() + zLengthHalf)
+		);
+	}
+
 	public static Location randomSafeLocationInCircle(Location center, double radius, Predicate<Location> safePredicate) {
 		Location loc = randomLocationInCircle(center, radius);
 		if (safePredicate.test(loc)) {
