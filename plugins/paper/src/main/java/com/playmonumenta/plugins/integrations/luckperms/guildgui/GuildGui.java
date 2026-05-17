@@ -157,6 +157,10 @@ public class GuildGui extends MailGui {
 			throw CommandAPI.failWithString("The guild GUI can only be shown to players");
 		}
 
+		if (!player.hasPermission("monumenta.command.guild.gui")) {
+			throw CommandAPI.failWithString("This command is currently disabled");
+		}
+
 		boolean openedAsModerator = targetName != null || guildName != null;
 
 		UUID targetUuid;
