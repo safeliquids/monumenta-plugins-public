@@ -29,7 +29,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class LucidityOverride extends BaseOverride {
 	private static final String LUCIDITY_NAME = "Lucidity";
@@ -38,11 +41,12 @@ public class LucidityOverride extends BaseOverride {
 	private static final int MIN_SCORE = 70;
 
 	private static final String COOLDOWN_SOURCE = "LucidityCooldown";
+	private static final int NO_SPAWNERS_COOLDOWN = 4 * Constants.TICKS_PER_SECOND;
 	private static final int COOLDOWN = Constants.TICKS_PER_MINUTE;
 	private static final double RANGE = 20;
 	private static final Color COLOR = Color.fromRGB(0x39B14E);
 	private static final TextColor TEXT_COLOR = TextColor.color(COLOR.asRGB());
-	private static final BlockData SPAWNER_BLOCK_DATA = Material.SPAWNER.createBlockData();
+	private static final BlockData DISPLAY_DATA = Material.TINTED_GLASS.createBlockData();
 
 	private static final Map<Location, UUID> mLuciditySpawners = new HashMap<>();
 
@@ -72,12 +76,12 @@ public class LucidityOverride extends BaseOverride {
 			return false;
 		}
 		// Prevent spamming Lucidity
-		plugin.mEffectManager.addEffect(player, COOLDOWN_SOURCE, new ItemCooldown(COOLDOWN, item, item.getType(), plugin));
 
 		World world = player.getWorld();
 		Location playerLocation = player.getLocation();
 		if (!revealSpawners(playerLocation, world)) {
 			player.sendMessage(Component.text("No spawners appear to be in the area...", NamedTextColor.RED));
+			plugin.mEffectManager.addEffect(player, COOLDOWN_SOURCE, new ItemCooldown(NO_SPAWNERS_COOLDOWN, item, item.getType(), plugin));
 			return false;
 		}
 
@@ -97,14 +101,32 @@ public class LucidityOverride extends BaseOverride {
 				}
 				Location loc = block.getLocation();
 				BlockDisplay blockDisplay = world.spawn(loc, BlockDisplay.class, display -> {
-					display.setBlock(SPAWNER_BLOCK_DATA);
+					display.setBlock(DISPLAY_DATA);
+					display.setTransformation(new Transformation(
+						new Vector3f(0.05f),
+						new Quaternionf(),
+						new Vector3f(0.9f),
+						new Quaternionf()
+					));
 					display.setGlowColorOverride(COLOR);
 					display.setGlowing(true);
 				});
 				displays.put(loc, blockDisplay.getUniqueId());
 			}
 		}
-		mLuciditySpawners.putAll(displays);
+		displays.forEach((location, uuid) -> {
+			@Nullable
+			UUID existingDisplay = mLuciditySpawners.remove(location);
+			if (existingDisplay != null) {
+				@Nullable
+				Entity displayEntity = Bukkit.getEntity(existingDisplay);
+				if (displayEntity != null) {
+					displayEntity.remove();
+				}
+			}
+
+			mLuciditySpawners.put(location, uuid);
+		});
 
 		return !displays.isEmpty();
 	}
