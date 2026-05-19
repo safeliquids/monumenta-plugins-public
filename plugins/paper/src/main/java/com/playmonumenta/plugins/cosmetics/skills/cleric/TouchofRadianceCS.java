@@ -48,7 +48,7 @@ public class TouchofRadianceCS implements CosmeticSkill {
 			trial.spawnAsPlayerBuff(player);
 		} else {
 			crit.spawnAsEnemyBuff();
-			crit.spawnAsEnemyBuff();
+			trial.spawnAsEnemyBuff();
 		}
 	}
 

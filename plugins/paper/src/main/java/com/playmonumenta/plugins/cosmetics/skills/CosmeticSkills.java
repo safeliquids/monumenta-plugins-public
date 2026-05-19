@@ -33,6 +33,7 @@ import com.playmonumenta.plugins.cosmetics.skills.cleric.ContortingBoltCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.DarkPunishmentCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.EnbyRainCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.ForceFieldCS;
+import com.playmonumenta.plugins.cosmetics.skills.cleric.PsychicConnectionCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.PurgingPyreCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.RebirthCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.SoulStrainCS;
@@ -189,6 +190,7 @@ public class CosmeticSkills {
 		BloodbathCS::new,
 		PurgingPyreCS::new,
 		ContortingBoltCS::new,
+		PsychicConnectionCS::new,
 		ForceFieldCS::new,
 		AnathemaCS::new,
 		RipplingBeamCS::new,

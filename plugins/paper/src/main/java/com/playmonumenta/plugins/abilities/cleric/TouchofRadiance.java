@@ -22,7 +22,6 @@ import com.playmonumenta.plugins.managers.GlowingManager;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.List;
 import java.util.Objects;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -137,7 +136,7 @@ public class TouchofRadiance extends Ability {
 			allay = (Allay) EntityUtils.getEntityAtCursor(mPlayer, mRange, a -> a.getType() == EntityType.ALLAY && KeeperVirtue.virtueBelongsTo((Allay) a, mPlayer));
 		}
 		if (targetPlayer != null) {
-			GlowingManager.startGlowing(targetPlayer, mCosmetic.glowColor(), mBuffDuration, 1);
+			GlowingManager.startGlowing(targetPlayer, mCosmetic.glowColor(), mBuffDuration, GlowingManager.PLAYER_ABILITY_PRIORITY);
 			mPlugin.mEffectManager.addEffect(targetPlayer, CDR_EFFECT_NAME, new AbilityCooldownRechargeRate(mBuffDuration, mCDRAlly, ABILITY) {
 				@Override
 				public void entityTickEffect(Entity entity, boolean fourHertz, boolean twoHertz, boolean oneHertz) {
@@ -168,7 +167,7 @@ public class TouchofRadiance extends Ability {
 		} else if (allay != null) {
 			// Virtue cast
 			Allay finalAllay = allay;
-			GlowingManager.startGlowing(finalAllay, NamedTextColor.YELLOW, mBuffDuration, GlowingManager.PLAYER_ABILITY_PRIORITY);
+			GlowingManager.startGlowing(finalAllay, mCosmetic.glowColor(), mBuffDuration, GlowingManager.PLAYER_ABILITY_PRIORITY);
 			mPlugin.mEffectManager.addEffect(finalAllay, VIRTUE_EFFECT_NAME, new SingleArgumentEffect(mBuffDuration, Objects.requireNonNull(mKeeperVirtue).mEnhanceStunDuration, VIRTUE_EFFECT_NAME) {
 				@Override
 				public void entityTickEffect(Entity entity, boolean fourHertz, boolean twoHertz, boolean oneHertz) {
@@ -214,7 +213,7 @@ public class TouchofRadiance extends Ability {
 			}
 		}
 
-		GlowingManager.startGlowing(mPlayer, NamedTextColor.YELLOW, mBuffDuration, 1);
+		GlowingManager.startGlowing(mPlayer, mCosmetic.glowColor(), mBuffDuration, GlowingManager.PLAYER_ABILITY_PRIORITY);
 		mPlugin.mEffectManager.addEffect(mPlayer, CDR_EFFECT_NAME, new AbilityCooldownRechargeRate(mBuffDuration, mCDR, ABILITY) {
 			@Override
 			public void entityTickEffect(Entity entity, boolean fourHertz, boolean twoHertz, boolean oneHertz) {
