@@ -1157,7 +1157,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 				int warnDuration = FastUtils.randomIntInRange(minTime, maxTime);
 				Runnable breakBlock = () -> {
 					new PartialParticle(Particle.BLOCK_CRACK, bLoc)
-						.count(5)
+						.count(3)
 						.distanceFalloff(ARENA_RADIUS)
 						.data(blockData)
 						.delta(0.3)
@@ -1241,7 +1241,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 	}
 
 	public static boolean isAuroraLoom(ItemStack itemStack) {
-		return ItemUtils.getPlainName(itemStack).equals(AURORA_LOOM_NAME);
+		return itemStack.getType() == Material.PEARLESCENT_FROGLIGHT && ItemUtils.getPlainName(itemStack).equals(AURORA_LOOM_NAME);
 	}
 
 }

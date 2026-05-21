@@ -223,10 +223,14 @@ public class SpellAstralGreatsword extends Spell implements CooldownReducible {
 				mLength = LocationUtils.rayLengthToSphereSurface(mCenter, mSwordLoc, Aurora.ARENA_RADIUS);
 
 				if (mTicks % 4 == 0) {
-					new PPLine(Particle.REDSTONE, mSwordLoc.clone().add(mDir.clone().multiply(5)), mDir, mLength)
-						.data(new Particle.DustOptions(stillAiming ? Color.FUCHSIA : Color.RED, 1.55f))
-						.countPerMeter(2)
-						.spawnForPlayer(ParticleCategory.BOSS, target);
+					PPLine ppLine = new PPLine(Particle.REDSTONE, mSwordLoc.clone().add(mDir.clone().multiply(5)), mDir, mLength)
+						.data(new Particle.DustOptions(stillAiming ? Color.FUCHSIA : Color.RED, 1.65f))
+						.countPerMeter(2);
+					if (stillAiming) {
+						ppLine.spawnForPlayer(ParticleCategory.BOSS, target);
+					} else {
+						ppLine.spawnAsBoss();
+					}
 				}
 
 				if (stillAiming) {

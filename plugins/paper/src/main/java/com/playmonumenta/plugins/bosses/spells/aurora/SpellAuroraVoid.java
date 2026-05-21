@@ -95,16 +95,17 @@ public class SpellAuroraVoid extends Spell {
 					mRecentlySeenPlayers.put(player, mTicks + VOID_IFRAMES);
 				}
 			}
-
-			for (Player player : players) {
-				if (mRecentlySeenPlayers.getOrDefault(player, 0L) <= mTicks && LocationUtils.xzDistance(player.getLocation(), mCenter) > Aurora.ARENA_RADIUS + 1) {
-					DamageUtils.damagePercentHealth(null, player, EXIT_ARENA_DAMAGE, false, false, VOID_NAME);
+		}
+		for (Player player : players) {
+			if (mRecentlySeenPlayers.getOrDefault(player, 0L) <= mTicks && LocationUtils.xzDistance(player.getLocation(), mCenter) > Aurora.ARENA_RADIUS + 1) {
+				DamageUtils.damagePercentHealth(null, player, ANTI_CHEESE_DAMAGE, false, false, VOID_NAME);
+				if (!mSupernova) {
 					launchCenter(player);
-
-					mRecentlySeenPlayers.put(player, mTicks + VOID_IFRAMES);
 				}
 
+				mRecentlySeenPlayers.put(player, mTicks + VOID_IFRAMES);
 			}
+
 		}
 		mTicks++;
 	}

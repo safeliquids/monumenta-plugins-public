@@ -34,7 +34,7 @@ public class AuroraConditionalTp extends Spell {
 		Location location = mBoss.getLocation();
 		if (location.getY() <= mCenter.getY() - 5 ||
 			LocationUtils.xzDistance(location, mCenter) >= Aurora.ARENA_RADIUS ||
-			!location.add(0, 1, 0).getBlock().getType().isAir()
+			!location.add(0, 1, 0).getBlock().isPassable()
 		) {
 			mTpCd = 30;
 			List<Player> players = Aurora.playersInRange(mCenter);
