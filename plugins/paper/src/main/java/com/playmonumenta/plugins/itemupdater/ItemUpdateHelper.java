@@ -21,6 +21,7 @@ import com.playmonumenta.plugins.listeners.AuditListener;
 import com.playmonumenta.plugins.listeners.QuiverListener;
 import com.playmonumenta.plugins.overrides.FirmamentOverride;
 import com.playmonumenta.plugins.overrides.WorldshaperOverride;
+import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.DelveInfusionUtils;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
@@ -224,10 +225,10 @@ public class ItemUpdateHelper {
 					}
 
 					// if nothing was added, then that UUID must already exist in the set, so potential dupe
-					if (added == 0 || item.getAmount() > 1) {
+					if (ServerProperties.getZenithCharmDupeCheckEnabled() && (added == 0 || item.getAmount() > 1)) {
 						StringBuilder message = new StringBuilder("Potentially duped Zenith Charm with UUID " + uuid + " at:");
 						for (String node : contextPath) {
-							message.append(" " + node);
+							message.append(" ").append(node);
 						}
 						AuditListener.logSevere(message.toString());
 					}

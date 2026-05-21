@@ -82,6 +82,7 @@ public class ServerProperties {
 	private int mLootingLimiterSpawners = 0;
 	private boolean mLootingLimiterIgnoreBreakingChests = false;
 	private boolean mDepthsEnabled = false;
+	private boolean mZenithCharmDupeCheckEnabled = true;
 	private boolean mTrickyCreepersEnabled = true;
 	private @Nullable String mGameplayDataExportPath = null;
 	private boolean mSkinManagerReadonly = true;
@@ -283,6 +284,10 @@ public class ServerProperties {
 		return INSTANCE.mDepthsEnabled;
 	}
 
+	public static boolean getZenithCharmDupeCheckEnabled() {
+		return INSTANCE.mZenithCharmDupeCheckEnabled;
+	}
+
 	public static boolean getTrickyCreepersEnabled() {
 		return INSTANCE.mTrickyCreepersEnabled;
 	}
@@ -461,6 +466,7 @@ public class ServerProperties {
 			mLootingLimiterIgnoreBreakingChests = getPropertyValueBool(object, "lootingLimiterIgnoreBreakingChests", mLootingLimiterIgnoreBreakingChests);
 
 			mDepthsEnabled = getPropertyValueBool(object, "depthsEnabled", mDepthsEnabled);
+			mZenithCharmDupeCheckEnabled = getPropertyValueBool(object, "zenithCharmDupeCheckEnabled", mZenithCharmDupeCheckEnabled);
 			mTrickyCreepersEnabled = getPropertyValueBool(object, "trickyCreepersEnabled", mTrickyCreepersEnabled);
 			mSkinManagerReadonly = getPropertyValueBool(object, "skinManagerReadonly", mSkinManagerReadonly);
 
@@ -538,6 +544,7 @@ public class ServerProperties {
 		out.add("lootingLimiterIgnoreBreakingChests = " + mLootingLimiterIgnoreBreakingChests);
 
 		out.add("depthsEnabled = " + mDepthsEnabled + " (NB: changing this requires a restart)");
+		out.add("zenithCharmDupeCheckEnabled = " + mZenithCharmDupeCheckEnabled);
 
 		out.add("trickyCreepersEnabled = " + mTrickyCreepersEnabled);
 
