@@ -178,7 +178,7 @@ public class SpawnerUtils {
 				// set health to specified
 				Objects.requireNonNull(cat.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(catHealth);
 				cat.setHealth(catHealth);
-				cat.addScoreboardTag("Hostile");
+				cat.addScoreboardTag(EntityUtils.HOSTILE_TAG);
 				spawnerCatMap.put(block.getLocation(), cat.getUniqueId());
 				spawnersWithCat.add(block.getLocation());
 

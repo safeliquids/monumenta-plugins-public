@@ -165,7 +165,7 @@ public class ChanceCubes {
 							Horse horse = (Horse) loc.getWorld().spawnEntity(loc, EntityType.HORSE);
 							horse.customName(Component.text("Juan"));
 							horse.setCustomNameVisible(true);
-							horse.addScoreboardTag("Hostile");
+							horse.addScoreboardTag(EntityUtils.HOSTILE_TAG);
 							Objects.requireNonNull(horse.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(50.0);
 							horse.setHealth(50.0);
 							nearbyEntities = (List<Entity>) loc.getWorld().getNearbyEntities(loc, 10, 10, 10);
@@ -328,7 +328,7 @@ public class ChanceCubes {
 						Horse horse = (Horse) loc.getWorld().spawnEntity(loc, EntityType.HORSE);
 						horse.customName(Component.text("Juan"));
 						horse.setCustomNameVisible(true);
-						horse.addScoreboardTag("Hostile");
+						horse.addScoreboardTag(EntityUtils.HOSTILE_TAG);
 						Objects.requireNonNull(horse.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(50.0);
 						horse.setHealth(50.0);
 						randomEnemy = horse;

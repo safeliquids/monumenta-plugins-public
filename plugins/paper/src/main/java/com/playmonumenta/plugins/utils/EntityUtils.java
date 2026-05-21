@@ -221,6 +221,7 @@ public class EntityUtils {
 	 */
 	public static final String IGNORE_DEATH_TRIGGERS_TAG = "boss_no_death_triggers";
 	public static final String DONT_ENTER_BOATS_TAG = "boss_no_boat_riding";
+	public static final String HOSTILE_TAG = "Hostile";
 	public static final Set<String> VIRTUAL_ENTITY_BOSSTAGS = Set.of(
 		ImmortalPassengerBoss.identityTag,
 		ImmortalMountBoss.identityTag,
@@ -469,7 +470,7 @@ public class EntityUtils {
 
 		if (mob.getTarget() instanceof Player) {
 			return true;
-		} else if (mob.getScoreboardTags().contains("Hostile")) {
+		} else if (mob.getScoreboardTags().contains(HOSTILE_TAG)) {
 			return true;
 		} else {
 			return checkingOnSpawn && (mob.getScoreboardTags().contains(PlayerTargetBoss.identityTag) || mob.getScoreboardTags().contains(HostileBoss.identityTag));
