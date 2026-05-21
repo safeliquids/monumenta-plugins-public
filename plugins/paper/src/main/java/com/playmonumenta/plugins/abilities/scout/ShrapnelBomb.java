@@ -159,7 +159,7 @@ public class ShrapnelBomb extends Ability {
 
 		final ItemStatManager.PlayerItemStats playerItemStats = Plugin.getInstance().mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
-		Projectile bomb = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, mPlayer.getWorld(), mVelocity, mCosmetic.getName(), mCosmetic.getParticle(), LocationUtils.isLocationInWater(mPlayer.getLocation()));
+		Projectile bomb = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, mPlayer.getWorld(), mVelocity, mCosmetic.getName(), mCosmetic.getParticle());
 
 		PROJECTILE_MAP.put(bomb, playerItemStats);
 
@@ -206,7 +206,7 @@ public class ShrapnelBomb extends Ability {
 
 		for (LivingEntity e : EntityUtils.getNearbyMobs(loc, mBombRadius)) {
 
-			DamageUtils.damage(mPlayer, e, DamageEvent.DamageType.PROJECTILE_SKILL, mBombDamage, mInfo.getLinkedSpell(), true);
+			DamageUtils.damage(mPlayer, e, new DamageEvent.Metadata(DamageEvent.DamageType.PROJECTILE_SKILL, mInfo.getLinkedSpell(), stats), mBombDamage, true, false, false);
 
 			MovementUtils.knockAwayDirection(dir, e, mKnockback / 2);
 
