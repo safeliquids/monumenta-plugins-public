@@ -1,8 +1,8 @@
 package com.playmonumenta.plugins.mail;
 
 import com.playmonumenta.plugins.Constants.Keybind;
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
 import com.playmonumenta.plugins.mail.recipient.MailDirection;
 import com.playmonumenta.plugins.mail.recipient.RecipientType;
@@ -38,7 +38,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class MailGui extends Gui implements Comparable<MailGui> {
+public abstract class MailGui extends NjolGui implements Comparable<MailGui> {
 	public static final CommandPermission MAIL_PERM = CommandPermission.fromString("monumenta.command.mail");
 	public static final CommandPermission MAIL_MOD_PERM = CommandPermission.fromString("monumenta.command.mail.mod");
 	public static final ItemStack HEADER_FILLER = GUIUtils.createFiller(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
@@ -235,7 +235,7 @@ public abstract class MailGui extends Gui implements Comparable<MailGui> {
 		if (mailItem == null) {
 			mailItem = new ItemStack(Material.AIR);
 		}
-		setItem(row, column, new GuiItem(mailItem, false))
+		setItem(row, column, new NjolGuiItem(mailItem, false))
 			.onClick((InventoryClickEvent event) -> onMailClick(event, mailbox, mailSlot));
 	}
 

@@ -34,10 +34,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An item in a {@link Gui}.
+ * An item in a {@link FloweyGui}.
  */
 @Immutable
-public final class GuiItem {
+public final class FloweyGuiItem {
 	public static final class Builder {
 		@Nullable
 		private Material mMaterial;
@@ -261,7 +261,7 @@ public final class GuiItem {
 			return this;
 		}
 
-		public GuiItem build() {
+		public FloweyGuiItem build() {
 			Preconditions.checkState(mMaterial != null, "illegal material");
 			Preconditions.checkState(mCount > 0, "count must be greater than one");
 			Preconditions.checkState(mMaxLoreLength >= 0, "max lore length cannot be negative");
@@ -308,14 +308,14 @@ public final class GuiItem {
 				ItemUtils.setPlainTag(stack);
 			}
 
-			return new GuiItem(stack, mHandlers);
+			return new FloweyGuiItem(stack, mHandlers);
 		}
 
-		public void set(Gui gui, int index) {
+		public void set(FloweyGui gui, int index) {
 			gui.setItem(index, build());
 		}
 
-		public void set(Gui gui, int row, int col) {
+		public void set(FloweyGui gui, int row, int col) {
 			gui.setItem(row, col, build());
 		}
 	}
@@ -327,7 +327,7 @@ public final class GuiItem {
 	 * @param item     The base ItemStack to use
 	 * @param handlers Initial click handlers to register
 	 */
-	private GuiItem(ItemStack item, List<Consumer<InventoryClickEvent>> handlers) {
+	private FloweyGuiItem(ItemStack item, List<Consumer<InventoryClickEvent>> handlers) {
 		mItem = item;
 		mClickListeners = Collections.unmodifiableList(handlers);
 	}

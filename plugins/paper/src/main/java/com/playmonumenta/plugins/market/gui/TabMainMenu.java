@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.market.gui;
 
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class TabMainMenu implements MarketGuiTab {
 		}
 	}
 
-	private GuiItem buildOptionsIcon() {
+	private NjolGuiItem buildOptionsIcon() {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Options", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
@@ -48,7 +48,7 @@ public class TabMainMenu implements MarketGuiTab {
 		lore.add(Component.text("Left Click to edit your", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 		lore.add(Component.text("options or preferences", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 
-		return new GuiItem(GUIUtils.createBasicItem(Material.OBSERVER, 1, name, lore, false), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(Material.OBSERVER, 1, name, lore, false), false);
 	}
 
 	private void clickPlayerListingsAction(InventoryClickEvent clickEvent) {
@@ -59,7 +59,7 @@ public class TabMainMenu implements MarketGuiTab {
 		}
 	}
 
-	private GuiItem buildPlayerListingsIcon() {
+	private NjolGuiItem buildPlayerListingsIcon() {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Your Listings", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
@@ -69,10 +69,10 @@ public class TabMainMenu implements MarketGuiTab {
 		lore.add(Component.text("You can also Right Click", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 		lore.add(Component.text("to directly add a listing", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 
-		return new GuiItem(GUIUtils.createBasicItem(Material.BOOKSHELF, 1, name, lore, false), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(Material.BOOKSHELF, 1, name, lore, false), false);
 	}
 
-	private GuiItem buildBazaarBrowserIcon() {
+	private NjolGuiItem buildBazaarBrowserIcon() {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Bazaar Market", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
@@ -82,27 +82,27 @@ public class TabMainMenu implements MarketGuiTab {
 		lore.add(Component.text("Meant for general goods that are", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 		lore.add(Component.text("unfit for the other ways of trading", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 
-		return new GuiItem(GUIUtils.createBasicItem(Material.BARREL, 1, name, lore, false), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(Material.BARREL, 1, name, lore, false), false);
 	}
 
-	private GuiItem buildAuctionBrowserIcon() {
+	private NjolGuiItem buildAuctionBrowserIcon() {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Auction Market", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.OBFUSCATED, true);
 
 		lore.add(Component.text("Not yet implemented.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 
-		return new GuiItem(GUIUtils.createBasicItem(Material.JIGSAW, 1, name, lore, false), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(Material.JIGSAW, 1, name, lore, false), false);
 	}
 
-	private GuiItem buildStockBrowserIcon() {
+	private NjolGuiItem buildStockBrowserIcon() {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Stock Market", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.OBFUSCATED, true);
 
 		lore.add(Component.text("Not yet implemented.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 
-		return new GuiItem(GUIUtils.createBasicItem(Material.JIGSAW, 1, name, lore, false), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(Material.JIGSAW, 1, name, lore, false), false);
 	}
 
 	@Override

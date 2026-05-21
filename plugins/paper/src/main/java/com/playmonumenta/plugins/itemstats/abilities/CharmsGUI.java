@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.itemstats.abilities;
 
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.custominventories.PlayerDisplayCustomInventory;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.InventoryUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class CharmsGUI extends Gui {
+public class CharmsGUI extends NjolGui {
 	private static final int START_OF_CHARMS = 45;
 	private final ItemStack AVAILABLE_CHARM_POWER_SLOT;
 	private final ItemStack UNAVAILABLE_CHARM_POWER_SLOT;

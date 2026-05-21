@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.cosmetics.gui;
 
 import com.playmonumenta.plugins.Constants;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.utils.InventoryUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.WalletUtils;
@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-class VanityBuyScreen extends Gui {
+class VanityBuyScreen extends NjolGui {
 	private final ItemStack mItem;
 	private final VanityGUI mVanityGUI;
 

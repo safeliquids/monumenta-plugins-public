@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.inventories;
 
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.utils.InventoryUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
@@ -30,7 +30,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class CustomContainerItemGui extends Gui {
+public class CustomContainerItemGui extends NjolGui {
 	private final ItemStack mContainer;
 	private final CustomContainerItemManager.CustomContainerItemConfiguration mConfig;
 	private int mPage;
@@ -93,7 +93,7 @@ public class CustomContainerItemGui extends Gui {
 			if (showAmounts) {
 				displayItem.setAmount((int) Math.max(1, Math.min(64, showAmountsAsStacks ? amount / item.getMaxStackSize() : amount)));
 			}
-			setItem(1 + posInPage / 9, posInPage % 9, new GuiItem(displayItem, false))
+			setItem(1 + posInPage / 9, posInPage % 9, new NjolGuiItem(displayItem, false))
 				.onClick(event -> {
 					ItemStack movedItem = ItemUtils.clone(item);
 					NBT.modify(movedItem, ItemStatUtils::removePlayerModified);

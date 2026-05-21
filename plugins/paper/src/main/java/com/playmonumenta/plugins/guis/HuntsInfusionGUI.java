@@ -31,7 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import static com.playmonumenta.plugins.custominventories.DelveInfusionCustomInventory.mMaxLevelReachedItem;
 import static com.playmonumenta.plugins.custominventories.DelveInfusionCustomInventory.mMaxLevelReachedRevelationItem;
 
-public class HuntsInfusionGUI extends Gui {
+public class HuntsInfusionGUI extends NjolGui {
 
 	private static final NamespacedKey HAR_KEY = NamespacedKeyUtils.fromString("epic:r3/items/currency/hyperchromatic_archos_ring");
 	private static final NamespacedKey RUCK_KEY = NamespacedKeyUtils.fromString("epic:r3/hunts/currency/ruck");

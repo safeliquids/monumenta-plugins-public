@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
  * This class manages inventory creation, updates, and basic state management.
  * </p>
  */
-public abstract class Gui implements InventoryHolder {
+public abstract class FloweyGui implements InventoryHolder {
 	/**
 	 * The player interacting with this GUI instance.
 	 */
@@ -44,7 +44,7 @@ public abstract class Gui implements InventoryHolder {
 	/**
 	 * List of GuiItems in the inventory, with null entries representing filler items.
 	 */
-	final List<@Nullable GuiItem> mItems = new ArrayList<>();
+	final List<@Nullable FloweyGuiItem> mItems = new ArrayList<>();
 
 	/**
 	 * The Bukkit inventory instance managed by this GUI.
@@ -70,7 +70,7 @@ public abstract class Gui implements InventoryHolder {
 	 * @param title  The initial title of the inventory
 	 * @param size   The initial size of the inventory (must be multiple of 9)
 	 */
-	protected Gui(Player player, ItemStack filler, Component title, int size) {
+	protected FloweyGui(Player player, ItemStack filler, Component title, int size) {
 		Preconditions.checkState(Bukkit.isPrimaryThread(), "off-main gui creation is not allowed");
 		mFiller = filler;
 		mPlayer = player;
@@ -85,7 +85,7 @@ public abstract class Gui implements InventoryHolder {
 	 * @param title  The initial title of the inventory
 	 * @param size   The initial size of the inventory (must be multiple of 9)
 	 */
-	protected Gui(Player player, ItemStack filler, String title, int size) {
+	protected FloweyGui(Player player, ItemStack filler, String title, int size) {
 		this(player, filler, MessagingUtils.MINIMESSAGE_ALL.deserialize(title), size);
 	}
 
@@ -161,7 +161,7 @@ public abstract class Gui implements InventoryHolder {
 	 * @param item The GUI item to place in the slot
 	 * @throws IllegalStateException If called after inventory disposal or outside render()
 	 */
-	public final void setItem(int i, GuiItem item) {
+	public final void setItem(int i, FloweyGuiItem item) {
 		Preconditions.checkState(Bukkit.isPrimaryThread(), "off-main gui operation is not allowed");
 		Preconditions.checkState(mIsRendering, "setItem() called outside of render()");
 		Preconditions.checkState(mInventory != null, "setItem called after inventory was disposed");
@@ -169,7 +169,7 @@ public abstract class Gui implements InventoryHolder {
 		mItems.set(i, item);
 	}
 
-	public final void setItem(int row, int col, GuiItem item) {
+	public final void setItem(int row, int col, FloweyGuiItem item) {
 		setItem(row * 9 + col, item);
 	}
 
@@ -223,7 +223,7 @@ public abstract class Gui implements InventoryHolder {
 	/**
 	 * Called when the GUI needs to be rendered.
 	 * <p>
-	 * Implementations should use {@link #setItem(int, GuiItem)} to populate the inventory.
+	 * Implementations should use {@link #setItem(int, FloweyGuiItem)} to populate the inventory.
 	 * </p>
 	 */
 	@ApiStatus.OverrideOnly
@@ -233,7 +233,7 @@ public abstract class Gui implements InventoryHolder {
 	 * Called when a click occurs within the GUI inventory.
 	 *
 	 * @param event The inventory click event
-	 * @return true if the event should continue to {@link GuiItem} processing, false otherwise
+	 * @return true if the event should continue to {@link FloweyGuiItem} processing, false otherwise
 	 */
 	@ApiStatus.OverrideOnly
 	protected boolean onGuiClick(InventoryClickEvent event) {

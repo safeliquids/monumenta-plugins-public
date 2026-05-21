@@ -1,8 +1,8 @@
 package com.playmonumenta.plugins.social;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.social.PlayerSocialDisplayInfo.Friend;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
@@ -25,7 +25,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FriendListGui extends Gui {
+public class FriendListGui extends NjolGui {
 	private static final List<Integer> GUI_LOCATIONS = List.of(
 		19, 20, 21, 22, 23, 24, 25,
 		28, 29, 30, 31, 32, 33, 34,
@@ -119,14 +119,14 @@ public class FriendListGui extends Gui {
 		createControlButtons();
 
 		if (mFriendList.isEmpty()) {
-			setItem(31, new GuiItem(GUIUtils.createBasicItem(Material.BARRIER, (mIsSelf ? "You have " : mPlayerName + " has ") + "no friends added!", NamedTextColor.RED)));
+			setItem(31, new NjolGuiItem(GUIUtils.createBasicItem(Material.BARRIER, (mIsSelf ? "You have " : mPlayerName + " has ") + "no friends added!", NamedTextColor.RED)));
 			return;
 		}
 
 		for (int i = 0; i < GUI_LOCATIONS.size(); i++) {
 			if (i + pageOffset < mFriendList.size()) {
 				Friend friend = mFriendList.get(i + pageOffset);
-				GuiItem friendSkull = new GuiItem(createHead(friend));
+				NjolGuiItem friendSkull = new NjolGuiItem(createHead(friend));
 
 				if (guiMode == GuiMode.REMOVAL_MODE) {
 					friendSkull.onClick(event -> {
@@ -145,16 +145,16 @@ public class FriendListGui extends Gui {
 		String selectedFriendName = selectedFriend.mFriendName;
 		UUID selectedFriendUuid = selectedFriend.mFriendUuid;
 
-		setItem(4, new GuiItem(createHead(selectedFriend)));
+		setItem(4, new NjolGuiItem(createHead(selectedFriend)));
 
-		setItem(30, new GuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Cancel Removal", NamedTextColor.WHITE, false, "Click here to return to the friend management screen.", NamedTextColor.LIGHT_PURPLE)))
+		setItem(30, new NjolGuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Cancel Removal", NamedTextColor.WHITE, false, "Click here to return to the friend management screen.", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				mGuiMode = GuiMode.REMOVAL_MODE;
 				mSelectedFriend = null;
 				update();
 			});
 
-		setItem(32, new GuiItem(GUIUtils.createBasicItem(Material.GREEN_CONCRETE, "Confirm Removal", NamedTextColor.WHITE, false, "Click here to remove " + selectedFriendName + " as " + (mIsSelf ? "your " : mPlayerName + "'s ") + "friend.", NamedTextColor.LIGHT_PURPLE)))
+		setItem(32, new NjolGuiItem(GUIUtils.createBasicItem(Material.GREEN_CONCRETE, "Confirm Removal", NamedTextColor.WHITE, false, "Click here to remove " + selectedFriendName + " as " + (mIsSelf ? "your " : mPlayerName + "'s ") + "friend.", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event ->
 				SocialManager.removeFriend((mIsSelf ? null : mViewer), mPlayerUuid, selectedFriendUuid)
 					.thenCompose(v -> refreshData())
@@ -186,12 +186,12 @@ public class FriendListGui extends Gui {
 		skullMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		infoHead.setItemMeta(skullMeta);
 
-		setItem(4, new GuiItem(infoHead));
+		setItem(4, new NjolGuiItem(infoHead));
 	}
 
 	private void createControlButtons() {
 		if (mCurrentPage > 1) {
-			setItem(0, new GuiItem(GUIUtils.createBasicItem(Material.ARROW, "Back", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage - 1) + ".", NamedTextColor.LIGHT_PURPLE)))
+			setItem(0, new NjolGuiItem(GUIUtils.createBasicItem(Material.ARROW, "Back", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage - 1) + ".", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mCurrentPage -= 1;
 					update();
@@ -199,7 +199,7 @@ public class FriendListGui extends Gui {
 		}
 
 		if (mCurrentPage < mTotalPages) {
-			setItem(8, new GuiItem(GUIUtils.createBasicItem(Material.ARROW, "Next", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage + 1) + ".", NamedTextColor.LIGHT_PURPLE)))
+			setItem(8, new NjolGuiItem(GUIUtils.createBasicItem(Material.ARROW, "Next", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage + 1) + ".", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mCurrentPage += 1;
 					update();
@@ -207,7 +207,7 @@ public class FriendListGui extends Gui {
 		}
 
 		if (mGuiMode == GuiMode.LIST_MODE) {
-			setItem(6, new GuiItem(GUIUtils.createBasicItem(Material.FLINT_AND_STEEL, "Enter Removal Mode", NamedTextColor.WHITE, false, "Click here to enter removal mode where you can remove friends on this screen.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(6, new NjolGuiItem(GUIUtils.createBasicItem(Material.FLINT_AND_STEEL, "Enter Removal Mode", NamedTextColor.WHITE, false, "Click here to enter removal mode where you can remove friends on this screen.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mGuiMode = GuiMode.REMOVAL_MODE;
 					update();
@@ -215,7 +215,7 @@ public class FriendListGui extends Gui {
 		}
 
 		if (mGuiMode == GuiMode.REMOVAL_MODE) {
-			setItem(6, new GuiItem(GUIUtils.createBasicItem(Material.CAMPFIRE, "Exit Removal Mode", NamedTextColor.WHITE, false, "Click here to exit removal mode.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(6, new NjolGuiItem(GUIUtils.createBasicItem(Material.CAMPFIRE, "Exit Removal Mode", NamedTextColor.WHITE, false, "Click here to exit removal mode.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mGuiMode = GuiMode.LIST_MODE;
 					update();

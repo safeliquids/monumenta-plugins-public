@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.integrations.luckperms.guildgui;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
 import com.playmonumenta.plugins.integrations.luckperms.GuildAccessLevel;
 import com.playmonumenta.plugins.integrations.luckperms.GuildFlag;
@@ -460,7 +460,7 @@ public class GuildGui extends MailGui {
 				});
 		}
 
-		GuiItem guiItem = setItem(HEADER_Y, 5,
+		NjolGuiItem guiItem = setItem(HEADER_Y, 5,
 			GUIUtils.createBasicItem(Material.REDSTONE_TORCH, "Guild Settings", NamedTextColor.GRAY));
 		if (mGuildGroup != null) {
 			guiItem.onClick((InventoryClickEvent event) -> setView(new SettingsView(this)));
@@ -650,7 +650,7 @@ public class GuildGui extends MailGui {
 		meta.lore(lore);
 
 		item.setItemMeta(meta);
-		GuiItem guiItem = setItem(row, column, new GuiItem(item, false));
+		NjolGuiItem guiItem = setItem(row, column, new NjolGuiItem(item, false));
 
 		guiItem.onClick((InventoryClickEvent event) -> {
 			if (
@@ -779,7 +779,7 @@ public class GuildGui extends MailGui {
 	protected void setAccessHeaderIcon(int row, int column, GuildAccessLevel accessLevel) {
 		ItemStack item = getAccessHeaderIcon(accessLevel);
 
-		GuiItem guiItem = setItem(row, column, item);
+		NjolGuiItem guiItem = setItem(row, column, item);
 		if (!(GuildAccessLevel.FOUNDER.equals(accessLevel) || GuildAccessLevel.BLOCKED.equals(accessLevel))) {
 			guiItem.onClick(onAccessHeaderClick(accessLevel));
 		}

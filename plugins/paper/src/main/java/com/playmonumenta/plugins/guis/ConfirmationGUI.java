@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class ConfirmationGUI extends Gui {
+public class ConfirmationGUI extends NjolGui {
 	private final String mConfirmCommand;
 	private final String mDenyCommand;
 

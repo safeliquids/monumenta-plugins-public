@@ -54,7 +54,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 
-public class CustomTradeGui extends Gui {
+public class CustomTradeGui extends NjolGui {
 	// Variables:
 	//region <SCOREBOARDS>
 	public static final String MAIN = "peb_tradeGUI_main";

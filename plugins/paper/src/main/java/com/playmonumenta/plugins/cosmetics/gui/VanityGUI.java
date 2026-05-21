@@ -3,8 +3,8 @@ package com.playmonumenta.plugins.cosmetics.gui;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.collect.ImmutableMap;
 import com.playmonumenta.plugins.cosmetics.VanityManager;
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
@@ -30,7 +30,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-public class VanityGUI extends Gui {
+public class VanityGUI extends NjolGui {
 
 	static final int STRAND_COST_PER_VANITY_UNLOCK = 16;
 
@@ -150,7 +150,7 @@ public class VanityGUI extends Gui {
 				meta.lore(lore);
 				meta.addItemFlags(ItemFlag.values());
 				vanityItem.setItemMeta(meta);
-				setItem(Objects.requireNonNull(VANITY_EQUIPMENT_ITEM_SLOTS.get(slot)), new GuiItem(vanityItem, false)).onLeftClick(() -> {
+				setItem(Objects.requireNonNull(VANITY_EQUIPMENT_ITEM_SLOTS.get(slot)), new NjolGuiItem(vanityItem, false)).onLeftClick(() -> {
 					mNewVanity.remove(slot);
 					update();
 				});
@@ -197,7 +197,7 @@ public class VanityGUI extends Gui {
 			NBT.modify(lockboxVanityToggle, nbt -> {
 				ItemStatUtils.addPlayerModified(nbt).setString(ItemStatUtils.CUSTOM_SKIN_KEY, vanityData.mLockboxSwapEnabled ? "Alchemist" : "Warrior");
 			});
-			setItem(4, 5, new GuiItem(lockboxVanityToggle, false)).onLeftClick(() -> {
+			setItem(4, 5, new NjolGuiItem(lockboxVanityToggle, false)).onLeftClick(() -> {
 				mPlugin.mVanityManager.toggleLockboxSwap(mPlayer);
 				update();
 			});

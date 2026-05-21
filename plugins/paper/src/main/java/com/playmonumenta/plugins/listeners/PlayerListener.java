@@ -19,7 +19,7 @@ import com.playmonumenta.plugins.events.EffectTypeApplyFromPotionEvent;
 import com.playmonumenta.plugins.events.EntityGainAbsorptionEvent;
 import com.playmonumenta.plugins.events.HemorrhageEvent;
 import com.playmonumenta.plugins.events.PotionEffectApplyEvent;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkChatIntegration;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkRelayIntegration;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
@@ -349,7 +349,7 @@ public class PlayerListener implements Listener {
 
 		mPlugin.mTrackingManager.removeEntity(player);
 
-		Gui.playerQuit(player);
+		NjolGui.playerQuit(player);
 
 		Team playersTeam = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(PLAYERS_TEAM_NAME);
 		if (playersTeam != null) {
@@ -1486,7 +1486,7 @@ public class PlayerListener implements Listener {
 		// If the teleport wasn't cancelled by anything, update their gamemode and other location-based info
 		mPlugin.mTrackingManager.mPlayers.updateLocation(player, event.getTo(), 0);
 
-		Gui gui = Gui.getOpenGui(player);
+		NjolGui gui = NjolGui.getOpenGui(player);
 		if (gui != null && gui.getCloseOnTeleport()) {
 			gui.close();
 		}

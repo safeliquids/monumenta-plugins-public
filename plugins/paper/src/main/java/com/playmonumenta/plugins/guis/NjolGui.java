@@ -25,9 +25,9 @@ import org.jetbrains.annotations.Nullable;
  * A helper class to make simple Minecraft item GUIs.
  * Extend this class and define all items in the overridden {@link #setup()} method, then just {@link #open()} it to show it to a player.
  */
-public abstract class Gui {
+public abstract class NjolGui {
 
-	private static final Map<UUID, Gui> LAST_OPENED_INVENTORY = new HashMap<>();
+	private static final Map<UUID, NjolGui> LAST_OPENED_INVENTORY = new HashMap<>();
 
 	protected final Plugin mPlugin;
 	public final Player mPlayer;
@@ -37,19 +37,19 @@ public abstract class Gui {
 	private boolean mTitleDirty = false;
 	private GuiCustomInventory mCustomInventory;
 
-	private final List<GuiItem> mItems;
+	private final List<NjolGuiItem> mItems;
 
 	public ItemStack mFiller = GUIUtils.FILLER;
 
-	public Gui(Player player, int size, String title) {
+	public NjolGui(Player player, int size, String title) {
 		this(player, size, Component.text(title));
 	}
 
-	public Gui(Player player, int size, Component title) {
+	public NjolGui(Player player, int size, Component title) {
 		this(player, size, title, false);
 	}
 
-	public Gui(Player player, int size, Component title, boolean closeOnTeleport) {
+	public NjolGui(Player player, int size, Component title, boolean closeOnTeleport) {
 		mPlugin = Plugin.getInstance();
 		mPlayer = player;
 		mSize = size;
@@ -80,7 +80,7 @@ public abstract class Gui {
 		}
 		Inventory inventory = mCustomInventory.getInventory();
 		for (int i = 0; i < mSize; i++) {
-			GuiItem guiItem = i < mItems.size() ? mItems.get(i) : null;
+			NjolGuiItem guiItem = i < mItems.size() ? mItems.get(i) : null;
 			if (guiItem != null) {
 				inventory.setItem(i, guiItem.mItem);
 			} else {
@@ -139,11 +139,11 @@ public abstract class Gui {
 		mTitleDirty = true;
 	}
 
-	public GuiItem setItem(int row, int column, GuiItem item) {
+	public NjolGuiItem setItem(int row, int column, NjolGuiItem item) {
 		return setItem(row * 9 + column, item);
 	}
 
-	public GuiItem setItem(int index, GuiItem item) {
+	public NjolGuiItem setItem(int index, NjolGuiItem item) {
 		if (index < 0 || index >= 6 * 9) {
 			throw new IllegalArgumentException("Invalid item index " + index);
 		}
@@ -158,15 +158,15 @@ public abstract class Gui {
 		return item;
 	}
 
-	public GuiItem setItem(int row, int column, ItemStack item) {
-		return setItem(row, column, new GuiItem(item));
+	public NjolGuiItem setItem(int row, int column, ItemStack item) {
+		return setItem(row, column, new NjolGuiItem(item));
 	}
 
-	public GuiItem setItem(int index, ItemStack item) {
-		return setItem(index, new GuiItem(item));
+	public NjolGuiItem setItem(int index, ItemStack item) {
+		return setItem(index, new NjolGuiItem(item));
 	}
 
-	public @Nullable GuiItem getItem(int index) {
+	public @Nullable NjolGuiItem getItem(int index) {
 		if (mItems.size() <= index) {
 			return null;
 		}
@@ -182,7 +182,7 @@ public abstract class Gui {
 	}
 
 	/**
-	 * Called when the player clicks in the GUI area. Only use this if {@link GuiItem#onClick(Consumer)} is not sufficient for your use case.
+	 * Called when the player clicks in the GUI area. Only use this if {@link NjolGuiItem#onClick(Consumer)} is not sufficient for your use case.
 	 * If this returns false, no item's onClick handler will be called.
 	 */
 	protected boolean onGuiClick(InventoryClickEvent event) {
@@ -224,7 +224,7 @@ public abstract class Gui {
 			event.setCancelled(true);
 			GUIUtils.refreshOffhand(event);
 			if (mDiscarded) {
-				MMLog.warning("GuiCustomInventory received click event after being discarded (GUI class=" + Gui.this.getClass() + ")");
+				MMLog.warning("GuiCustomInventory received click event after being discarded (GUI class=" + NjolGui.this.getClass() + ")");
 				return;
 			}
 			if (event.getClickedInventory() == mInventory) {
@@ -232,7 +232,7 @@ public abstract class Gui {
 					return;
 				}
 				if (event.getSlot() < mItems.size()) {
-					GuiItem item = mItems.get(event.getSlot());
+					NjolGuiItem item = mItems.get(event.getSlot());
 					if (item != null) {
 						item.clicked(event);
 					}
@@ -264,8 +264,8 @@ public abstract class Gui {
 		}
 	}
 
-	public static @Nullable Gui getOpenGui(Player player) {
-		Gui lastOpenedGui = LAST_OPENED_INVENTORY.get(player.getUniqueId());
+	public static @Nullable NjolGui getOpenGui(Player player) {
+		NjolGui lastOpenedGui = LAST_OPENED_INVENTORY.get(player.getUniqueId());
 		if (lastOpenedGui != null && lastOpenedGui.mCustomInventory.getInventory().equals(player.getOpenInventory().getTopInventory())) {
 			return lastOpenedGui;
 		}

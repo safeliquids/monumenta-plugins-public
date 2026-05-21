@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class DungeonsGui extends Gui {
+public class DungeonsGui extends NjolGui {
 
 	private static final ItemStack NO_INSTANCE_ITEM = GUIUtils.createBasicItem(
 		Material.RED_STAINED_GLASS_PANE,

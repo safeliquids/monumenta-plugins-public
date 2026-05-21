@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.integrations.luckperms.listeners;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.integrations.luckperms.GuildFlag;
 import com.playmonumenta.plugins.integrations.luckperms.LuckPermsIntegration;
 import com.playmonumenta.plugins.integrations.luckperms.guildgui.GuildGui;
@@ -114,7 +114,7 @@ public class GuildFlags implements Listener {
 				+ "; updating relevant code"
 		);
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			Gui openGui = Gui.getOpenGui(player);
+			NjolGui openGui = NjolGui.getOpenGui(player);
 			if (openGui instanceof GuildGui guildGui) {
 				guildGui.refreshIfGuild(guildRoot);
 			}

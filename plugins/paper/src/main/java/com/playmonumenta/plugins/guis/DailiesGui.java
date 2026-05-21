@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class DailiesGui extends Gui {
+public class DailiesGui extends NjolGui {
 
 	private static final ItemStack NO_COMPLETION_ITEM = GUIUtils.createBasicItem(
 		Material.RED_STAINED_GLASS_PANE,

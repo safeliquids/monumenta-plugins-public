@@ -8,7 +8,7 @@ import com.playmonumenta.plugins.classes.MonumentaClasses;
 import com.playmonumenta.plugins.classes.PlayerClass;
 import com.playmonumenta.plugins.classes.PlayerSpec;
 import com.playmonumenta.plugins.effects.AbilitySilence;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.overrides.YellowTesseractOverride;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.AbilityUtils;
@@ -34,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.scoreboard;
 
-public class ClassSelectionGui extends Gui {
+public class ClassSelectionGui extends NjolGui {
 	protected static final int COMMON_HEADER_ROW = 0;
 	private static final int COMMON_REMAINING_SKILL_COLUMN = 8;
 	private static final int COMMON_REMAINING_SPEC_COLUMN = 7;

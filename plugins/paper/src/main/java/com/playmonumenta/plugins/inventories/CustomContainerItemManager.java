@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.inventories;
 
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.listeners.QuiverListener;
@@ -79,7 +79,7 @@ public class CustomContainerItemManager implements Listener {
 			return false;
 		}
 
-		public void createAdditionalGuiItems(ItemStack container, Gui gui) {
+		public void createAdditionalGuiItems(ItemStack container, NjolGui gui) {
 		}
 
 		public boolean checkCanUse(Player player) {

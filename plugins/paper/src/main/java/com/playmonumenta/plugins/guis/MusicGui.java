@@ -36,7 +36,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
-public class MusicGui extends Gui {
+public class MusicGui extends NjolGui {
 	public enum MusicPage {
 		VANILLA("vanilla", 36, "Minecraft Music Discs"),
 		VALLEY("valley", 36, "Monumenta Soundtrack: King's Valley"),

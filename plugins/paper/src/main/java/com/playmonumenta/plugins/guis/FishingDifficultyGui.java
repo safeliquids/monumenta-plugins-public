@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class FishingDifficultyGui extends Gui {
+public class FishingDifficultyGui extends NjolGui {
 
 	private static final Component TITLE = Component.text("Fish Shrine");
 	private static final String DIFFICULTY_UNLOCKED_SCOREBOARD = "FishUnlockedDifficulties";
