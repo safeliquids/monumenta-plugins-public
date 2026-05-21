@@ -125,7 +125,7 @@ public class DaggerThrow extends Ability {
 
 			Location endLoc = LocationUtils.rayTraceToBlock(startLoc, newDir, mRange, loc -> mCosmetic.daggerHitBlockEffect(loc, mPlayer));
 
-			traceDaggerPathAndDamage(startLoc, endLoc);
+			traceDaggerPathAndDamage(startLoc, endLoc, 1);
 
 			if (isEnhanced()) {
 				mDaggerEndPoints.add(endLoc);
@@ -176,20 +176,20 @@ public class DaggerThrow extends Ability {
 		mCosmetic.daggerThrowEffect(world, playerLoc, mPlayer);
 
 		for (Location location : mDaggerEndPoints) {
-			traceDaggerPathAndDamage(location, playerLoc);
+			traceDaggerPathAndDamage(location, playerLoc, mRecastMultiplier);
 		}
 
 		mDaggerEndPoints.clear();
 	}
 
-	private void traceDaggerPathAndDamage(Location startLoc, Location endLoc) {
+	private void traceDaggerPathAndDamage(Location startLoc, Location endLoc, double multiplier) {
 		mCosmetic.daggerParticle(startLoc, endLoc, mPlayer);
 		for (LivingEntity mob : Hitbox.approximateCylinder(startLoc, endLoc, 0.7, true).accuracy(0.5).getHitMobs()) {
 			if (!MetadataUtils.checkOnceThisTick(mPlugin, mob, DAGGER_THROW_MOB_HIT_TICK)) {
 				continue;
 			}
 			mCosmetic.daggerHitEffect(startLoc.getWorld(), endLoc, mob, mPlayer);
-			DamageUtils.damage(mPlayer, mob, DamageType.MELEE_SKILL, mDamage * mRecastMultiplier, mInfo.getLinkedSpell(), true);
+			DamageUtils.damage(mPlayer, mob, DamageType.MELEE_SKILL, mDamage * multiplier, mInfo.getLinkedSpell(), true);
 			EntityUtils.applyVulnerability(mPlugin, mVulnDuration, mVulnBase, mob);
 			if (isEnhanced()) {
 				EntityUtils.applySilence(mPlugin, mSilenceDuration, mob);
