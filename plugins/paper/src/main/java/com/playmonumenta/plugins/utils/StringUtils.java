@@ -236,19 +236,19 @@ public class StringUtils {
 		hours = Math.floorMod(hours, 24);
 
 		if (days > 9) {
-			return days + "d";
+			return String.format("%dd", days);
 		} else if (days > 0) {
-			return days + "d " + hours + "h";
+			return String.format("%dd %02dh", days, hours);
 		} else if (hours > 9) {
-			return hours + "h";
+			return String.format("%dh", hours);
 		} else if (hours > 0) {
-			return hours + "h " + minutes + "m";
+			return String.format("%dh %02dm", hours, minutes);
 		} else if (minutes > 9) {
-			return minutes + "m";
+			return String.format("%dm", minutes);
 		} else if (minutes > 0) {
-			return minutes + "m " + seconds + "s";
+			return String.format("%dm %02ds", minutes, seconds);
 		}
-		return seconds + "s";
+		return String.format("%ds", seconds);
 	}
 
 	public static String ticksToTime(int ticks) {
