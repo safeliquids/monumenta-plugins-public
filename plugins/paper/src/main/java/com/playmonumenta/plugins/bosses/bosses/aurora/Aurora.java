@@ -155,7 +155,7 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 
 		players.forEach(player -> {
 			boolean foundWorldshaper = false;
-			for (ItemStack itemStack : player.getInventory()) {
+			for (@Nullable ItemStack itemStack : player.getInventory()) {
 				if (isAuroraLoom(itemStack)) {
 					foundWorldshaper = true;
 					break;
@@ -1240,8 +1240,10 @@ public class Aurora extends SerializedLocationBossAbilityGroup {
 		return Component.text(speaker + " ", NamedTextColor.GOLD).append(Component.text(message, textColor));
 	}
 
-	public static boolean isAuroraLoom(ItemStack itemStack) {
-		return itemStack.getType() == Material.PEARLESCENT_FROGLIGHT && ItemUtils.getPlainName(itemStack).equals(AURORA_LOOM_NAME);
+	public static boolean isAuroraLoom(@Nullable ItemStack itemStack) {
+		return itemStack != null &&
+			itemStack.getType() == Material.PEARLESCENT_FROGLIGHT &&
+			ItemUtils.getPlainName(itemStack).equals(AURORA_LOOM_NAME);
 	}
 
 }
