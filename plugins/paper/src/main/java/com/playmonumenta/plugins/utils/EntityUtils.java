@@ -988,13 +988,13 @@ public class EntityUtils {
 	}
 
 	public static final String SLOW_EFFECT_NAME = "SlowEffect";
+	public static final String NEGATIVE_SLOW_EFFECT_NAME = "SlowEffectNegative";
 
 	public static void applySlow(Plugin plugin, int ticks, double amount, LivingEntity mob) {
-		if (!isCCImmuneMob(mob)) {
-			plugin.mEffectManager.addEffect(mob, SLOW_EFFECT_NAME, new PercentSpeed(ticks, -amount, SLOW_EFFECT_NAME));
-		}
+		applySlow(plugin, ticks, amount, mob, amount > 0 ? SLOW_EFFECT_NAME : NEGATIVE_SLOW_EFFECT_NAME);
 	}
 
+	// Don't use this method directly unless there is a reason the slow should stack with other slows
 	public static void applySlow(Plugin plugin, int ticks, double amount, LivingEntity mob, String effectString) {
 		if (!isCCImmuneMob(mob)) {
 			plugin.mEffectManager.addEffect(mob, SLOW_EFFECT_NAME, new PercentSpeed(ticks, -amount, effectString));
@@ -1042,6 +1042,7 @@ public class EntityUtils {
 	}
 
 	public static final String WEAKEN_EFFECT_NAME = "WeakenEffect";
+	public static final String NEGATIVE_WEAKEN_EFFECT_NAME = "WeakenEffectNegative";
 	private static final String WEAKEN_EFFECT_AESTHETICS_NAME = "WeakenEffectAesthetics";
 
 	private static final EnumSet<DamageType> WEAKEN_EFFECT_AFFECTED_DAMAGE_TYPES = EnumSet.of(
@@ -1050,13 +1051,14 @@ public class EntityUtils {
 	);
 
 	public static void applyWeaken(Plugin plugin, int ticks, double amount, LivingEntity mob) {
-		applyWeaken(plugin, ticks, amount, mob, WEAKEN_EFFECT_AFFECTED_DAMAGE_TYPES, WEAKEN_EFFECT_NAME);
+		applyWeaken(plugin, ticks, amount, mob, WEAKEN_EFFECT_AFFECTED_DAMAGE_TYPES);
 	}
 
 	public static void applyWeaken(Plugin plugin, int ticks, double amount, LivingEntity mob, @Nullable EnumSet<DamageType> affectedDamageTypes) {
-		applyWeaken(plugin, ticks, amount, mob, affectedDamageTypes, WEAKEN_EFFECT_NAME);
+		applyWeaken(plugin, ticks, amount, mob, affectedDamageTypes, amount > 0 ? WEAKEN_EFFECT_NAME : NEGATIVE_WEAKEN_EFFECT_NAME);
 	}
 
+	// Don't use this method directly unless there is a reason the weaken should stack with other weakens
 	public static void applyWeaken(Plugin plugin, int ticks, double amount, LivingEntity mob, @Nullable EnumSet<DamageType> affectedDamageTypes, String effectString) {
 		plugin.mEffectManager.addEffect(mob, effectString, new PercentDamageDealt(ticks, -amount).damageTypes(affectedDamageTypes));
 		plugin.mEffectManager.addEffect(mob, WEAKEN_EFFECT_AESTHETICS_NAME, new Aesthetics(ticks,

@@ -138,7 +138,7 @@ public class Permafrost extends DepthsAbility implements AbilityWithChargesOrSta
 			});
 
 		Hitbox.approximateCone(loc, mRadius, Math.PI * 2 / 3).getHitMobs().forEach(m -> {
-			EntityUtils.applySlow(mPlugin, mDebuffDuration, mSlowness, m, DEBUFF_SOURCE);
+			EntityUtils.applySlow(mPlugin, mDebuffDuration, mSlowness, m);
 			EntityUtils.applySelfishVulnerability(mPlugin, mDebuffDuration, mVulnerability, m, mPlayer);
 			GlowingManager.startGlowing(m, NamedTextColor.AQUA, mDebuffDuration, GlowingManager.PLAYER_ABILITY_PRIORITY, p -> p.equals(mPlayer), DEBUFF_SOURCE);
 		});
