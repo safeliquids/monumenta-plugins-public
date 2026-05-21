@@ -25,6 +25,7 @@ import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
 import com.playmonumenta.plugins.itemstats.enums.Operation;
 import com.playmonumenta.plugins.itemstats.infusions.Ardor;
+import com.playmonumenta.plugins.itemstats.infusions.Celerity;
 import com.playmonumenta.plugins.itemstats.infusions.Epoch;
 import com.playmonumenta.plugins.itemstats.infusions.Expedite;
 import com.playmonumenta.plugins.itemstats.infusions.Focus;
@@ -153,6 +154,7 @@ enum PSGUIStat {
 		stats -> stats.getAttributeAmount(AttributeType.SPEED, 0.1,
 			RegionScalingDamageTaken.SPEED_EFFECT[stats.getRegionScaling(stats.mPlayer, false)]
 				+ Ardor.getMovementSpeedBonus(stats.getInfusion(InfusionType.ARDOR))
+				+ Celerity.getMovementSpeedBonus(stats.getInfusion(InfusionType.CELERITY))
 				+ Expedite.getMovementSpeedBonus(stats.getInfusion(InfusionType.EXPEDITE), Expedite.MAX_STACKS)) / 0.1),
 	KNOCKBACK_RESISTANCE("Knockback Resistance", Formatting.PERCENT, stats -> Math.min(1, stats.getAttributeAmount(AttributeType.KNOCKBACK_RESISTANCE, 0)
 		+ Unyielding.getKnockbackResistance(stats.getInfusion(InfusionType.UNYIELDING)))),
