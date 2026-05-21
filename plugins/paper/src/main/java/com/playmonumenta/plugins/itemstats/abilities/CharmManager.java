@@ -1859,49 +1859,42 @@ public class CharmManager {
 	public void onSave(PlayerSaveEvent event) {
 		for (CharmType charmType : CharmType.values()) {
 			Player player = event.getPlayer();
+			JsonObject data = new JsonObject();
+			JsonArray charmArray = new JsonArray();
+			data.add(KEY_CHARMS, charmArray);
 			List<ItemStack> charms = charmType.mPlayerCharms.get(player.getUniqueId());
 			if (charms != null) {
-				JsonObject data = new JsonObject();
-				JsonArray charmArray = new JsonArray();
-				data.add(KEY_CHARMS, charmArray);
 				for (ItemStack charm : charms) {
 					JsonObject charmData = new JsonObject();
 					charmData.addProperty(KEY_ITEM, NBT.itemStackToNBT(charm).toString());
 					charmArray.add(charmData);
 				}
-				event.setPluginData(charmType.getPluginDataKey(), data);
 			}
+			event.setPluginData(charmType.getPluginDataKey(), data);
 		}
 	}
 
 	//Load plugin data into local charm data
 	public void onJoin(Player p) {
 		for (CharmType charmType : CharmType.values()) {
+			List<ItemStack> playerCharms = new ArrayList<>();
 			JsonObject charmPluginData = MonumentaRedisSyncAPI.getPlayerPluginData(p.getUniqueId(), charmType.getPluginDataKey());
-			if (charmPluginData != null) {
-				if (charmPluginData.has(KEY_CHARMS)) {
-					JsonArray charmArray = charmPluginData.getAsJsonArray(KEY_CHARMS);
-					List<ItemStack> playerCharms = new ArrayList<>();
-					for (JsonElement charmElement : charmArray) {
-						JsonObject data = charmElement.getAsJsonObject();
-						if (data.has(KEY_ITEM) && data.get(KEY_ITEM).isJsonPrimitive() && data.getAsJsonPrimitive(KEY_ITEM).isString()) {
-							ItemStack item = NBT.itemStackFromNBT(NBT.parseNBT(data.getAsJsonPrimitive(KEY_ITEM).getAsString()));
-							if (item != null) {
-
-								ItemStatUtils.cleanIfNecessary(item);
-
-								playerCharms.add(item);
-							}
+			if (charmPluginData != null && charmPluginData.has(KEY_CHARMS)) {
+				JsonArray charmArray = charmPluginData.getAsJsonArray(KEY_CHARMS);
+				for (JsonElement charmElement : charmArray) {
+					JsonObject data = charmElement.getAsJsonObject();
+					if (data.has(KEY_ITEM) && data.get(KEY_ITEM).isJsonPrimitive() && data.getAsJsonPrimitive(KEY_ITEM).isString()) {
+						ItemStack item = NBT.itemStackFromNBT(NBT.parseNBT(data.getAsJsonPrimitive(KEY_ITEM).getAsString()));
+						if (item != null) {
+							ItemStatUtils.cleanIfNecessary(item);
+							playerCharms.add(item);
 						}
-					}
-					//Check if we actually loaded any charms
-					if (!playerCharms.isEmpty()) {
-						charmType.mPlayerCharms.put(p.getUniqueId(), playerCharms);
-						//Recalculate the charm map based on loaded charms by calling update
-						updateCharms(p, charmType);
 					}
 				}
 			}
+			// Always overwrite — clears stale in-memory data from rapid reconnects (e.g. after rollback)
+			charmType.mPlayerCharms.put(p.getUniqueId(), playerCharms);
+			updateCharms(p, charmType);
 		}
 	}
 
