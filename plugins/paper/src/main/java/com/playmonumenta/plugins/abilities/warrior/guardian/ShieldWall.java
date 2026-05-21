@@ -21,6 +21,8 @@ import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.MovementUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
+import it.unimi.dsi.fastutil.Pair;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Nullable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.cooldown;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.stat;
@@ -82,6 +85,7 @@ public class ShieldWall extends Ability implements AbilityWithDuration {
 	private final double mRadius;
 	private final double mRadiusStationary;
 	private final ShieldWallCS mCosmetic;
+	private @Nullable BukkitRunnable mShieldRunnable;
 
 	private int mCurrDuration = -1;
 
@@ -97,6 +101,7 @@ public class ShieldWall extends Ability implements AbilityWithDuration {
 		mRadius = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RADIUS, SHIELD_WALL_RADIUS);
 		mRadiusStationary = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RADIUS, SHIELD_WALL_RADIUS_STATIONARY);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new ShieldWallCS());
+		mShieldRunnable = null;
 	}
 
 	public boolean cast(boolean deposit, boolean canRecast) {
@@ -107,19 +112,26 @@ public class ShieldWall extends Ability implements AbilityWithDuration {
 			mDeposited = true;
 			return true;
 		}
+		if (mShieldRunnable != null) {
+			if (!mShieldRunnable.isCancelled()) {
+				mShieldRunnable.cancel();
+			}
+			mShieldRunnable = null;
+		}
 		mDeposited = deposit;
 
 		World world = mPlayer.getWorld();
 		Location loc = mPlayer.getLocation();
-		mCosmetic.shieldStartEffect(world, mPlayer, loc, SHIELD_WALL_RADIUS);
+		mCosmetic.shieldStartEffect(world, mPlayer, loc, mRadius, mAngle, mHeight);
 		putOnCooldown();
 
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
 		mCurrDuration = 0;
-		cancelOnDeath(new BukkitRunnable() {
+		mShieldRunnable = new BukkitRunnable() {
 			final Set<LivingEntity> mMobsAlreadyHit = new HashSet<>();
 			Location mLoc = loc;
+			List<Pair<Float, Double>> mArcHeights = new ArrayList<>();
 
 			@Override
 			public void run() {
@@ -137,13 +149,13 @@ public class ShieldWall extends Ability implements AbilityWithDuration {
 
 				Hitbox hitbox = Hitbox.approximateHollowCylinderSegment(mLoc.clone().add(0, -1, 0), mHeight + 1, 0.7 * radius - 0.5, 1.15 * radius, Math.toRadians(mAngle) / 2);
 
-				mCosmetic.wallParticles(mPlayer, mLoc, radius, mAngle, mHeight);
+				mArcHeights = mCosmetic.wallParticles(mPlayer, mLoc, radius, mAngle, mHeight, mCurrDuration);
 
 				List<Projectile> projectiles = hitbox.getHitEntitiesByClass(Projectile.class);
 				for (Projectile proj : projectiles) {
 					if (proj.getShooter() instanceof LivingEntity shooter && !(shooter instanceof Player)) {
 						proj.remove();
-						mCosmetic.shieldOnBlock(world, proj.getLocation(), mPlayer);
+						mCosmetic.shieldOnBlock(mPlayer, mLoc, proj.getLocation(), radius);
 					}
 				}
 
@@ -154,16 +166,20 @@ public class ShieldWall extends Ability implements AbilityWithDuration {
 						DamageUtils.damage(mPlayer, le, new DamageEvent.Metadata(DamageEvent.DamageType.MELEE_SKILL, mInfo.getLinkedSpell(), playerItemStats), mDamage, false, true, false);
 					}
 
-					if (mKnockback > 0 && !EntityUtils.isCCImmuneMob(le) && !mPlugin.mEffectManager.hasEffect(le, ON_HIT_EFFECT + mPlayer.getName())) {
-						float y = 0.4f;
-						if (!le.isOnGround()) {
-							y -= 0.2f;
+					if (!mPlugin.mEffectManager.hasEffect(le, ON_HIT_EFFECT + mPlayer.getName())) {
+						if (mKnockback > 0 && !EntityUtils.isCCImmuneMob(le)) {
+							float y = 0.4f;
+							if (!le.isOnGround()) {
+								y -= 0.2f;
+							}
+							if (!enteredWall) {
+								y -= 0.15f;
+							}
+							mCosmetic.shieldOnHit(mLoc, mArcHeights, le, radius, enteredWall ? 1 : 0.5f);
+							MovementUtils.knockAway(mLoc, le, mKnockback, y, true);
+						} else {
+							mCosmetic.shieldOnHit(mLoc, mArcHeights, le, radius, enteredWall ? 1 : 0.2f);
 						}
-						if (!enteredWall) {
-							y -= 0.15f;
-						}
-						mCosmetic.shieldOnHit(world, le.getLocation(), mPlayer, enteredWall ? 1 : 0.5f);
-						MovementUtils.knockAway(mLoc, le, mKnockback, y, true);
 						mPlugin.mEffectManager.addEffect(le, ON_HIT_EFFECT + mPlayer.getName(), new OnHitTimerEffect(5));
 					}
 
@@ -183,7 +199,8 @@ public class ShieldWall extends Ability implements AbilityWithDuration {
 				mCurrDuration = -1;
 				ClientModHandler.updateAbility(mPlayer, ShieldWall.this);
 			}
-		}.runTaskTimer(mPlugin, 0, 1));
+		};
+		cancelOnDeath(mShieldRunnable.runTaskTimer(mPlugin, 0, 1));
 
 		return true;
 	}

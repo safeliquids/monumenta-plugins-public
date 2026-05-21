@@ -852,10 +852,12 @@ public class LocationUtils {
 		for (int i = 0; i < 1000; i++) {
 			Block block = clone.getBlock();
 			if (!block.isSolid()) {
+				clone.setY(block.getY());
 				return clone;
 			}
 			double newY = block.getBoundingBox().getMaxY();
 			if (newY < clone.getY()) {
+				clone.setY(newY);
 				return clone;
 			}
 			if (newY >= maxHeight) {
