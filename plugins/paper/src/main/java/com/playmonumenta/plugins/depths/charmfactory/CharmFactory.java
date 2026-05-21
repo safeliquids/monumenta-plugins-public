@@ -880,4 +880,12 @@ public class CharmFactory {
 			return item;
 		}
 	}
+
+	public static long getUUID(ItemStack item) {
+		ReadableNBT playerModified = ItemStatUtils.getPlayerModified(NBT.readNbt(item));
+		if (playerModified == null) {
+			throw new IllegalArgumentException("Cannot read UUID from non-Zenith Charm item!");
+		}
+		return playerModified.getLong(CHARM_UUID_KEY);
+	}
 }

@@ -163,7 +163,7 @@ public class ItemUpdateManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void entityPickupItemEvent(EntityPickupItemEvent event) {
 		List<String> path = new ArrayList<>();
-		path.add("EntityPickupItemEvent");
+		path.add("EntityPickupItemEvent at " + event.getEntity().getLocation().getWorld().getName() + " " + event.getEntity().getLocation().toVector());
 
 		Item entity = event.getItem();
 		ItemStack item = entity.getItemStack();
@@ -177,7 +177,7 @@ public class ItemUpdateManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void itemSpawnEvent(ItemSpawnEvent event) {
 		List<String> path = new ArrayList<>();
-		path.add("ItemSpawnEvent");
+		path.add("ItemSpawnEvent at " + event.getEntity().getLocation().getWorld().getName() + " " + event.getEntity().getLocation().toVector());
 
 		Item itemEntity = event.getEntity();
 		ItemStack item = itemEntity.getItemStack();
@@ -191,7 +191,10 @@ public class ItemUpdateManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void inventoryOpenEvent(InventoryOpenEvent event) {
 		List<String> path = new ArrayList<>();
-		path.add("InventoryOpenEvent");
+		Player player = (Player) event.getPlayer();
+		path.add("InventoryOpenEvent for Player"
+			+ " " + player.getName()
+			+ " at " + player.getLocation().getWorld().getName() + " " + player.getLocation().toVector());
 
 		try {
 			updateNested(path, event.getInventory());
@@ -272,7 +275,7 @@ public class ItemUpdateManager implements Listener {
 				});
 			}
 
-			ItemUpdateHelper.generateItemStats(item);
+			ItemUpdateHelper.generateItemStats(item, path);
 		} catch (Exception e) {
 			path = new ArrayList<>(path);
 			path.add("in ItemStack " + ItemUtils.getGiveCommand(item));

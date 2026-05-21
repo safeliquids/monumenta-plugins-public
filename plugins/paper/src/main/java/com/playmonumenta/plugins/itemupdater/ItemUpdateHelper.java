@@ -17,6 +17,7 @@ import com.playmonumenta.plugins.itemstats.enums.Region;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
 import com.playmonumenta.plugins.itemstats.enums.Tier;
 import com.playmonumenta.plugins.itemstats.infusions.Shattered;
+import com.playmonumenta.plugins.listeners.AuditListener;
 import com.playmonumenta.plugins.listeners.QuiverListener;
 import com.playmonumenta.plugins.overrides.FirmamentOverride;
 import com.playmonumenta.plugins.overrides.WorldshaperOverride;
@@ -24,10 +25,13 @@ import com.playmonumenta.plugins.utils.DelveInfusionUtils;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
+import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import com.playmonumenta.plugins.utils.PotionUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import com.playmonumenta.plugins.utils.StringUtils;
+import com.playmonumenta.redissync.BukkitConfigAPI;
+import com.playmonumenta.redissync.RedisAPI;
 import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.NBTType;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -176,6 +180,10 @@ public class ItemUpdateHelper {
 	}
 
 	public static void generateItemStats(final ItemStack item) {
+		generateItemStats(item, List.of());
+	}
+
+	public static void generateItemStats(final ItemStack item, List<String> contextPath) {
 		if (ItemUtils.isNullOrAir(item)) {
 			return;
 		}
@@ -205,6 +213,27 @@ public class ItemUpdateHelper {
 			if (newCharm != null) {
 				item.setItemMeta(newCharm.getItemMeta());
 			}
+
+			// Dupe Check: if we update a charm with a UUID that we already encountered this week, it could be a dupe
+			long uuid = CharmFactory.getUUID(item);
+			try (RedisAPI.BorrowedCommands<String, String> conn = RedisAPI.borrow()) {
+				conn.sadd(BukkitConfigAPI.getServerDomain() + ":zenithcharmdupecheck", Long.toString(uuid)).whenComplete((added, ex) -> {
+					if (ex != null) {
+						MMLog.severe("Failed to write Zenith Charm UUID to Redis!", ex);
+						return;
+					}
+
+					// if nothing was added, then that UUID must already exist in the set, so potential dupe
+					if (added == 0 || item.getAmount() > 1) {
+						StringBuilder message = new StringBuilder("Potentially duped Zenith Charm with UUID " + uuid + " at:");
+						for (String node : contextPath) {
+							message.append(" " + node);
+						}
+						AuditListener.logSevere(message.toString());
+					}
+				});
+			}
+
 			return;
 		}
 
