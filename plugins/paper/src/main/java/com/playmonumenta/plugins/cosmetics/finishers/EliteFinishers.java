@@ -55,6 +55,7 @@ public class EliteFinishers {
 			.put(MaledictioRanae.NAME, new MaledictioRanae())
 			.put(MegalovaniaFinisher.NAME, new MegalovaniaFinisher())
 			.put(MoneyRainFinisher.NAME, new MoneyRainFinisher())
+			.put(MonumentMotifFinisher.NAME, new MonumentMotifFinisher())
 			.put(PaintSplashFinisher.NAME, new PaintSplashFinisher())
 			.put(PoultryficationFinisher.NAME, new PoultryficationFinisher())
 			.put(PrideFinisher.NAME, new PrideFinisher())
