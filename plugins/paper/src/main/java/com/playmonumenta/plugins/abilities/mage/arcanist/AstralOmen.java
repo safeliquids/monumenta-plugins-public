@@ -205,7 +205,7 @@ public class AstralOmen extends Ability {
 	private static Description<AstralOmen> getDescription1() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 1)
 			.addDashedLine()
-			.addLine("Damaging a mob with a ability gives it")
+			.addLine("Damaging a mob with an ability gives it")
 			.addLine("an *Omen* based on the ability's element").styles(OMEN_COLOR)
 			.addLine("that lasts for %t.")
 				.statValues(stat(STACK_TICKS))

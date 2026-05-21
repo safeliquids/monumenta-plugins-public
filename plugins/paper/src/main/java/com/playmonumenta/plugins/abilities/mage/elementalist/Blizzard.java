@@ -120,8 +120,10 @@ public class Blizzard extends Ability {
 						}
 
 						// Artifact Charm code for magic res
-						mPlugin.mEffectManager.addEffect(p, CHARM_ARTIFACT_BLIZZARD_MAGIC_RES,
-							new PercentDamageReceived(SLOW_INTERVAL * 2, -mMagicResistanceModifier, EnumSet.of(DamageEvent.DamageType.MAGIC)).deleteOnAbilityUpdate(true));
+						if (mMagicResistanceModifier != 0) {
+							mPlugin.mEffectManager.addEffect(p, CHARM_ARTIFACT_BLIZZARD_MAGIC_RES,
+								new PercentDamageReceived(SLOW_INTERVAL * 2, -mMagicResistanceModifier, EnumSet.of(DamageEvent.DamageType.MAGIC)).deleteOnAbilityUpdate(true));
+						}
 					}
 
 					for (LivingEntity mob : mobs) {

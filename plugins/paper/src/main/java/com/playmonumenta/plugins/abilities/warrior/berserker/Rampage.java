@@ -124,7 +124,7 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 		mHealing = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_HEALING, HEAL_PERCENT);
 		mDamageBuff = (isLevelOne() ? DAMAGE_PERCENT_L1 : DAMAGE_PERCENT_L2) + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_DAMAGE_BUFF);
 		mKnockback = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, KNOCKBACK);
-		mMeleeResistance = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_MELEE_RESISTANCE, MELEE_RESISTANCE_PERCENT);
+		mMeleeResistance = MELEE_RESISTANCE_PERCENT + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_MELEE_RESISTANCE);
 
 		mBloodlustCost = BLOODLUST_COST + (int) CharmManager.getLevel(mPlayer, CHARM_BLOODLUST_COST);
 		mMaxDuration = CharmManager.getDuration(mPlayer, CHARM_MAX_DURATION, mDurationPerStack * mMaxBloodlustGain + mInitialDuration);

@@ -152,7 +152,7 @@ public class MagmaShield extends MultipleChargeAbility {
 				.statValues(stat(a -> a.mFireDuration, FIRE_TICKS))
 			.addStat("Radius: %r (Cone-Shaped)")
 				.statValues(stat(a -> a.mRadius, RADIUS))
-			.addStat("Cooldown: %t1e_only")
+			.addStat("Cooldown: %t1u")
 				.statValues(cooldown(COOLDOWN_TICKS))
 			.addDashedLine();
 	}

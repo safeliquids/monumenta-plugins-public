@@ -155,7 +155,7 @@ public class CleansingTotem extends TotemAbility {
 			.addLine("Summon a *Totem* that periodically heals").styles(Shaman.TOTEM_COLOR)
 			.addLine("all nearby players.")
 			.addLine()
-			.addStat("Healing: %p1e_only HP every 1s")
+			.addStat("Healing: %p1u HP every 1s")
 				.statValues(stat(a -> a.mHealPercentBase, HEAL_PERCENT))
 			.addStat("Radius: %r")
 				.statValues(stat(a -> a.mRadius, AOE_RANGE))

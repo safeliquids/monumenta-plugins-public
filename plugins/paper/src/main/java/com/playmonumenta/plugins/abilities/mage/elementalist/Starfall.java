@@ -158,6 +158,8 @@ public class Starfall extends Ability {
 				.statValues(stat(a -> a.mFireDuration, FIRE_TICKS))
 			.addStat("Radius: %r")
 				.statValues(stat(a -> a.mRadius, SIZE))
+			.addStat("Range: %r")
+				.statValues(stat(a -> a.mDistance, DISTANCE))
 			.addStat("Cooldown: %t")
 				.statValues(cooldown(COOLDOWN_TICKS))
 			.addDashedLine();

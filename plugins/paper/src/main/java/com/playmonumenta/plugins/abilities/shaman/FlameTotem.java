@@ -211,7 +211,7 @@ public class FlameTotem extends TotemAbility {
 			.addLine()
 			.addLine("Casting non-*Totem* abilities inside *Flame*").styles(Shaman.TOTEM_COLOR, UNDERLINED)
 			.addLine("*Totem*'s area increases its damage").styles(UNDERLINED)
-			.addLine("by +%d (s), up to %d1e_only times.")
+			.addLine("by +%d (s), up to %d1u times.")
 				.statValues(stat(a -> a.mBonusDamageFlat, ABILITY_FLAT_DMG_ADDITION), stat(a -> a.mAbilityLimit, ABILITY_LIMIT))
 			.addDashedLine();
 	}
