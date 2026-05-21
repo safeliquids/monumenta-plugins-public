@@ -221,6 +221,11 @@ public class EntityUtils {
 	 */
 	public static final String IGNORE_DEATH_TRIGGERS_TAG = "boss_no_death_triggers";
 	public static final String DONT_ENTER_BOATS_TAG = "boss_no_boat_riding";
+	public static final Set<String> VIRTUAL_ENTITY_BOSSTAGS = Set.of(
+		ImmortalPassengerBoss.identityTag,
+		ImmortalMountBoss.identityTag,
+		WormSegmentBoss.identityTag
+	);
 	private static final Map<LivingEntity, Integer> COOLING_MOBS = new HashMap<>();
 	private static final Map<LivingEntity, Integer> STUNNED_MOBS = new HashMap<>();
 	private static final Map<LivingEntity, Integer> FROZEN_MOBS = new HashMap<>(); // Frozen is just stun but without the visuals
@@ -389,6 +394,15 @@ public class EntityUtils {
 
 	public static boolean isWaterMob(EntityType type) {
 		return WATER_MOBS.contains(type);
+	}
+
+	public static boolean isVirtualMob(LivingEntity entity) {
+		for (String tag : VIRTUAL_ENTITY_BOSSTAGS) {
+			if (entity.getScoreboardTags().contains(tag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// Affected by Abyssal

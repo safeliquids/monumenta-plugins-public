@@ -833,10 +833,19 @@ public class BossManager implements Listener {
 		}
 
 		Entity vehicle = damagee.getVehicle();
-		if (vehicle instanceof LivingEntity mount) {
-			Boss mountBoss = mBosses.get(mount.getUniqueId());
+		if (vehicle instanceof LivingEntity le) {
+			Boss mountBoss = mBosses.get(le.getUniqueId());
 			if (mountBoss != null) {
 				mountBoss.onPassengerHurt(event);
+			}
+		}
+
+		for (Entity passenger : damagee.getPassengers()) {
+			if (passenger instanceof LivingEntity le) {
+				Boss mountBoss = mBosses.get(le.getUniqueId());
+				if (mountBoss != null) {
+					mountBoss.onMountHurt(event);
+				}
 			}
 		}
 
