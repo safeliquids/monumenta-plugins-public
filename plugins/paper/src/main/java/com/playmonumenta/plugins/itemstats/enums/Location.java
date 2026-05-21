@@ -139,7 +139,7 @@ public enum Location {
 	SIRIUS("sirius", "The Final Blight", TextColor.fromHexString("#34CFBC")),
 	HUNTS("hunts", "Diamenean Hunts", TextColor.fromHexString("#414e18")),
 	TWISTED_INTRUDER("twisted", Component.text("Twisted ", Constants.Colors.TWISTED_INTRUDER).decoration(TextDecoration.ITALIC, false).append(Component.text("lxxxxxxx", Constants.Colors.TWISTED_INTRUDER).decoration(TextDecoration.ITALIC, false).decoration(TextDecoration.OBFUSCATED, true))),
-	AURORA("aurora", "Aurora's Endgame", TextColor.fromHexString("#A6CFE3"), true),
+	AURORA("aurora", "Aurora's Endgame", TextColor.fromHexString("#A6CFE3")),
 	// events, legacy
 	VALENTINE("valentine", "Valentine Event", TextColor.fromHexString("#FF7F7F")),
 	VALENTINESKIN("valentineskin", "Valentine Skin", TextColor.fromHexString("#FF7F7F")),
@@ -148,7 +148,7 @@ public enum Location {
 	EASTER("easter", "Easter Event", TextColor.fromHexString("#55FF55")),
 	EASTERSKIN("easterskin", "Easter Skin", TextColor.fromHexString("#55FF55")),
 	HALLOWEEN("halloween", "Halloween Event", TextColor.fromHexString("#FF6600")),
-	TENYEARS("tenyears", MessagingUtils.addGradient("Monumenta's 10th Anniversary", "3efbe7", "159aff").decoration(TextDecoration.ITALIC, false), true),
+	TENYEARS("tenyears", MessagingUtils.addGradient("Monumenta's 10th Anniversary", "3efbe7", "159aff").decoration(TextDecoration.ITALIC, false), TextColor.fromHexString("3EFBE7"), true),
 	TRICKSTER("trickster", "Trickster Challenge", TextColor.fromHexString("#FF6600")),
 	WINTER("winter", "Winter Event", TextColor.fromHexString("#AFC2E3")),
 	KOAL("koal", "Coalrupted Sierhaven", TextColor.fromHexString("#A1C4E0")),
@@ -196,14 +196,14 @@ public enum Location {
 	}
 
 	Location(String name, Component display) {
-		this(name, display, false);
+		this(name, display, display.color(), false);
 	}
 
-	Location(String name, Component display, boolean buildHidden) {
+	Location(String name, Component display, TextColor color, boolean buildHidden) {
 		mName = name;
 		mDisplayName = MessagingUtils.plainText(display);
 		mDisplay = display;
-		mColor = display.color();
+		mColor = color;
 		mBuildHidden = buildHidden;
 	}
 
