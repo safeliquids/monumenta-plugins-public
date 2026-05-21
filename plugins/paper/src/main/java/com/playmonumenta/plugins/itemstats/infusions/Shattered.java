@@ -108,7 +108,7 @@ public class Shattered implements Infusion {
 				if (DateUtils.getSecond() % 12 < 6) {
 					MessagingUtils.sendActionBarMessage(player, "Some of your gear is Shattered, giving you " + (hasMaxShatteredItemEquipped(player) ? "Mining Fatigue and " : "") + (int) (getMultiplier(shatterLevel) * 100) + "% Weakness and Vulnerability!", NamedTextColor.RED);
 				} else {
-					MessagingUtils.sendActionBarMessage(player, "Retrieve a Grave, or use Repair Anvils to remove Shattered.", NamedTextColor.RED);
+					MessagingUtils.sendActionBarMessage(player, "Retrieve a Grave or use Repair Anvils to remove Shattered.", NamedTextColor.RED);
 				}
 			}
 			updateEffects(plugin, player, shatterLevel);
