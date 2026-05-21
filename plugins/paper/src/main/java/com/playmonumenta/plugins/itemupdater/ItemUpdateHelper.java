@@ -350,7 +350,7 @@ public class ItemUpdateHelper {
 					if (region == Region.RING) {
 						if (masterwork != null && masterwork != Masterwork.ERROR && masterwork != Masterwork.NONE) {
 							final Tier previousTier = tier;
-							switch (Objects.requireNonNull(masterwork)) {
+							switch (masterwork) {
 								case ZERO, I, II, III -> tier = Tier.RARE;
 								case IV, V -> tier = Tier.ARTIFACT;
 								case VI -> tier = Tier.EPIC;
