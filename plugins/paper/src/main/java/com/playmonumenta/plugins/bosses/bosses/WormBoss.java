@@ -80,22 +80,34 @@ public class WormBoss extends BossAbilityGroup {
 
 		mParams = BossParameters.getParameters(boss, identityTag, new Parameters());
 
+		double bossInitialHp = EntityUtils.getAttributeBaseOrDefault(mBoss, Attribute.GENERIC_MAX_HEALTH, boss.getHealth());
 		for (int i = 1; i < mParams.LENGTH - 1; i++) {
-			summonPart(mParams, i, false);
+			summonPart(mParams, i, false, bossInitialHp);
 		}
-		summonPart(mParams, mParams.LENGTH - 1, true);
+		summonPart(mParams, mParams.LENGTH - 1, true, bossInitialHp);
 
 		mMovement = mParams.SNAKE_MOVEMENT ? new SnakeMovement(boss.getLocation().toVector()) : new FollowMovement();
 
 		new BukkitRunnable() {
+			private double mLastMaxHealth = -1;
 			@Override
 			public void run() {
 				if (!mBoss.isValid()) {
 					cancel();
 					return;
 				}
+				double maxHealth = EntityUtils.getAttributeBaseOrDefault(mBoss, Attribute.GENERIC_MAX_HEALTH, 1);
+				double health = Math.clamp(mBoss.getHealth(), 0, maxHealth);
+				boolean setMaxHealth = false;
+				if (mLastMaxHealth != maxHealth) {
+					mLastMaxHealth = maxHealth;
+					setMaxHealth = true;
+				}
 				for (LivingEntity part : mParts) {
-					part.setHealth(mBoss.getHealth());
+					if (setMaxHealth) {
+						EntityUtils.setAttributeBase(part, Attribute.GENERIC_MAX_HEALTH, maxHealth);
+					}
+					part.setHealth(health);
 				}
 				mMovement.move();
 			}
@@ -104,7 +116,7 @@ public class WormBoss extends BossAbilityGroup {
 		super.constructBoss(SpellManager.EMPTY, Collections.emptyList(), mParams.DETECTION, null);
 	}
 
-	private void summonPart(Parameters params, int index, boolean tail) {
+	private void summonPart(Parameters params, int index, boolean tail, double health) {
 		double logIndex = Math.log(1 + index / 6.0);
 		Location spawnLocation = mBoss.getLocation().add(VectorUtils.rotateYAxis(new Vector(mBoss.getWidth() * (0.8 + logIndex), 0, 0), 500 * logIndex));
 		LivingEntity part = null;
@@ -158,8 +170,8 @@ public class WormBoss extends BossAbilityGroup {
 		EntityUtils.setRemoveEntityOnUnload(part);
 		part.setAI(false);
 		mBoss.getCollidableExemptions().add(part.getUniqueId());
-		EntityUtils.setAttributeBase(part, Attribute.GENERIC_MAX_HEALTH, EntityUtils.getMaxHealth(mBoss));
-		part.setHealth(mBoss.getHealth());
+		EntityUtils.setAttributeBase(part, Attribute.GENERIC_MAX_HEALTH, health);
+		part.setHealth(health);
 
 		// prevent dropping XP (and items)
 		MetadataUtils.setMetadata(part, Constants.SPAWNER_COUNT_METAKEY, MobListener.SPAWNER_DROP_THRESHOLD + 1);
