@@ -141,9 +141,11 @@ public class LucidRendBoss extends BossAbilityGroup {
 					if (mBossMob.getTarget() != null) {
 						Location loc = mBoss.getLocation();
 						Vector targetDir = mBossMob.getTarget().getLocation().toVector().subtract(loc.toVector());
-						double[] targetYawPitch = VectorUtils.vectorToRotation(targetDir);
-						mBoss.setRotation((float) targetYawPitch[0], (float) targetYawPitch[1]);
-						mSpell.swordMatchRotation();
+						if (targetDir.lengthSquared() > 0) {
+							double[] targetYawPitch = VectorUtils.vectorToRotation(targetDir);
+							mBoss.setRotation((float) targetYawPitch[0], (float) targetYawPitch[1]);
+							mSpell.swordMatchRotation();
+						}
 						if (mCurrentCooldown <= 0 && Objects.requireNonNull(mBossMob.getTarget()).getLocation().distance(mBoss.getLocation()) <= 3.5) {
 							forceCastSpell(mSpell.getClass());
 							// Jank
