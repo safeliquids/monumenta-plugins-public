@@ -317,6 +317,7 @@ public class Plugin extends JavaPlugin {
 		Portal1.register();
 		Portal2.register();
 		PZeroCommand.register();
+		ReAsyncCommand.register(this);
 		RedeemVoteRewards.register(this);
 		RefreshClass.register(this);
 		RegisterTorch.register();
@@ -592,7 +593,6 @@ public class Plugin extends JavaPlugin {
 		manager.registerEvents(new WitchListener(this), this);
 		manager.registerEvents(new SeasonalEventListener(), this);
 		manager.registerEvents(CosmeticsManager.getInstance(), this);
-		LootTableManager.INSTANCE.reload();
 		manager.registerEvents(LootTableManager.INSTANCE, this);
 		manager.registerEvents(new CharmListener(this), this);
 		manager.registerEvents(new QuiverListener(), this);
