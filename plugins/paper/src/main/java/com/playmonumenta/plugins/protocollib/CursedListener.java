@@ -13,6 +13,7 @@ import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlay
 import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutEntityMetadataHandle;
 import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutScoreboardTeamHandle;
 import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityHandle;
+import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityLivingHandle;
 import com.bergerkiller.generated.net.minecraft.world.entity.DisplayHandle;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -362,7 +363,7 @@ public class CursedListener extends PacketAdapter {
 		// https://minecraft.wiki/w/Java_Edition_protocol/Packets?oldid=2773257#Spawn_Entity
 		PacketContainer playerPacket = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
 		playerPacket.getModifier().writeDefaults();
-		PacketPlayOutSpawnEntityHandle playerHandle = PacketPlayOutSpawnEntityHandle.createHandle(playerPacket.getHandle());
+		PacketPlayOutSpawnEntityLivingHandle playerHandle = PacketPlayOutSpawnEntityLivingHandle.createHandle(playerPacket.getHandle());
 		playerHandle.setEntityId(entity.getEntityId());
 		playerHandle.setEntityUUID(entity.getUniqueId());
 		Location loc = entity.getLocation();
@@ -371,6 +372,7 @@ public class CursedListener extends PacketAdapter {
 		playerHandle.setPosZ(loc.getZ());
 		playerHandle.setPitch(loc.getPitch());
 		playerHandle.setYaw(loc.getYaw());
+		playerHandle.setHeadYaw(NmsUtils.getVersionAdapter().getEntityHeadRotation(entity));
 		playerHandle.setCommonEntityType(CommonEntityType.PLAYER);
 		sendPacketNoFilters(recievingPlayer, playerPacket);
 	}
