@@ -90,7 +90,7 @@ public class FirmamentOverride {
 				|| currentItem.getType().isAir()
 				|| ItemUtils.notAllowedTreeReplace.contains(currentItem.getType())
 				|| (!currentItem.getType().isOccluding() && !ItemUtils.GOOD_OCCLUDERS.contains(currentItem.getType()))
-				|| currentItem.getItemMeta().hasLore()) {
+				|| (currentItem.getItemMeta().hasLore() && !WaterloggedOverride.mayPlaceWaterloggable(currentItem))) {
 				// Air breaks it, skip over it. Also, the banned items break it, skip over those.
 				continue;
 			}

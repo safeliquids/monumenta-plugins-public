@@ -344,7 +344,7 @@ public class WorldshaperOverride {
 			Material type = currentItem.getType();
 			if (type.isAir() || ItemUtils.notAllowedTreeReplace.contains(type)
 				|| (!type.isOccluding() && !ItemUtils.GOOD_OCCLUDERS.contains(type) && !(occludingException != null && occludingException.test(type)))
-				|| currentItem.getItemMeta().hasLore()) {
+				|| (currentItem.getItemMeta().hasLore() && !WaterloggedOverride.mayPlaceWaterloggable(currentItem))) {
 				// Air breaks it, skip over it. Also, the banned items break it, skip over those.
 				continue;
 			}
