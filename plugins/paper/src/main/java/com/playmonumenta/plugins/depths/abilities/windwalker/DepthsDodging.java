@@ -10,6 +10,7 @@ import com.playmonumenta.plugins.depths.abilities.DepthsAbilityInfo;
 import com.playmonumenta.plugins.depths.abilities.DepthsTrigger;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
+import com.playmonumenta.plugins.itemstats.enchantments.CurseOfInstability;
 import com.playmonumenta.plugins.listeners.EntityListener;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import java.util.Collection;
@@ -78,7 +79,8 @@ public class DepthsDodging extends DepthsAbility {
 	@Override
 	public void onHurt(DamageEvent event, @Nullable Entity damager, @Nullable LivingEntity source) {
 		// See if we should dodge. If false, allow the event to proceed normally
-		if (event.getType() == DamageType.PROJECTILE && !event.isBlocked() && dodge()) {
+		DamageType type = CurseOfInstability.getType(mPlayer, event.getType());
+		if (type == DamageType.PROJECTILE && !event.isBlocked() && dodge()) {
 			event.setCancelled(true);
 			mPlayer.setLastDamage(event.getDamage());
 			mPlayer.setNoDamageTicks(20);
@@ -136,6 +138,13 @@ public class DepthsDodging extends DepthsAbility {
 			 */
 			return false;
 
+		}
+
+		if (CurseOfInstability.getType(mPlayer, DamageType.PROJECTILE) != DamageType.PROJECTILE) {
+			// Curse of Instability is causing this projectile attack to not be
+			// projectile damage. Don't proc Dodging.
+			// (Instability rolls the same type for all events for a player in a given tick)
+			return false;
 		}
 
 		/*
