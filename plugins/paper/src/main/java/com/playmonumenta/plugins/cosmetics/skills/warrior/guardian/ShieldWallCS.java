@@ -77,7 +77,7 @@ public class ShieldWallCS implements CosmeticSkill {
 
 	public List<Pair<Float, Double>> wallParticles(Player player, Location center, double radius, double angle, double height, int ticks) {
 		List<Pair<Float, Double>> arcHeights = subdivide(center, radius, angle, height);
-		if (mLastTickLoc != null && mLastTickLoc.distanceSquared(center) > NOT_MOVING_COSMETIC_THRESHOLD_SQUARED) {
+		if (mLastTickLoc != null && mLastTickLoc.getWorld() != null && mLastTickLoc.getWorld().equals(center.getWorld()) && mLastTickLoc.distanceSquared(center) > NOT_MOVING_COSMETIC_THRESHOLD_SQUARED) {
 			movingWallLine(player, center, arcHeights, radius, angle, height, ticks);
 		} else {
 			stationaryWallLine(player, center, arcHeights, radius, height);
