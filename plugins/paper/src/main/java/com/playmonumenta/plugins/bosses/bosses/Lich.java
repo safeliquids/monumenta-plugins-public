@@ -28,6 +28,7 @@ import com.playmonumenta.plugins.bosses.spells.lich.SpellSalientOfDecay;
 import com.playmonumenta.plugins.bosses.spells.lich.SpellShadowRealm;
 import com.playmonumenta.plugins.bosses.spells.lich.SpellSoulShackle;
 import com.playmonumenta.plugins.cosmetics.VanityManager;
+import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.effects.LichCurseEffect;
 import com.playmonumenta.plugins.effects.PercentDamageReceived;
 import com.playmonumenta.plugins.effects.PercentSpeed;
@@ -61,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 import net.kyori.adventure.bossbar.BossBar;
@@ -1222,6 +1224,23 @@ public final class Lich extends SerializedLocationBossAbilityGroup {
 		Plugin.getInstance().mEffectManager.addEffect(p, curseSource, new LichCurseEffect(time * 20));
 		p.sendMessage(Component.text("I CAST DOWN DOOM UPON THEE, AND CURSE YOUR VERY BONES. YOU SHALL JOIN MY REVENANTS.", NamedTextColor.LIGHT_PURPLE));
 		p.sendActionBar(Component.text("You are cursed! You take double damage for " + time + " Seconds.", NamedTextColor.DARK_RED));
+	}
+
+	public static boolean isCursed(Plugin plugin, Player p) {
+		return plugin.mEffectManager.hasEffect(p, curseSource);
+	}
+
+	public static void removeCursed(Plugin plugin, Player p) {
+		setCursedTicks(plugin, p, 0);
+	}
+
+	public static void setCursedTicks(Plugin plugin, Player p, int ticks) {
+		NavigableSet<Effect> cursed = plugin.mEffectManager.getEffects(p, curseSource);
+		if (cursed != null) {
+			for (Effect curse : cursed) {
+				curse.setDuration(ticks);
+			}
+		}
 	}
 
 	public static void bossGotHit(boolean gotHit) {

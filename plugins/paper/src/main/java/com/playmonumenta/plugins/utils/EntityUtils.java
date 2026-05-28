@@ -892,23 +892,6 @@ public class EntityUtils {
 		return nearbyPlayers;
 	}
 
-	public static double vulnerabilityMult(LivingEntity target) {
-		if (target instanceof Player) {
-			PotionEffect unluck = target.getPotionEffect(PotionEffectType.UNLUCK);
-			if (unluck != null) {
-				double vulnLevel = 1 + unluck.getAmplifier();
-
-				if (isBoss(target)) {
-					vulnLevel = vulnLevel / 2;
-				}
-
-				return 1 + 0.05 * vulnLevel;
-			}
-		}
-
-		return 1;
-	}
-
 	public static @Nullable LivingEntity getNearestHostileTargetable(Location loc, double range) {
 		return loc.getNearbyEntitiesByType(LivingEntity.class, range, range, range)
 			.stream()
