@@ -137,8 +137,12 @@ public class MarketCommands {
 			.withPermission(perms)
 			.withArguments(arguments)
 			.executesPlayer((player, args) -> {
-				player.sendMessage(MarketRedisManager.getListing(args.getUnchecked("listingID")).toBeautifiedJsonString());
-
+				MarketListing listing = MarketRedisManager.getListing(args.getUnchecked("listingID"));
+				if (listing == null) {
+					player.sendMessage("No listing found with that ID.");
+					return;
+				}
+				player.sendMessage(listing.toBeautifiedJsonString());
 			})
 			.register();
 
