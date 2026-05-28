@@ -206,7 +206,7 @@ public class CharmFactory {
 			return generateCharm(rarity, power, seed, charmEffectOrder, charmActionOrder, charmRollsOrder, item.getItemMeta().displayName(), item, 0, false);
 		} catch (Exception e) {
 			MMLog.warning("CharmFactory failed to update a charm! Returning the same charm...");
-			ItemUpdateHelper.generateItemStats(item);
+			ItemUpdateHelper.generateItemStats(item, List.of("Failed CharmFactory updateCharm()"));
 			return item;
 		}
 	}
@@ -601,7 +601,7 @@ public class CharmFactory {
 			ItemStatUtils.addCharmEffect(item, sortedEffects.size(), charmTextLines.get(i));
 		}
 
-		ItemUpdateHelper.generateItemStats(item);
+		ItemUpdateHelper.generateItemStats(item, List.of("CharmFactory generateCharm()"));
 		return item;
 	}
 
@@ -876,7 +876,7 @@ public class CharmFactory {
 			return generateCharm(Math.min(rarity + 1, 5), power, seed, charmEffectOrder, charmActionOrder, charmRollsOrder, item.getItemMeta().displayName(), item, 0, true);
 		} catch (Exception e) {
 			MMLog.warning("CharmFactory failed to upgrade a charm! Returning the same charm...");
-			ItemUpdateHelper.generateItemStats(item);
+			ItemUpdateHelper.generateItemStats(item, List.of("Failed CharmFactory upgradeCharm()"));
 			return item;
 		}
 	}

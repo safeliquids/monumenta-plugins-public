@@ -216,25 +216,37 @@ public class ItemUpdateHelper {
 			}
 
 			// Dupe Check: if we update a charm with a UUID that we already encountered this week, it could be a dupe
-			long uuid = CharmFactory.getUUID(item);
+			boolean dupeCheckEnabled = ServerProperties.getZenithCharmDupeCheckEnabled();
+			String uuid = Long.toHexString(CharmFactory.getUUID(item));
+			String context = String.join(" ", contextPath);
 			try (RedisAPI.BorrowedCommands<String, String> conn = RedisAPI.borrow()) {
-				conn.sadd(BukkitConfigAPI.getServerDomain() + ":zenithcharmdupecheck", Long.toString(uuid)).whenComplete((added, ex) -> {
+				// check if UUID already exists in Hash
+				conn.hget(BukkitConfigAPI.getServerDomain() + ":zenithcharmdupecheck", uuid).toCompletableFuture().whenComplete((oldContext, ex) -> {
 					if (ex != null) {
-						MMLog.severe("Failed to write Zenith Charm UUID to Redis!", ex);
+						MMLog.severe("Failed to read Zenith Charm UUID from Redis!", ex);
 						return;
 					}
-
-					// if nothing was added, then that UUID must already exist in the set, so potential dupe
-					if (ServerProperties.getZenithCharmDupeCheckEnabled() && (added == 0 || item.getAmount() > 1)) {
-						StringBuilder message = new StringBuilder("Potentially duped Zenith Charm with UUID " + uuid + " at:");
-						for (String node : contextPath) {
-							message.append(" ").append(node);
-						}
-						AuditListener.logSevere(message.toString());
+					if (dupeCheckEnabled && oldContext != null) {
+						// if oldContext found, then charm was already recorded and might be a dupe
+						String message = "Potentially duped Zenith Charm with UUID " + uuid + " at: " + context;
+						message += "\n\nPreviously seen at: " + oldContext;
+						AuditListener.logSevere(message);
+					} else if (dupeCheckEnabled && item.getAmount() > 1) {
+						// stacked charms are also very sussy too
+						String message = "Potentially duped Zenith Charm with UUID " + uuid + " at: " + context;
+						message += "\n\nCharm found with a stack size of: " + item.getAmount();
+						AuditListener.logSevere(message);
 					}
 				});
-			}
 
+				// update hash with newest context
+				try (RedisAPI.BorrowedCommands<String, String> conn2 = RedisAPI.borrow()) {
+					conn2.hset(BukkitConfigAPI.getServerDomain() + ":zenithcharmdupecheck", uuid, context).exceptionally(ex -> {
+						MMLog.severe("Failed to write Zenith Charm UUID to Redis!", ex);
+						return null;
+					});
+				}
+			}
 			return;
 		}
 

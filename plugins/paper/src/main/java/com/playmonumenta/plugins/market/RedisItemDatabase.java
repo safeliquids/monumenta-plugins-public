@@ -110,7 +110,7 @@ public class RedisItemDatabase {
 		// Check dirty flag for if lore text needs updating
 		if (ItemStatUtils.isDirty(item)) {
 			List<String> itemPath = new ArrayList<>();
-			itemPath.add("RedisItemDatabase[" + id + "]");
+			itemPath.add("RedisItemDatabase[" + id + "] getting item from ID");
 			ItemUpdateManager.updateNested(itemPath, item);
 			updateItemEntryInRedis(id, item.asOne());
 		}
@@ -147,6 +147,12 @@ public class RedisItemDatabase {
 	}
 
 	private static void saveToCache(long id, ItemStack item) {
+		// never save a Dirty item to cache
+		if (ItemStatUtils.isDirty(item)) {
+			List<String> itemPath = new ArrayList<>(List.of("RedisItemDatabase[" + id + "] saveToCache"));
+			ItemUpdateManager.updateNested(itemPath, item);
+		}
+
 		mLocalCacheIDToItem.put(id, item.asOne());
 		mLocalCacheItemToID.put(item.asOne(), id);
 		touchCacheTimestamp(id);

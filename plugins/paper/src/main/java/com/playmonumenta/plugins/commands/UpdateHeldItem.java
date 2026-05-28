@@ -3,6 +3,7 @@ package com.playmonumenta.plugins.commands;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
+import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +20,7 @@ public class UpdateHeldItem extends GenericCommand {
 		}
 		ItemUpdateHelper.fixLegacies(item);
 		String errorFound = ItemUpdateHelper.regenerateStats(item);
-		ItemUpdateHelper.generateItemStats(item);
+		ItemUpdateHelper.generateItemStats(item, List.of("/updatehelditem"));
 		// String errorFound = ItemUpdateHelper.checkForErrors(item);
 		if (errorFound != null) {
 			errorFound = "Errors found with held item: " + errorFound;

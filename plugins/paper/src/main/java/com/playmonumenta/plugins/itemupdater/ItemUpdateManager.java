@@ -192,9 +192,15 @@ public class ItemUpdateManager implements Listener {
 	public void inventoryOpenEvent(InventoryOpenEvent event) {
 		List<String> path = new ArrayList<>();
 		Player player = (Player) event.getPlayer();
-		path.add("InventoryOpenEvent for Player"
-			+ " " + player.getName()
-			+ " at " + player.getLocation().getWorld().getName() + " " + player.getLocation().toVector());
+		Location location = event.getInventory().getLocation();
+		String locationString;
+		if (location == null) {
+			locationString = " for virtual inventory (" + event.getInventory().getType() + ")";
+		} else {
+			locationString = " for inventory (" + event.getInventory().getType() + ") at " + location.getWorld().getName() + " " + location.toVector();
+		}
+		path.add("InventoryOpenEvent for Player" + " " + player.getName()
+			+ locationString);
 
 		try {
 			updateNested(path, event.getInventory());
@@ -491,7 +497,7 @@ public class ItemUpdateManager implements Listener {
 			@Nullable ItemStack item = items[i];
 			if (item != null) {
 				List<String> subPath = new ArrayList<>(path);
-				subPath.add("in slot " + i);
+				subPath.add("slot " + i);
 				try {
 					updateNested(subPath, item);
 				} catch (Exception e) {
