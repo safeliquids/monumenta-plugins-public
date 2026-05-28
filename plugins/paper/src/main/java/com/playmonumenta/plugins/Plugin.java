@@ -91,6 +91,7 @@ import com.playmonumenta.plugins.listeners.LootTableManager;
 import com.playmonumenta.plugins.listeners.LootingLimiter;
 import com.playmonumenta.plugins.listeners.MinigameManager;
 import com.playmonumenta.plugins.listeners.MobListener;
+import com.playmonumenta.plugins.listeners.PlacedBlocksListener;
 import com.playmonumenta.plugins.listeners.PlayerListener;
 import com.playmonumenta.plugins.listeners.PortableEnderListener;
 import com.playmonumenta.plugins.listeners.PotionBarrelListener;
