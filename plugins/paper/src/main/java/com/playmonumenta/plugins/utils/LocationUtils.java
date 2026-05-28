@@ -880,6 +880,15 @@ public class LocationUtils {
 		return startLocation;
 	}
 
+	public static double distanceToGround(Location loc, double minHeight, double maxDistance, boolean ignoreLiquids) {
+		Vector toGround = getVectorTo(loc, fallToGround(loc, minHeight, ignoreLiquids));
+		if (toGround.getY() > maxDistance || toGround.getY() < 0) {
+			return 0;
+		} else {
+			return toGround.getY();
+		}
+	}
+
 	public static double distanceToGround(Location loc, double minHeight, double maxDistance) {
 		Vector toGround = getVectorTo(loc, fallToGround(loc, minHeight));
 		if (toGround.getY() > maxDistance || toGround.getY() < 0) {
