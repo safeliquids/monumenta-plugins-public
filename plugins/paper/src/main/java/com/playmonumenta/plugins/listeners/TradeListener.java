@@ -215,6 +215,9 @@ public class TradeListener implements Listener {
 
 		InventoryView view = tradeSelectEvent.getView();
 		int index = tradeSelectEvent.getIndex();
+		if (index < 0 || index >= tradeSelectEvent.getMerchant().getRecipes().size()) {
+			return;
+		}
 		MerchantRecipe recipe = tradeSelectEvent.getMerchant().getRecipe(index);
 		List<ItemStack> ingredients = recipe.getIngredients();
 
