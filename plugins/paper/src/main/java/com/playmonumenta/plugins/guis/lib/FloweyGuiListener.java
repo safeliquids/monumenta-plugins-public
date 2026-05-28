@@ -15,6 +15,11 @@ public class FloweyGuiListener implements Listener {
 		}
 
 		event.setCancelled(true);
+
+		if (gui.checkRateLimit()) {
+			return;
+		}
+
 		GUIUtils.refreshOffhand(event);
 
 		if (event.getClickedInventory() == gui.getInventory()) {
@@ -40,6 +45,11 @@ public class FloweyGuiListener implements Listener {
 		}
 
 		event.setCancelled(true);
+
+		if (gui.checkRateLimit()) {
+			return;
+		}
+
 		gui.onInventoryDrag(event);
 
 		gui.update();

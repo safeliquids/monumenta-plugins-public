@@ -26,6 +26,35 @@ import org.jetbrains.annotations.Nullable;
  * </p>
  */
 public abstract class FloweyGui implements InventoryHolder {
+	private enum RateLimitState {
+		NONE(false, false),
+		SEND_MESSAGE(true, true),
+		FULL(true, false);
+
+		private final boolean mBlockInteraction;
+		private final boolean mSendMessage;
+
+		RateLimitState(boolean mBlockInteraction, boolean mSendMessage) {
+			this.mBlockInteraction = mBlockInteraction;
+			this.mSendMessage = mSendMessage;
+		}
+
+		boolean sendMessage() {
+			return mSendMessage;
+		}
+
+		boolean blockInteraction() {
+			return mBlockInteraction;
+		}
+
+		RateLimitState next() {
+			return switch (this) {
+				case NONE -> SEND_MESSAGE;
+				case SEND_MESSAGE, FULL -> FULL;
+			};
+		}
+	}
+
 	/**
 	 * The player interacting with this GUI instance.
 	 */
@@ -62,6 +91,12 @@ public abstract class FloweyGui implements InventoryHolder {
 	 */
 	private boolean mIsRendering;
 
+	private int mRateLimitResetTicks = 1;
+
+	private RateLimitState mRateLimit = RateLimitState.NONE;
+
+	private int mRateLimitTick;
+
 	/**
 	 * Constructs a new GUI instance.
 	 *
@@ -89,6 +124,23 @@ public abstract class FloweyGui implements InventoryHolder {
 		this(player, filler, MessagingUtils.MINIMESSAGE_ALL.deserialize(title), size);
 	}
 
+	boolean checkRateLimit() {
+		int currentTick = Bukkit.getCurrentTick();
+
+		if (currentTick - mRateLimitTick > mRateLimitResetTicks) {
+			mRateLimit = RateLimitState.NONE;
+			mRateLimitTick = currentTick;
+		}
+
+		if (mRateLimit.sendMessage()) {
+			MessagingUtils.sendError(mPlayer, "Please do not spam the GUI!");
+		}
+
+		boolean blocksInteraction = mRateLimit.blockInteraction();
+		mRateLimit = mRateLimit.next();
+		return blocksInteraction;
+	}
+
 	/**
 	 * Recreates the inventory with specified size and title.
 	 * <p>
@@ -110,13 +162,23 @@ public abstract class FloweyGui implements InventoryHolder {
 	}
 
 	/**
+	 * Specifies the number of ticks to wait before allowing new player input.
+	 *
+	 * @param ticks the tick delay
+	 */
+	protected final void setRateLimit(int ticks) {
+		Preconditions.checkArgument(ticks > 0, "rate limit must be at least one tick");
+		mRateLimitResetTicks = ticks;
+	}
+
+	/**
 	 * Updates the GUI if marked as dirty.
 	 * <p>
 	 * Recreates the inventory if size or title changed, triggers rendering,
 	 * and opens the updated inventory for the player if necessary.
 	 * </p>
 	 */
-	protected void update() {
+	protected final void update() {
 		if (mInventory == null || !mIsDirty) {
 			return;
 		}
