@@ -1,6 +1,7 @@
 package com.playmonumenta.velocity.handlers;
 
 import com.playmonumenta.velocity.MonumentaVelocity;
+import com.playmonumenta.velocity.integrations.NetworkRelayIntegration;
 import com.playmonumenta.velocity.integrations.PremiumVanishIntegration;
 import com.playmonumenta.velocity.network.VelocityClientModHandler;
 import com.velocitypowered.api.event.ResultedEvent;
@@ -24,6 +25,7 @@ public class JoinLeaveHandler {
 
 	/* Keeps track of players that have had their join message sent */
 	private final Set<UUID> mOnlinePlayers = new ConcurrentSkipListSet<>();
+	private final Set<String> mBanLogoutListening = new ConcurrentSkipListSet<>();
 
 	public JoinLeaveHandler(MonumentaVelocity main) {
 		mPlugin = main;
@@ -78,6 +80,14 @@ public class JoinLeaveHandler {
 		}
 	}
 
+	public void listenPlayerLogout(String playerName) {
+		// if player name is not on the proxy at all
+		if (mPlugin.mServer.getPlayer(playerName).isEmpty()) {
+			return;
+		}
+		mBanLogoutListening.add(playerName);
+	}
+
 	@Subscribe(priority = Short.MAX_VALUE / 2)
 	public void loginEvent(LoginEvent event) {
 		String whitelistPermission = System.getenv("MONUMENTA_WHITELIST");
@@ -111,16 +121,27 @@ public class JoinLeaveHandler {
 			return;
 		}
 		Player player = event.getPlayer();
+		String username = player.getUsername();
 
 		if (mOnlinePlayers.contains(player.getUniqueId())) {
 			/* This player was online - send leave message */
 			mOnlinePlayers.remove(player.getUniqueId());
 			VelocityClientModHandler.onPlayerDisconnected(player);
+			if (mBanLogoutListening.contains(username)) {
+				NetworkRelayIntegration.sendLogoutAlert(username);
+			}
+			if (mPlugin.mBanOnLogout != null) {
+				mPlugin.mBanOnLogout.onPlayerLogout(username);
+			}
 
 			if (mPlugin.mConfig.mJoinMessagesEnabled) {
 				joinLeaveEvent(player, " left the game",
 					mVanishEnabled && PremiumVanishIntegration.isInvisible(player));
 			}
 		}
+	}
+
+	public boolean isTracked(String playerName) {
+		return mBanLogoutListening.contains(playerName);
 	}
 }

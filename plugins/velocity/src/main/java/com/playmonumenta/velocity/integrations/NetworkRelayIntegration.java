@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.playmonumenta.networkrelay.GatherRemotePlayerDataEventVelocity;
 import com.playmonumenta.networkrelay.NetworkRelayAPI;
 import com.playmonumenta.networkrelay.NetworkRelayMessageEventGeneric;
+import com.playmonumenta.networkrelay.util.MMLog;
 import com.playmonumenta.velocity.MonumentaVelocity;
 import com.playmonumenta.velocity.voting.VoteManager;
 import com.velocitypowered.api.event.Subscribe;
@@ -19,6 +20,9 @@ import org.slf4j.Logger;
 
 public class NetworkRelayIntegration {
 	public static final String VOTE_NOTIFY_CHANNEL = "Monumenta.Bungee.VoteNotify";
+	public static final String BAN_CHANNEL = "Monumenta.Velocity.BanOnLogout";
+	private static final String BAN_LOGOUT_LISTEN = "logoutListen";
+	private static final String BAN_LOGOUT_ALERT = "logoutAlert";
 
 	private final MonumentaVelocity mMain;
 	private final Logger mLogger;
@@ -66,7 +70,8 @@ public class NetworkRelayIntegration {
 
 	@Subscribe(priority = Short.MAX_VALUE / 2)
 	public void networkRelayMessageEventVelocity(NetworkRelayMessageEventGeneric event) {
-		if (event.getChannel().equals(VOTE_NOTIFY_CHANNEL)) {
+		String channel = event.getChannel();
+		if (channel.equals(VOTE_NOTIFY_CHANNEL)) {
 			JsonObject data = event.getData();
 			if (!data.has("playerUUID") ||
 				!data.get("playerUUID").isJsonPrimitive() ||
@@ -83,8 +88,8 @@ public class NetworkRelayIntegration {
 			}
 
 			if (!data.has("cooldownMinutes") ||
-					!data.get("cooldownMinutes").isJsonPrimitive() ||
-					!data.getAsJsonPrimitive("cooldownMinutes").isNumber()) {
+				!data.get("cooldownMinutes").isJsonPrimitive() ||
+				!data.getAsJsonPrimitive("cooldownMinutes").isNumber()) {
 				mLogger.error("VOTE_NOTIFY_CHANNEL failed to parse required int field 'cooldownMinutes'");
 				return;
 			}
@@ -94,6 +99,28 @@ public class NetworkRelayIntegration {
 			long cooldownMinutes = data.get("cooldownMinutes").getAsLong();
 
 			VoteManager.gotVoteNotifyMessage(uuid, matchingSite, cooldownMinutes);
+		} else if (channel.equals(BAN_CHANNEL)) {
+			JsonObject data = event.getData();
+			if (!data.has("type") ||
+				!data.has("player")
+			) {
+				mLogger.error("BAN_CHANNEL gave an invalid message");
+				return;
+			}
+			if (mMain.mBanOnLogout == null || mMain.mJoinLeaveHandler == null) {
+				mLogger.error("mBanOnLogout or mJoinLeaveHandler was not initialised!");
+				return;
+			}
+
+			String type = data.get("type").getAsString();
+			String playerName = data.get("player").getAsString();
+			if (type.equals(BAN_LOGOUT_LISTEN) && !mMain.mBanOnLogout.isTracked(playerName)) {
+				// Failsafe: Don't send logouts to another proxy if the player is already going to be banned from this one
+				mMain.mJoinLeaveHandler.listenPlayerLogout(playerName);
+			} else if (type.equals(BAN_LOGOUT_ALERT) && !mMain.mJoinLeaveHandler.isTracked(playerName)) {
+				// Failsafe: Don't ban on this proxy if another proxy already requested this player
+				mMain.mBanOnLogout.onPlayerLogout(playerName);
+			}
 		}
 	}
 
@@ -145,5 +172,52 @@ public class NetworkRelayIntegration {
 			// ignored
 		}
 		return mCachedPlayerCount;
+	}
+
+	public static void setScore(String scoreHolder, String score, int value) {
+		try {
+			NetworkRelayAPI.sendBroadcastCommand("execute if entity %1$s run scoreboard players set %1$s %2$s %3$d".formatted(scoreHolder, score, value), NetworkRelayAPI.ServerType.MINECRAFT);
+		} catch (Exception e) {
+			MMLog.severe("Failed to set score \"%s\" to %d for %s".formatted(score, value, scoreHolder));
+		}
+	}
+
+	public static void sendAdminMessage(String message) {
+		JsonObject data = new JsonObject();
+		data.addProperty("message", message);
+		try {
+			// See MonumentaNetworkRelayIntegration
+			NetworkRelayAPI.sendMessage("*", "Monumenta.Automation.AdminNotification", data);
+		} catch (Exception ex) {
+			// TODO: pls use MMLog that paper can use
+			INSTANCE.mLogger.error("Failed to send admin alert message", ex);
+		}
+	}
+
+	public static void sendLogoutNotifyRequest(String playerName) {
+		JsonObject data = new JsonObject();
+		data.addProperty("type", BAN_LOGOUT_LISTEN);
+		data.addProperty("player", playerName);
+		try {
+			// See MonumentaNetworkRelayIntegration
+			NetworkRelayAPI.sendMessage("*", BAN_CHANNEL, data);
+		} catch (Exception ex) {
+			// TODO: pls use MMLog that paper can use
+			INSTANCE.mLogger.error("Failed to send logout notify request", ex);
+		}
+	}
+
+	public static void sendLogoutAlert(String playerName) {
+		JsonObject data = new JsonObject();
+		data.addProperty("type", BAN_LOGOUT_ALERT);
+		data.addProperty("player", playerName);
+		try {
+			// See MonumentaNetworkRelayIntegration
+			NetworkRelayAPI.sendMessage("*", BAN_CHANNEL, data);
+		} catch (Exception ex) {
+			// TODO: pls use MMLog that paper can use
+			MMLog.severe("Failed to send logout notify request");
+			MMLog.severe(String.valueOf(ex.getMessage()));
+		}
 	}
 }
