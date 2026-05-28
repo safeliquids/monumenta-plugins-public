@@ -790,7 +790,7 @@ public class ShopManager implements Listener {
 				for (int y = 0; y <= SHOP_HEIGHT + SHOP_DEPTH + 2; y++) {
 					BlockState state = plat.getBlock().getState();
 					if (state instanceof Lockable lockable && lockable.getLock().isEmpty()) {
-						lockable.setLock(LOCK_PREFIX + shop.mOwnerName + LOCK_SUFFIX);
+						lockable.setLock(LOCK_PREFIX + shop.mOwnerName + " " + LOCK_SUFFIX);
 						state.update();
 					}
 					plat.add(0, 1, 0);

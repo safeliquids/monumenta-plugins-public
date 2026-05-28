@@ -41,6 +41,7 @@ import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.particle.ParticleCategory;
 import com.playmonumenta.plugins.particle.ParticleManager;
 import com.playmonumenta.plugins.player.EnderPearlTracker;
+import com.playmonumenta.plugins.plots.PlotManager;
 import com.playmonumenta.plugins.poi.POIManager;
 import com.playmonumenta.plugins.point.Point;
 import com.playmonumenta.plugins.portals.PortalManager;
@@ -403,6 +404,7 @@ public class PlayerListener implements Listener {
 			if (
 				player.getGameMode() == GameMode.ADVENTURE
 					|| ZoneUtils.hasZoneProperty(block.getLocation(), ZoneProperty.RESTRICTED)
+					|| PlotManager.onLockedPlot(player)
 					|| (
 					guildPlotGameMode != null
 						&& guildPlotGameMode != GameMode.SURVIVAL
@@ -418,7 +420,7 @@ public class PlayerListener implements Listener {
 			player.getGameMode() != GameMode.CREATIVE
 				&& block != null
 				&& !(blockData instanceof Powerable)
-				&& ZoneUtils.hasZoneProperty(block.getLocation(), ZoneProperty.RESTRICTED)
+				&& (ZoneUtils.hasZoneProperty(block.getLocation(), ZoneProperty.RESTRICTED) || PlotManager.onLockedPlot(player))
 		) {
 			event.setCancelled(true);
 			event.setUseInteractedBlock(Event.Result.DENY);
@@ -731,6 +733,7 @@ public class PlayerListener implements Listener {
 			(
 				ZoneUtils.hasZoneProperty(player, ZoneProperty.RESTRICTED)
 					|| GuildPlotUtils.guildPlotInventoryModificationBlocked(player)
+					|| PlotManager.onLockedPlot(player)
 			)
 				&& player.getGameMode() != GameMode.CREATIVE
 		) {
@@ -768,7 +771,7 @@ public class PlayerListener implements Listener {
 
 		/* Don't let the player do this when in a restricted zone */
 		if (
-			ZoneUtils.hasZoneProperty(player, ZoneProperty.RESTRICTED)
+			(ZoneUtils.hasZoneProperty(player, ZoneProperty.RESTRICTED) || PlotManager.onLockedPlot(player))
 				&& player.getGameMode() != GameMode.CREATIVE
 		) {
 			event.setCancelled(true);
