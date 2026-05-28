@@ -80,7 +80,8 @@ public class IdolatryBoss extends BossAbilityGroup {
 			|| damagedEntity.getScoreboardTags().contains(identityTag)
 			|| damagedEntity.getScoreboardTags().contains(IDOLATRY_IMMUNE_TAG)
 			|| event.getAbility() == ClassAbility.COUP_DE_GRACE
-			|| event.getDamager() == damagedEntity) {
+			|| event.getDamager() == damagedEntity
+			|| !EntityUtils.isHostileMob(damagedEntity)) {
 			return;
 		} // This event is called a LOT and has a LOT of if statements. someone very very experienced with the damage pipeline should optimise the order
 		// Note on the doubled proj and earrows damage: Projectile hits deal both a normal and a True damage pop, because of... iframes probably.
