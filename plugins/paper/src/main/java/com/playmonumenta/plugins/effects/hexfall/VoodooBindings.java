@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.effects.hexfall;
 
 import com.google.gson.JsonObject;
 import com.playmonumenta.plugins.effects.Effect;
-import com.playmonumenta.plugins.utils.ScoreboardUtils;
+import com.playmonumenta.plugins.managers.GlowingManager;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import net.kyori.adventure.bossbar.BossBar;
@@ -26,40 +26,46 @@ public class VoodooBindings extends Effect {
 
 	// White = No Requirements
 	// Green = Solo
-	// Yellow = Partners
+	// Blue = Partners
 	// Red = Party Stack
 	public static final String GENERIC_NAME = "VoodooBindings";
 	public static final String effectId = "voodooBindings";
 	private final BossBar mBossBar;
 	private @Nullable TextDisplay mDisplay;
 	public final Queue<VoodooBinding> mBindings;
+	public static final String CIRCLE = "⦿";
+	public static final String DONUT = "⦾";
 
 	public enum VoodooBinding {
-		WHITE_CIRCLE(0, Component.text("⦿", NamedTextColor.WHITE), Component.text("⦿, conform.", Style.style(NamedTextColor.WHITE, TextDecoration.BOLD)), "white", "WC"),
-		WHITE_DONUT(0, Component.text("⦾", NamedTextColor.WHITE), Component.text("⦾, conform.", Style.style(NamedTextColor.WHITE, TextDecoration.BOLD)), "white", "WD"),
-		GREEN_CIRCLE(1, Component.text("⦿", NamedTextColor.GREEN), Component.text("⦿, in solitude.", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD)), "green", "GC"),
-		GREEN_DONUT(1, Component.text("⦾", NamedTextColor.GREEN), Component.text("⦾, in solitude.", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD)), "green", "GD"),
-		BLUE_CIRCLE(2, Component.text("⦿", NamedTextColor.BLUE), Component.text("⦿, in tandem.", Style.style(NamedTextColor.BLUE, TextDecoration.BOLD)), "blue", "BC"),
-		BLUE_DONUT(2, Component.text("⦾", NamedTextColor.BLUE), Component.text("⦾, in tandem.", Style.style(NamedTextColor.BLUE, TextDecoration.BOLD)), "blue", "BD"),
-		RED_CIRCLE(4, Component.text("⦿", NamedTextColor.RED), Component.text("⦿, unified.", Style.style(NamedTextColor.RED, TextDecoration.BOLD)), "red", "RC"),
-		RED_DONUT(4, Component.text("⦾", NamedTextColor.RED), Component.text("⦾, unified.", Style.style(NamedTextColor.RED, TextDecoration.BOLD)), "red", "RD");
+		WHITE_CIRCLE(0, NamedTextColor.WHITE, CIRCLE, "conform", "WC"),
+		WHITE_DONUT(0, NamedTextColor.WHITE, DONUT, "conform", "WD"),
+		GREEN_CIRCLE(1, NamedTextColor.GREEN, CIRCLE, "in solitude", "GC"),
+		GREEN_DONUT(1, NamedTextColor.GREEN, DONUT, "in solitude", "GD"),
+		BLUE_CIRCLE(2, NamedTextColor.BLUE, CIRCLE, "in tandem", "BC"),
+		BLUE_DONUT(2, NamedTextColor.BLUE, DONUT, "in tandem", "BD"),
+		RED_CIRCLE(4, NamedTextColor.RED, CIRCLE, "unified", "RC"),
+		RED_DONUT(4, NamedTextColor.RED, DONUT, "unified", "RD");
 
 		private final int mPlayerCount;
+		private final NamedTextColor mColor;
 		private final Component mColoredDot;
 		private final Component mDirective;
-		private final String mScoreboardTeam;
 		private final String mStringDescriptor;
 
-		VoodooBinding(int playerCount, Component coloredDot, Component chatMessage, String scoreboardTeam, String stringDescriptor) {
+		VoodooBinding(int playerCount, NamedTextColor color, String dot, String chatMessage, String stringDescriptor) {
 			mPlayerCount = playerCount;
-			mColoredDot = coloredDot;
-			mDirective = chatMessage;
-			mScoreboardTeam = scoreboardTeam;
+			mColor = color;
+			mColoredDot = Component.text(dot, color);
+			mDirective = Component.text("%s, %s.".formatted(dot, chatMessage), Style.style(color, TextDecoration.BOLD));
 			mStringDescriptor = stringDescriptor;
 		}
 
 		public int playerCount() {
 			return mPlayerCount;
+		}
+
+		public NamedTextColor color() {
+			return mColor;
 		}
 
 		public Component toColoredDot() {
@@ -68,10 +74,6 @@ public class VoodooBindings extends Effect {
 
 		public Component toDirective() {
 			return mDirective;
-		}
-
-		public String glowingTeamName() {
-			return mScoreboardTeam;
 		}
 
 		@Override
@@ -116,13 +118,8 @@ public class VoodooBindings extends Effect {
 			return;
 		}
 
-		ScoreboardUtils.getExistingTeamOrCreate("red").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("blue").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("green").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("white").removePlayer(player);
-
-		ScoreboardUtils.getExistingTeamOrCreate(binding.glowingTeamName()).addPlayer(player);
-		entity.setGlowing(true);
+		GlowingManager.startGlowing(player, binding.color(), 9999,
+			GlowingManager.BOSS_SPELL_PRIORITY, p -> true, effectId);
 
 		Component title = Component.empty();
 		for (VoodooBinding voodooBinding : mBindings) {
@@ -160,11 +157,7 @@ public class VoodooBindings extends Effect {
 		if (event.isCancelled() || !(event.getEntity() instanceof Player player)) {
 			return;
 		}
-		ScoreboardUtils.getExistingTeamOrCreate("white").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("red").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("blue").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("green").removePlayer(player);
-		player.setGlowing(false);
+		GlowingManager.clear(player, effectId);
 		player.getWorld().hideBossBar(mBossBar);
 		if (mDisplay != null) {
 			mDisplay.remove();
@@ -176,11 +169,7 @@ public class VoodooBindings extends Effect {
 		if (!(entity instanceof Player player)) {
 			return;
 		}
-		ScoreboardUtils.getExistingTeamOrCreate("white").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("red").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("blue").removePlayer(player);
-		ScoreboardUtils.getExistingTeamOrCreate("green").removePlayer(player);
-		entity.setGlowing(false);
+		GlowingManager.clear(player, effectId);
 		player.getWorld().hideBossBar(mBossBar);
 		if (mDisplay != null) {
 			mDisplay.remove();

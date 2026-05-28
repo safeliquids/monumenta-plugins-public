@@ -344,6 +344,7 @@ public class Plugin extends JavaPlugin {
 		MonumentaReload.register(this);
 		MonumentaTrigger.register();
 		NameMCVerify.register(this);
+		NBTGlowingCommand.register();
 		if (!IS_PLAY_SERVER) {
 			NodePlanner.registerCommands();
 			BalanceModeManager.register();
