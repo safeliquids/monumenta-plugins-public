@@ -3,6 +3,7 @@ package com.playmonumenta.plugins.utils;
 import com.destroystokyo.paper.MaterialSetTag;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -28,6 +29,7 @@ import org.bukkit.block.data.type.Light;
 import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -489,6 +491,26 @@ public class BlockUtils {
 
 	public static boolean isLosBlockingBlock(Material mat) {
 		return mat.isOccluding();
+	}
+
+	public static boolean isFullBlock(Block block) {
+		if (!block.isSolid()) {
+			return false;
+		}
+		Collection<BoundingBox> boundingBoxes = block.getCollisionShape().getBoundingBoxes();
+		if (boundingBoxes.size() != 1) {
+			return false;
+		}
+		return boundingBoxes.iterator().next().getVolume() == 1;
+	}
+
+	public static double getBlockVolume(Block block) {
+		Collection<BoundingBox> boundingBoxes = block.getCollisionShape().getBoundingBoxes();
+		double size = 0;
+		for (BoundingBox box : boundingBoxes) {
+			size += box.getVolume();
+		}
+		return size;
 	}
 
 	public static boolean isPathBlockingBlock(Material mat) {

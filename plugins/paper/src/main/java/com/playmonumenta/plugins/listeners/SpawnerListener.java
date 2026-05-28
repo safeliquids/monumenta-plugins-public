@@ -456,13 +456,13 @@ public class SpawnerListener implements Listener {
 	// Prevent block explosions (for example respawn anchors) from breaking special spawners.
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void blockExplodeEvent(BlockExplodeEvent event) {
-		event.blockList().removeIf(block -> SpawnerUtils.isSpawner(block) && (SpawnerUtils.getShields(block) > 0 || SpawnerUtils.getSpawnerType(block, SpawnerUtils.GUARDED_ATTRIBUTE) > 0 || SpawnerUtils.getSpawnerType(block, SpawnerUtils.CAT_ATTRIBUTE) > 0 || SpawnerUtils.getSpawnerType(block, SpawnerUtils.SEQUENCE_ATTRIBUTE) > 0 || getProtector(block) || SpawnerUtils.getSpawnerType(block, SpawnerUtils.ENSNARED_ATTRIBUTE) > 0 || !SpawnerUtils.getBreakActionIdentifiers(block).isEmpty()));
+		event.blockList().removeIf(block -> SpawnerUtils.isSpawner(block) && SpawnerUtils.isSpecialSpawner(block));
 	}
 
 	// Prevent entity explosions from breaking special spawners.
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void entityExplodeEvent(EntityExplodeEvent event) {
-		event.blockList().removeIf(block -> SpawnerUtils.isSpawner(block) && (SpawnerUtils.getShields(block) > 0 || SpawnerUtils.getSpawnerType(block, SpawnerUtils.GUARDED_ATTRIBUTE) > 0 || SpawnerUtils.getSpawnerType(block, SpawnerUtils.CAT_ATTRIBUTE) > 0 || SpawnerUtils.getSpawnerType(block, SpawnerUtils.SEQUENCE_ATTRIBUTE) > 0 || getProtector(block) || SpawnerUtils.getSpawnerType(block, SpawnerUtils.ENSNARED_ATTRIBUTE) > 0 || !SpawnerUtils.getBreakActionIdentifiers(block).isEmpty()));
+		event.blockList().removeIf(block -> SpawnerUtils.isSpawner(block) && SpawnerUtils.isSpecialSpawner(block));
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

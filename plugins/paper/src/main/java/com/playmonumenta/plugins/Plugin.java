@@ -256,6 +256,7 @@ public class Plugin extends JavaPlugin {
 	public LoadoutManager mLoadoutManager;
 	public DoubleJumpManager mDoubleJumpManager;
 	public PlaylistManager mPlaylistManager;
+	public PlacedBlocksListener mPlacedBlocksListener;
 	public DataCollectionManager mDataCollectionManager;
 	public PzeroManager mPzeroManager;
 	public ShulkerEquipmentListener mShulkerEquipmentListener;
@@ -265,6 +266,7 @@ public class Plugin extends JavaPlugin {
 	public HuntsManager mHuntsManager;
 	public BalanceModeManager mBalanceModeManager;
 	public @Nullable ProtocolLibIntegration mProtocolLibIntegration = null;
+	public LootingLimiter mLootingLimiter;
 	public PlayerSkinManager mPlayerSkinManager;
 
 	// INSTANCE is set if the plugin is properly enabled
@@ -533,6 +535,8 @@ public class Plugin extends JavaPlugin {
 		mGrapplingListener = new GrapplingListener();
 		mHuntsManager = new HuntsManager(this);
 		mBalanceModeManager = new BalanceModeManager();
+		mPlacedBlocksListener = new PlacedBlocksListener();
+		mLootingLimiter = new LootingLimiter();
 
 
 		new ClientModHandler(this);
@@ -650,7 +654,6 @@ public class Plugin extends JavaPlugin {
 		manager.registerEvents(POIManager.getInstance(), this);
 		manager.registerEvents(new BrokenEquipmentListener(), this);
 		manager.registerEvents(PortalManager.getInstance(), this);
-		manager.registerEvents(new LootingLimiter(), this);
 		manager.registerEvents(new InventoryUpdateListener(), this);
 		GuildPlotUtils.initialize(spawn);
 		WalletManager.initialize(spawn);
@@ -711,6 +714,17 @@ public class Plugin extends JavaPlugin {
 
 		if (ServerProperties.getShardName().contains("rush")) {
 			manager.registerEvents(new RushManager(), this);
+		}
+
+		// Do not track player placed blocks on dev
+		// Do not track player placed blocks on any kind of plot, or buildshard
+		if (IS_PLAY_SERVER
+			&& ServerProperties.lootingLimiterEnabled()
+			&& !(ServerProperties.getShardName().contains("plot") || ServerProperties.getShardName().contains("build"))) {
+			manager.registerEvents(mLootingLimiter, this);
+			manager.registerEvents(mPlacedBlocksListener, this);
+			PlayerPlacedBlocksCommand.register();
+			LootingLimiterCommand.register();
 		}
 
 		//TODO Move the logic out of Plugin and into it's own class that derives off Runnable, a Timer class of some type.
