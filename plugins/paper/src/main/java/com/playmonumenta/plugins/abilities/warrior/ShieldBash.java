@@ -108,12 +108,12 @@ public class ShieldBash extends Ability {
 		World world = eyeLoc.getWorld();
 		mCosmetic.onCast(mPlayer, world, eyeLoc, mobLoc);
 
-		bash(mob, ClassAbility.SHIELD_BASH);
+		bash(mob);
 		if (isLevelTwo()) {
 			Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(mob), mRadius);
 			for (LivingEntity le : hitbox.getHitMobs(mob)) {
 				mCosmetic.onHitSurroundingMobs(mPlayer, world, eyeLoc, le.getEyeLocation());
-				bash(le, ClassAbility.SHIELD_BASH_AOE);
+				bash(le);
 			}
 		}
 
@@ -138,8 +138,8 @@ public class ShieldBash extends Ability {
 		}
 	}
 
-	private void bash(LivingEntity le, ClassAbility ca) {
-		DamageUtils.damage(mPlayer, le, DamageType.MELEE_SKILL, mDamage, ca, true, false);
+	private void bash(LivingEntity le) {
+		DamageUtils.damage(mPlayer, le, DamageType.MELEE_SKILL, mDamage, ClassAbility.SHIELD_BASH, true, false);
 		if (mKnockback != 0) {
 			MovementUtils.knockAway(mPlayer, le, (float) mKnockback);
 		}

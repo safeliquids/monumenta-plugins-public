@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.utils.EntityUtils;
 import dev.jorel.commandapi.CommandAPICommand;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,14 +33,20 @@ public class ShowMyDpsCommand {
 		FORMAT.setMaximumFractionDigits(1);
 	}
 
-	private record DPS(double damage, Map<String, Double> perAbilityDamage,
-	                   long startTime, long downTime, long lastHitTime) {
+	private record DPS(double damage, Map<DamageEvent.DamageType, Double> perTypeDamage,
+					   Map<ClassAbility, Double> perAbilityDamage,
+					   long startTime, long downTime, long lastHitTime) {
 		public Component getMessage(Component bossName, long timeNow) {
 			List<Component> abilities = new ArrayList<>();
 			abilities.add(Component.text("Damage Breakdown", NamedTextColor.AQUA, TextDecoration.BOLD));
 
-			for (Map.Entry<String, Double> entry : perAbilityDamage.entrySet()) {
-				TextComponent element = Component.text(entry.getKey() + ": ", NamedTextColor.GRAY)
+			for (Map.Entry<DamageEvent.DamageType, Double> entry : perTypeDamage.entrySet()) {
+				TextComponent element = Component.text(entry.getKey().getDisplay() + ": ", NamedTextColor.GRAY)
+					.append(Component.text(FORMAT.format(entry.getValue()).toLowerCase(Locale.ROOT), NamedTextColor.WHITE));
+				abilities.add(element);
+			}
+			for (Map.Entry<ClassAbility, Double> entry : perAbilityDamage.entrySet()) {
+				TextComponent element = Component.text(entry.getKey().getName() + ": ", NamedTextColor.GRAY)
 					.append(Component.text(FORMAT.format(entry.getValue()).toLowerCase(Locale.ROOT), NamedTextColor.WHITE));
 				abilities.add(element);
 			}
@@ -128,28 +135,32 @@ public class ShowMyDpsCommand {
 					return oldDps;
 				}
 
-				@Nullable
-				ClassAbility ability = event.getAbility();
-				String abilityOrType = ability == null ? event.getType().getDisplay() : ability.getName();
+				DamageEvent.DamageType type = event.getType();
+				@Nullable ClassAbility ability = event.getAbility();
 				long currentTime = System.currentTimeMillis();
 
 				if (oldDps == null) {
-					HashMap<String, Double> perAbilityDamage = new HashMap<>();
-					perAbilityDamage.put(abilityOrType, finalDamage);
-					return new DPS(finalDamage, perAbilityDamage, currentTime, 0, currentTime);
+					Map<DamageEvent.DamageType, Double> perTypeDamage = new EnumMap<>(DamageEvent.DamageType.class);
+					Map<ClassAbility, Double> perAbilityDamage = new EnumMap<>(ClassAbility.class);
+					if (ability != null) {
+						perAbilityDamage.put(ability, finalDamage);
+					} else {
+						perTypeDamage.put(type, finalDamage);
+					}
+					return new DPS(finalDamage, perTypeDamage, perAbilityDamage, currentTime, 0, currentTime);
 				}
 
-				Map<String, Double> perAbilityDamage = oldDps.perAbilityDamage;
-				perAbilityDamage.compute(abilityOrType, (string, previousDamage) -> {
-					if (previousDamage == null) {
-						return finalDamage;
-					}
-					return previousDamage + finalDamage;
-				});
+				Map<DamageEvent.DamageType, Double> perTypeDamage = oldDps.perTypeDamage;
+				Map<ClassAbility, Double> perAbilityDamage = oldDps.perAbilityDamage;
+				if (ability != null) {
+					perAbilityDamage.merge(ability, finalDamage, Double::sum);
+				} else {
+					perTypeDamage.merge(type, finalDamage, Double::sum);
+				}
 				long interval = currentTime - oldDps.lastHitTime;
 				// Record downtime exceeding 1 second
 				long newDownTime = oldDps.downTime + Math.max(interval - 1000, 0);
-				return new DPS(finalDamage + oldDps.damage, perAbilityDamage, oldDps.startTime, newDownTime, currentTime);
+				return new DPS(finalDamage + oldDps.damage, perTypeDamage, perAbilityDamage, oldDps.startTime, newDownTime, currentTime);
 			});
 		}
 	}
