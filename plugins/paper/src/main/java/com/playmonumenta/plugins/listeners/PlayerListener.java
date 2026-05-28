@@ -70,6 +70,7 @@ import com.playmonumenta.redissync.event.PlayerServerTransferEvent;
 import com.playmonumenta.redissync.event.PlayerTransferFailEvent;
 import com.playmonumenta.scriptedquests.managers.TranslationsManager;
 import de.tr7zw.nbtapi.NBT;
+import io.papermc.paper.event.player.CartographyItemEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -2023,6 +2024,22 @@ public class PlayerListener implements Listener {
 		event.setCancelled(cancel);
 	}
 
+	@EventHandler(ignoreCancelled = false)
+	public void cartographyTableUseEvent(CartographyItemEvent event) {
+		ItemStack result = event.getCurrentItem();
+		if (result == null) {
+			return;
+		}
+		for (ItemStack item : event.getInventory().getContents()) {
+			if (item != null) {
+				ItemMeta meta = item.getItemMeta();
+				if (meta != null && meta.hasLore()
+						&& ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0) {
+					event.setCancelled(true);
+				}
+			}
+		}
+	}
 
 	private static final Set<DamageCause> SCALABLE_REGION_DAMAGE_CAUSES = Set.of(
 		DamageCause.FIRE_TICK,
