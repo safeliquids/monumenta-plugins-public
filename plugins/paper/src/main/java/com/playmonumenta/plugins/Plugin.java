@@ -340,6 +340,7 @@ public class Plugin extends JavaPlugin {
 		LoadoutManagerCommand.register();
 		MailMan.registerCommands();
 		MarketCommands.register();
+		MMLogCommand.register();
 		MMQuest.register(this);
 		MonumentaReload.register(this);
 		MonumentaTrigger.register();
