@@ -245,7 +245,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 
 	private List<MarketListing> loadListingsInPageFromLoadedListingsIdList() {
 		int max = getMaxPageDisplayable();
-		if (mCurrentPage > max) {
+		if (mCurrentPage > max || mCurrentPage < 0) {
 			mCurrentPage = 0;
 		}
 		int searchIndex = mCurrentPage * 45;
