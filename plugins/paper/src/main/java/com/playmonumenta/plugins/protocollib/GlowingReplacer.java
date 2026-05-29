@@ -147,7 +147,7 @@ public class GlowingReplacer extends PacketAdapter implements Listener {
 			PacketPlayOutScoreboardTeamHandle handle = PacketPlayOutScoreboardTeamHandle.createNew();
 			handle.setName(oldTeamName);
 			handle.setMethod(PacketPlayOutScoreboardTeamHandle.METHOD_LEAVE);
-			handle.setPlayers(List.of(ScoreboardUtils.getScoreHolderName(entity)));
+			handle.setPlayers(List.of(ScoreboardUtils.getPacketScoreHolderName(entity)));
 			ProtocolLibrary.getProtocolManager().sendServerPacket(player, PacketContainer.fromPacket(handle.getRaw()), false);
 		}
 
@@ -169,7 +169,7 @@ public class GlowingReplacer extends PacketAdapter implements Listener {
 				handle.setDisplayName(ChatText.fromMessage(newTeam.toString()));
 				handle.setPrefix(ChatText.empty());
 				handle.setSuffix(ChatText.empty());
-				handle.setPlayers(List.of(ScoreboardUtils.getScoreHolderName(entity)));
+				handle.setPlayers(List.of(ScoreboardUtils.getPacketScoreHolderName(entity)));
 
 				ProtocolLibrary.getProtocolManager().sendServerPacket(player, PacketContainer.fromPacket(handle.getRaw()), false);
 			} else {
@@ -177,7 +177,7 @@ public class GlowingReplacer extends PacketAdapter implements Listener {
 				PacketPlayOutScoreboardTeamHandle handle = PacketPlayOutScoreboardTeamHandle.createNew();
 				handle.setName(newTeamName);
 				handle.setMethod(PacketPlayOutScoreboardTeamHandle.METHOD_JOIN);
-				handle.setPlayers(List.of(ScoreboardUtils.getScoreHolderName(entity)));
+				handle.setPlayers(List.of(ScoreboardUtils.getPacketScoreHolderName(entity)));
 				ProtocolLibrary.getProtocolManager().sendServerPacket(player, PacketContainer.fromPacket(handle.getRaw()), false);
 			}
 		}
