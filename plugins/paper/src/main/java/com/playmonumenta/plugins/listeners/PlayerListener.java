@@ -1961,25 +1961,36 @@ public class PlayerListener implements Listener {
 		boolean gotBanner = false;
 		boolean gotShield = resultMat.equals(Material.SHIELD);
 
-		for (ItemStack item : event.getInventory().getMatrix()) {
-			if (item != null) {
-				Material mat = item.getType();
-				String matStr = mat.getKey().toString();
+		boolean gotCopyMaterial = false;
+		boolean gotNonCopyableItem = false;
 
-				ItemMeta meta = item.getItemMeta();
+		for (ItemStack item : event.getInventory().getMatrix()) {
+			if (item == null) {
+				continue;
+			}
+
+			Material mat = item.getType();
+			String matStr = mat.getKey().toString();
+
+			ItemMeta meta = item.getItemMeta();
+			if (meta != null && meta.hasLore()) {
 				if (
-					meta != null
-						&& meta.hasLore()
-						&& ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0
+					(Material.FILLED_MAP.equals(mat) || Material.WRITTEN_BOOK.equals(mat)) &&
+					ItemStatUtils.hasNonCopyableInfusion(item)
 				) {
+					gotNonCopyableItem = true;
+				}
+
+				if (ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0) {
 					cancel = true;
-				} else {
-					if (matStr.endsWith("_dye")) {
-						gotDye = true;
-					}
-					if (matStr.endsWith("_banner")) {
-						gotBanner = true;
-					}
+				}
+			} else {
+				gotCopyMaterial |= Material.MAP.equals(item.getType()) || Material.WRITABLE_BOOK.equals(item.getType());
+				if (matStr.endsWith("_dye")) {
+					gotDye = true;
+				}
+				if (matStr.endsWith("_banner")) {
+					gotBanner = true;
 				}
 			}
 		}
@@ -1995,6 +2006,9 @@ public class PlayerListener implements Listener {
 		}
 		if (resultMat.equals(Material.TIPPED_ARROW)) {
 			cancel = false;
+		}
+		if (gotCopyMaterial && gotNonCopyableItem) {
+			cancel = true;
 		}
 		event.setCancelled(cancel);
 
@@ -2033,14 +2047,29 @@ public class PlayerListener implements Listener {
 		if (result == null) {
 			return;
 		}
+
+		boolean gotCopyMaterial = false;
+		boolean gotNonCopyableItem = false;
+
 		for (ItemStack item : event.getInventory().getContents()) {
-			if (item != null) {
-				ItemMeta meta = item.getItemMeta();
-				if (meta != null && meta.hasLore()
-						&& ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0) {
+			if (item == null) {
+				continue;
+			}
+			gotCopyMaterial |= Material.MAP.equals(item.getType());
+
+			ItemMeta meta = item.getItemMeta();
+			if (meta != null && meta.hasLore()) {
+				gotNonCopyableItem |= ItemStatUtils.hasNonCopyableInfusion(item);
+
+				if (ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0) {
 					event.setCancelled(true);
+					return;
 				}
 			}
+		}
+
+		if (gotCopyMaterial && gotNonCopyableItem) {
+			event.setCancelled(true);
 		}
 	}
 
