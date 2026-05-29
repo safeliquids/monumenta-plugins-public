@@ -17,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
+import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
@@ -33,6 +34,7 @@ public class WaterloggedOverride extends BaseOverride {
 	public static final List<Component> WATERLOG_RELATED_LORE = List.of(WATERLOGGED_LORE, NOT_WATERLOGGED_LORE);
 	public static String BLOCK_STATE_TAG_KEY = "BlockStateTag";
 	public static String WATERLOGGED_KEY = "waterlogged";
+	public static String LEAVES_PERSISTENT_KEY = "persistent";
 
 	@Override
 	public boolean blockPlaceInteraction(Plugin plugin, Player player, ItemStack item, BlockPlaceEvent event) {
@@ -81,6 +83,7 @@ public class WaterloggedOverride extends BaseOverride {
 		if (!(defaultBlockData instanceof Waterlogged defaultWaterloggable)) {
 			return true;
 		}
+		boolean isLeaves = defaultBlockData instanceof Leaves;
 		boolean defaultIsWaterlogged = defaultWaterloggable.isWaterlogged();
 
 		ItemStack cursor = event.getCursor();
@@ -94,12 +97,18 @@ public class WaterloggedOverride extends BaseOverride {
 				ReadWriteNBT blockStateTag = nbt.getOrCreateCompound(BLOCK_STATE_TAG_KEY);
 				if (defaultIsWaterlogged) {
 					blockStateTag.removeKey(WATERLOGGED_KEY);
+					if (isLeaves) {
+						blockStateTag.removeKey(LEAVES_PERSISTENT_KEY);
+					}
 					if (blockStateTag.getKeys().isEmpty()) {
 						nbt.removeKey(BLOCK_STATE_TAG_KEY);
 					}
 					isDefault.set(nbt.getKeys().isEmpty());
 				} else {
 					blockStateTag.setString(WATERLOGGED_KEY, "true");
+					if (isLeaves) {
+						blockStateTag.setString(LEAVES_PERSISTENT_KEY, "true");
+					}
 				}
 			});
 			if (isDefault.get()) {
@@ -121,8 +130,14 @@ public class WaterloggedOverride extends BaseOverride {
 				ReadWriteNBT blockStateTag = nbt.getOrCreateCompound(BLOCK_STATE_TAG_KEY);
 				if (defaultIsWaterlogged) {
 					blockStateTag.setString(WATERLOGGED_KEY, "false");
+					if (isLeaves) {
+						blockStateTag.setString(LEAVES_PERSISTENT_KEY, "true");
+					}
 				} else {
 					blockStateTag.removeKey(WATERLOGGED_KEY);
+					if (isLeaves) {
+						blockStateTag.removeKey(LEAVES_PERSISTENT_KEY);
+					}
 					if (blockStateTag.getKeys().isEmpty()) {
 						nbt.removeKey(BLOCK_STATE_TAG_KEY);
 					}

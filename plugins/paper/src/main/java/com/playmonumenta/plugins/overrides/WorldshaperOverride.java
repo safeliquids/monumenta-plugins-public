@@ -11,12 +11,14 @@ import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.listeners.IndigoListener;
 import com.playmonumenta.plugins.listeners.RepairExplosionsListener;
 import com.playmonumenta.plugins.particle.PartialParticle;
+import com.playmonumenta.plugins.protocollib.FirmamentLagFix;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.BlockUtils;
 import com.playmonumenta.plugins.utils.InventoryUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
+import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import com.playmonumenta.plugins.utils.ZoneUtils;
 import de.tr7zw.nbtapi.NBT;
@@ -48,12 +50,15 @@ import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class WorldshaperOverride {
@@ -94,7 +99,7 @@ public class WorldshaperOverride {
 		}
 
 		if (ServerProperties.getShardName().contains("indigo")
-			|| ServerProperties.getShardName().startsWith("dev")) {
+		    || ServerProperties.getShardName().startsWith("dev")) {
 			IndigoListener.revokeBlocklessEligibility(player, "Worldshaper's loom used");
 		}
 
@@ -285,32 +290,13 @@ public class WorldshaperOverride {
 			}
 
 			List<BlockState> blockList = new ArrayList<>(List.of(location.getBlock().getState()));
-			StructureGrowEvent event = new StructureGrowEvent(location, TreeType.TREE, true, player, blockList);
-			Bukkit.getPluginManager().callEvent(event);
-			if (!event.isCancelled() && !blockList.isEmpty()) {
-				BlockData blockData = getBlockAndSubtract(item, occludingException);
-				if (blockData != null) {
-					if (mode == Mode.STAIRS && blockData instanceof Stairs stairs) {
-						stairs.setFacing(BlockUtils.getCardinalBlockFace(player));
-					}
-					if (mode == Mode.WALL && blockData instanceof Wall wall) {
-						BlockFace facing = BlockUtils.getCardinalBlockFace(player);
-						for (BlockFace face : List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
-							// Since the walls are placed from the bottom up, all but the top row will be updated to TALL
-							wall.setHeight(face, face == facing || face == facing.getOppositeFace() ? Wall.Height.NONE : Wall.Height.LOW);
-						}
-						wall.setUp(false);
-					}
-					Block block = location.getBlock();
-					RepairExplosionsListener.getInstance().playerReplacedBlockViaPlugin(player, block);
-					block.setBlockData(blockData);
+			StructureGrowEvent structureGrowEvent = new StructureGrowEvent(location, TreeType.TREE, true, player, blockList);
+			Bukkit.getPluginManager().callEvent(structureGrowEvent);
+			if (structureGrowEvent.isCancelled() || blockList.isEmpty()) {
+				break;
+			} else {
+				if (placeOneBlock(player, item, location, occludingException)) {
 					blocksPlaced++;
-					new PartialParticle(Particle.SMOKE_NORMAL, location, 10, 0.15, 0.15, 0.15).spawnAsPlayerActive(player);
-					world.playSound(player.getLocation(), Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1f, 0.75f);
-					CoreProtectIntegration.logPlacement(player, location, blockData.getMaterial(), blockData);
-					if (ServerProperties.lootingLimiterEnabled()) {
-						Plugin.getInstance().mPlacedBlocksListener.placeBlock(player, block);
-					}
 				} else {
 					if (blocksPlaced == 0) {
 						player.sendMessage(Component.text("There are no valid blocks to place in the shulker!", NamedTextColor.RED));
@@ -332,22 +318,32 @@ public class WorldshaperOverride {
 		return false;
 	}
 
-	// Gets and remove first block it finds in the shulker
-	private static @Nullable BlockData getBlockAndSubtract(ItemStack item, @Nullable Predicate<Material> occludingException) {
-
-		BlockStateMeta shulkerMeta = (BlockStateMeta) item.getItemMeta();
+	public static boolean placeOneBlock(Player player, ItemStack worldShaper, Location location, @Nullable Predicate<Material> occludingException) {
+		BlockStateMeta shulkerMeta = (BlockStateMeta) worldShaper.getItemMeta();
 		ShulkerBox shulkerBox = (ShulkerBox) shulkerMeta.getBlockState();
 		Inventory shulkerInventory = shulkerBox.getInventory();
+		Mode mode = getMode(worldShaper);
+
+		BlockFace facing = BlockUtils.getCardinalBlockFace(player);
+		Block block = location.getBlock();
+		BlockState replacedState = block.getState();
+		BlockData replacedBlockData = replacedState.getBlockData();
+		Block placedAgainst = location.clone().add(facing.getDirection()).getBlock();
 
 		for (int i = 0; i < 27; i++) {
 			ItemStack currentItem = shulkerInventory.getItem(i);
 			if (currentItem == null) {
 				continue;
 			}
+
 			Material type = currentItem.getType();
-			if (type.isAir() || ItemUtils.notAllowedTreeReplace.contains(type)
-				|| (!type.isOccluding() && !ItemUtils.GOOD_OCCLUDERS.contains(type) && !(occludingException != null && occludingException.test(type)))
-				|| (currentItem.getItemMeta().hasLore() && !WaterloggedOverride.mayPlaceWaterloggable(currentItem))) {
+			if (
+				type.isAir() ||
+				ItemUtils.isShulkerBox(type) ||
+				ItemUtils.notAllowedTreeReplace.contains(type) ||
+				(!type.isOccluding() && !ItemUtils.GOOD_OCCLUDERS.contains(type) && !(occludingException != null && occludingException.test(type))) ||
+				(currentItem.getItemMeta().hasLore() && !WaterloggedOverride.mayPlaceWaterloggable(currentItem))
+			) {
 				// Air breaks it, skip over it. Also, the banned items break it, skip over those.
 				continue;
 			}
@@ -356,10 +352,19 @@ public class WorldshaperOverride {
 			// No known way to preserve BlockStateMeta - so check that it's either null or simple BlockDataMeta
 			if (currentItem.getType().isBlock() && (meta == null || meta instanceof BlockDataMeta)) {
 				BlockData blockData;
-
 				// Use block data from meta if the meta has some already
 				if (meta instanceof BlockDataMeta blockMeta && blockMeta.hasBlockData()) {
 					blockData = blockMeta.getBlockData(currentItem.getType());
+					if (mode == Mode.STAIRS && blockData instanceof Stairs stairs) {
+						stairs.setFacing(facing);
+					}
+					if (mode == Mode.WALL && blockData instanceof Wall wall) {
+						for (BlockFace face : List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
+							// Since the walls are placed from the bottom up, all but the top row will be updated to TALL
+							wall.setHeight(face, face == facing || face == facing.getOppositeFace() ? Wall.Height.NONE : Wall.Height.LOW);
+						}
+						wall.setUp(false);
+					}
 				} else {
 					blockData = currentItem.getType().createBlockData();
 					if (blockData instanceof Leaves leaves) {
@@ -367,16 +372,69 @@ public class WorldshaperOverride {
 					}
 				}
 
-				// Update the Shulker's inventory
-				shulkerInventory.setItem(i, currentItem.subtract());
-				shulkerMeta.setBlockState(shulkerBox);
-				item.setItemMeta(shulkerMeta);
+				// Need to temporarily place the block to proceed; can undo afterwards
+				block.setBlockData(blockData, false);
+				BlockPlaceEvent thisBlockEvent = new BlockPlaceEventWithStackTrace(block, replacedState, placedAgainst, currentItem, player, true, EquipmentSlot.HAND);
 
-				return blockData;
+				// Safety
+				if (!Plugin.getInstance().mItemOverrides.blockPlaceInteraction(Plugin.getInstance(), player, currentItem, thisBlockEvent)) {
+					block.setBlockData(replacedBlockData, false);
+					return false;
+				}
+
+				// Log for overworld replacements
+				Bukkit.getPluginManager().callEvent(thisBlockEvent);
+				if (thisBlockEvent.isCancelled()) {
+					block.setBlockData(replacedBlockData, false);
+				} else {
+					// Update physics
+					block.setBlockData(Material.AIR.createBlockData(), false);
+					block.setBlockData(blockData, true);
+
+					RepairExplosionsListener.getInstance()
+						.playerReplacedBlockViaPlugin(player, block);
+
+					// Effects
+					new PartialParticle(Particle.SMOKE_NORMAL, location, 10, 0.15, 0.15, 0.15).spawnAsPlayerActive(player);
+					location.getWorld().playSound(player.getLocation(), Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1f, 0.75f);
+
+					// Log the placement of the block
+					CoreProtectIntegration.logPlacement(player, thisBlockEvent.getBlock()
+						.getLocation(), blockData.getMaterial(), blockData);
+
+					// Update loot limiter
+					if (ServerProperties.lootingLimiterEnabled()) {
+						Plugin.getInstance().mPlacedBlocksListener.placeBlock(player, block);
+					}
+
+					// Update the Shulker's inventory
+					shulkerInventory.setItem(i, currentItem.subtract());
+					shulkerMeta.setBlockState(shulkerBox);
+					worldShaper.setItemMeta(shulkerMeta);
+
+					//Stat tracking for firmament
+					StatTrackManager.getInstance()
+						.incrementStatImmediately(worldShaper, player, InfusionType.STAT_TRACK_BLOCKS, 1);
+
+					// Prevent sending block update packets for neighbors of the placed block
+					FirmamentLagFix.firmamentUsed(block);
+
+					// Force update physics on the placed block
+					Bukkit.getScheduler().runTask(Plugin.getInstance(), () -> {
+						BlockState state = thisBlockEvent.getBlock().getState();
+						if (state.getBlockData().equals(blockData)) {
+							thisBlockEvent.getBlock().setType(Material.AIR, false);
+							state.update(true, true);
+						}
+					});
+
+					// Block was placed
+					return true;
+				}
 			}
 		}
 
-		return null;
+		return false;
 	}
 
 	public static boolean changeMode(ItemStack item, Player player) {
@@ -409,9 +467,9 @@ public class WorldshaperOverride {
 
 	public static boolean isWorldshaperItem(ItemStack item) {
 		return item != null &&
-			InventoryUtils.testForItemWithName(item, ITEM_NAME, true) &&
-			ItemStatUtils.getTier(item).equals(Tier.EPIC) &&
-			ItemUtils.isShulkerBox(item.getType());
+		       InventoryUtils.testForItemWithName(item, ITEM_NAME, true) &&
+		       ItemStatUtils.getTier(item).equals(Tier.EPIC) &&
+		       ItemUtils.isShulkerBox(item.getType());
 	}
 
 	public static Mode getMode(ItemStack item) {
@@ -442,6 +500,18 @@ public class WorldshaperOverride {
 			mMessage = Component.text("Selected Mode: ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
 				.append(Component.text(name, color).decoration(TextDecoration.ITALIC, false));
 			mPitch = pitch;
+		}
+	}
+
+	public static class BlockPlaceEventWithStackTrace extends BlockPlaceEvent {
+		public BlockPlaceEventWithStackTrace(@NotNull final Block placedBlock, @NotNull final BlockState replacedBlockState, @NotNull final Block placedAgainst, @NotNull final ItemStack itemInHand, @NotNull final Player thePlayer, final boolean canBuild, @NotNull final EquipmentSlot hand) {
+			super(placedBlock, replacedBlockState, placedAgainst, itemInHand, thePlayer, canBuild, hand);
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			super.setCancelled(cancel);
+			MMLog.warning("Ignore this: ", new Exception("Dummy exception, please ignore"));
 		}
 	}
 }
