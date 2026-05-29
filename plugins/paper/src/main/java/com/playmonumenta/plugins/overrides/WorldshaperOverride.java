@@ -18,7 +18,6 @@ import com.playmonumenta.plugins.utils.InventoryUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
-import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import com.playmonumenta.plugins.utils.ZoneUtils;
 import de.tr7zw.nbtapi.NBT;
@@ -58,7 +57,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class WorldshaperOverride {
@@ -372,9 +370,9 @@ public class WorldshaperOverride {
 					}
 				}
 
-				// Need to temporarily place the block to proceed; can undo afterwards
+				// Need to temporarily place the block to proceed; can undo afterward
 				block.setBlockData(blockData, false);
-				BlockPlaceEvent thisBlockEvent = new BlockPlaceEventWithStackTrace(block, replacedState, placedAgainst, currentItem, player, true, EquipmentSlot.HAND);
+				BlockPlaceEvent thisBlockEvent = new BlockPlaceEvent(block, replacedState, placedAgainst, currentItem, player, true, EquipmentSlot.HAND);
 
 				// Safety
 				if (!Plugin.getInstance().mItemOverrides.blockPlaceInteraction(Plugin.getInstance(), player, currentItem, thisBlockEvent)) {
@@ -500,18 +498,6 @@ public class WorldshaperOverride {
 			mMessage = Component.text("Selected Mode: ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
 				.append(Component.text(name, color).decoration(TextDecoration.ITALIC, false));
 			mPitch = pitch;
-		}
-	}
-
-	public static class BlockPlaceEventWithStackTrace extends BlockPlaceEvent {
-		public BlockPlaceEventWithStackTrace(@NotNull final Block placedBlock, @NotNull final BlockState replacedBlockState, @NotNull final Block placedAgainst, @NotNull final ItemStack itemInHand, @NotNull final Player thePlayer, final boolean canBuild, @NotNull final EquipmentSlot hand) {
-			super(placedBlock, replacedBlockState, placedAgainst, itemInHand, thePlayer, canBuild, hand);
-		}
-
-		@Override
-		public void setCancelled(boolean cancel) {
-			super.setCancelled(cancel);
-			MMLog.warning("Ignore this: ", new Exception("Dummy exception, please ignore"));
 		}
 	}
 }
