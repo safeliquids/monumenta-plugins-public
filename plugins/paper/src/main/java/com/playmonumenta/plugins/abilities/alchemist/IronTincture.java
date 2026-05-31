@@ -110,7 +110,7 @@ public class IronTincture extends Ability implements AbilityWithChargesOrStacks 
 		super(plugin, player, INFO);
 		mMaxCharges = CHARGES + (int) CharmManager.getLevel(mPlayer, CHARM_CHARGES);
 		mCharges = Math.min(AbilityManager.getManager().getTrackedCharges(mPlayer, ClassAbility.IRON_TINCTURE), mMaxCharges);
-		mAbsorption = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_ABSORPTION, isLevelOne() ? ABSORPTION_1 : ABSORPTION_2);
+		mAbsorption = Math.max(0, CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_ABSORPTION, isLevelOne() ? ABSORPTION_1 : ABSORPTION_2));
 		mRefill = POTION_REFILL + (int) CharmManager.getLevel(mPlayer, CHARM_REFILL);
 		mAllyRefill = ALLY_POTION_REFILL + (int) CharmManager.getLevel(mPlayer, CHARM_ALLY_REFILL);
 		mDuration = CharmManager.getDuration(mPlayer, CHARM_DURATION, ABSORPTION_DURATION);
