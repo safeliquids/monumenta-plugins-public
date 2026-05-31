@@ -59,7 +59,11 @@ public class Sniper implements Enchantment {
 
 	public static double apply(Player player, Location target, double level) {
 		if (level > 0) {
-			float distanceScaling = Math.min((float) player.getEyeLocation().distance(target) / DISTANCE, 1);
+			Location eyeLoc = player.getEyeLocation();
+			if (eyeLoc.getWorld() == null || !eyeLoc.getWorld().equals(target.getWorld())) {
+				return 0;
+			}
+			float distanceScaling = Math.min((float) eyeLoc.distance(target) / DISTANCE, 1);
 			particles(target, player, distanceScaling);
 			return (level * DAMAGE_PER_LEVEL * distanceScaling);
 		}

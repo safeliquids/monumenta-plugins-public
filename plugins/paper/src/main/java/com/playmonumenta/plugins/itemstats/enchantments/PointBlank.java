@@ -59,7 +59,9 @@ public class PointBlank implements Enchantment {
 	}
 
 	public static double apply(Player player, Location target, double level) {
-		if (level > 0 && player.getEyeLocation().distance(target) < DISTANCE) {
+		Location eyeLoc = player.getEyeLocation();
+		if (level > 0 && eyeLoc.getWorld() != null && eyeLoc.getWorld().equals(target.getWorld())
+				&& eyeLoc.distance(target) < DISTANCE) {
 			particles(target, player);
 			return (level * DAMAGE_PER_LEVEL);
 		}
