@@ -146,13 +146,18 @@ public class SpellRiptide extends Spell {
 
 				@Override
 				public void run() {
-					if (!mBoss.isValid() || mTicks > mDuration) {
+					if (!mBoss.isValid()) {
+						this.cancel();
+						return;
+					}
+					if (mTicks > mDuration) {
+						playLandingAesthetics();
 						this.cancel();
 						return;
 					}
 					mTicks++;
 					if (mTicks >= 5 && mBoss.isOnGround()) {
-
+						playLandingAesthetics();
 						this.cancel();
 						return;
 					}
@@ -172,7 +177,6 @@ public class SpellRiptide extends Spell {
 					if (mBoss instanceof Mob mob) {
 						mob.getPathfinder().findPath(dashTarget);
 					}
-					playLandingAesthetics();
 				}
 			};
 			mActiveRunnables.add(runnable);
