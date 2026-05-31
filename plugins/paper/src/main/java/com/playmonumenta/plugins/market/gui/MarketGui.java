@@ -91,7 +91,7 @@ public class MarketGui extends NjolGui {
 			current = 1;
 		}
 		if (current < 1) {
-			current = max;
+			current = Math.max(max, 1);
 		}
 
 		return current;
