@@ -97,6 +97,7 @@ public class MonumentaVelocity {
 					.plugin(this)
 					.build();
 				commandManager.register(voteCommandMeta, new Vote(mVoteManager));
+				mServer.getEventManager().register(this, mVoteManager);
 			} catch (IllegalArgumentException ex) {
 				mLogger.warn("Failed to initialize voting system:", ex);
 			}
