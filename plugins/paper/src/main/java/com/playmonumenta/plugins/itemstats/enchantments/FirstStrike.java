@@ -48,6 +48,7 @@ public class FirstStrike implements Enchantment {
 	static {
 		AFFECTED_TYPES.addAll(ACTIVATION_DAMAGE_TYPES);
 		AFFECTED_TYPES.addAll(SAME_TICK_DAMAGE_TYPES);
+		AFFECTED_TYPES.addAll(DamageEvent.DamageType.getAllMagicTypes());
 	}
 
 	private static final EnumSet<ClassAbility> IGNORED_ABILITIES = EnumSet.of(
