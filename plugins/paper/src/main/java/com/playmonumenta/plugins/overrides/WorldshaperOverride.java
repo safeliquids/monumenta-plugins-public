@@ -347,27 +347,30 @@ public class WorldshaperOverride {
 			}
 
 			ItemMeta meta = currentItem.getItemMeta();
-			// No known way to preserve BlockStateMeta - so check that it's either null or simple BlockDataMeta
 			if (currentItem.getType().isBlock() && (meta == null || meta instanceof BlockDataMeta)) {
 				BlockData blockData;
-				// Use block data from meta if the meta has some already
 				if (meta instanceof BlockDataMeta blockMeta && blockMeta.hasBlockData()) {
+					// Use block data from meta if the meta has some already
 					blockData = blockMeta.getBlockData(currentItem.getType());
-					if (mode == Mode.STAIRS && blockData instanceof Stairs stairs) {
-						stairs.setFacing(facing);
-					}
-					if (mode == Mode.WALL && blockData instanceof Wall wall) {
-						for (BlockFace face : List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
-							// Since the walls are placed from the bottom up, all but the top row will be updated to TALL
-							wall.setHeight(face, face == facing || face == facing.getOppositeFace() ? Wall.Height.NONE : Wall.Height.LOW);
-						}
-						wall.setUp(false);
-					}
 				} else {
+					// Else, create new block data
 					blockData = currentItem.getType().createBlockData();
-					if (blockData instanceof Leaves leaves) {
-						leaves.setPersistent(true);
+				}
+
+				if (blockData instanceof Leaves leaves) {
+					leaves.setPersistent(true);
+				}
+
+				if (mode == Mode.STAIRS && blockData instanceof Stairs stairs) {
+					stairs.setFacing(facing);
+				}
+
+				if (mode == Mode.WALL && blockData instanceof Wall wall) {
+					for (BlockFace face : List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
+						// Since the walls are placed from the bottom up, all but the top row will be updated to TALL
+						wall.setHeight(face, face == facing || face == facing.getOppositeFace() ? Wall.Height.NONE : Wall.Height.LOW);
 					}
+					wall.setUp(false);
 				}
 
 				// Need to temporarily place the block to proceed; can undo afterward
