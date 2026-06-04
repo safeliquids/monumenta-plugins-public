@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -92,8 +93,8 @@ public class LootingLimiter implements Listener {
 		EntityType.OCELOT
 	);
 
-	protected HashMap<Player, Integer> mPlayerMobKills = new HashMap<>();
-	protected HashMap<Player, Integer> mPlayerSpawnerBreaks = new HashMap<>();
+	protected HashMap<UUID, Integer> mPlayerMobKills = new HashMap<>();
+	protected HashMap<UUID, Integer> mPlayerSpawnerBreaks = new HashMap<>();
 
 	// spawner break checks
 
@@ -130,14 +131,14 @@ public class LootingLimiter implements Listener {
 		if (player.hasPermission(DEBUG_PERMISSION)) {
 			player.sendMessage("LootingLimiter spawnerBreak");
 			player.sendMessage("    beforeSpawnerScore="
-				+ mPlayerSpawnerBreaks.getOrDefault(player, 0));
+				+ mPlayerSpawnerBreaks.getOrDefault(player.getUniqueId(), 0));
 		}
-		mPlayerSpawnerBreaks.put(player,
-			Math.min(mPlayerSpawnerBreaks.getOrDefault(player, 0) + 1, ServerProperties.getLootingLimiterBankedChests() * ServerProperties.getLootingLimiterSpawners()));
+		mPlayerSpawnerBreaks.put(player.getUniqueId(),
+			Math.min(mPlayerSpawnerBreaks.getOrDefault(player.getUniqueId(), 0) + 1, ServerProperties.getLootingLimiterBankedChests() * ServerProperties.getLootingLimiterSpawners()));
 		if (player.hasPermission(DEBUG_PERMISSION)) {
 			player.sendMessage("    spawnerScore="
-				+ mPlayerSpawnerBreaks.getOrDefault(player, 0));
-			if (mPlayerSpawnerBreaks.getOrDefault(player, 0)
+				+ mPlayerSpawnerBreaks.getOrDefault(player.getUniqueId(), 0));
+			if (mPlayerSpawnerBreaks.getOrDefault(player.getUniqueId(), 0)
 				== ServerProperties.getLootingLimiterBankedChests() * ServerProperties.getLootingLimiterSpawners()) {
 				player.sendMessage("    player has hit limit for spawnerBreak");
 			}
@@ -164,15 +165,15 @@ public class LootingLimiter implements Listener {
 		if (player.hasPermission(DEBUG_PERMISSION)) {
 			player.sendMessage("LootingLimiter mobKill");
 			player.sendMessage("    beforeKillScore="
-				+ mPlayerMobKills.getOrDefault(player, 0));
+				+ mPlayerMobKills.getOrDefault(player.getUniqueId(), 0));
 		}
-		mPlayerMobKills.put(player,
-			Math.min(mPlayerMobKills.getOrDefault(player, 0) + score, ServerProperties.getLootingLimiterBankedChests() * ServerProperties.getLootingLimiterMobKills()));
+		mPlayerMobKills.put(player.getUniqueId(),
+			Math.min(mPlayerMobKills.getOrDefault(player.getUniqueId(), 0) + score, ServerProperties.getLootingLimiterBankedChests() * ServerProperties.getLootingLimiterMobKills()));
 		if (player.hasPermission(DEBUG_PERMISSION)) {
 			player.sendMessage("    scoreForKill=" + score);
 			player.sendMessage("    killScore="
-				+ mPlayerMobKills.getOrDefault(player, 0));
-			if (mPlayerMobKills.getOrDefault(player, 0)
+				+ mPlayerMobKills.getOrDefault(player.getUniqueId(), 0));
+			if (mPlayerMobKills.getOrDefault(player.getUniqueId(), 0)
 				== ServerProperties.getLootingLimiterBankedChests() * ServerProperties.getLootingLimiterMobKills()) {
 				player.sendMessage("    player has hit limit for mobKills");
 			}
@@ -279,8 +280,8 @@ public class LootingLimiter implements Listener {
 				: ServerProperties.getLootingLimiterSpawnerCountThreshold()
 			);
 
-			int totalMobScore = players.stream().mapToInt(p -> mPlayerMobKills.getOrDefault(p, 0)).sum();
-			int totalSpawnerScore = players.stream().mapToInt(p -> mPlayerSpawnerBreaks.getOrDefault(player, 0)).sum();
+			int totalMobScore = players.stream().mapToInt(p -> mPlayerMobKills.getOrDefault(p.getUniqueId(), 0)).sum();
+			int totalSpawnerScore = players.stream().mapToInt(p -> mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0)).sum();
 
 			boolean blockedByMobs = hasMobs && totalMobScore < ServerProperties.getLootingLimiterMobKills();
 			boolean blockedBySpawners = hasSpawners && totalSpawnerScore < ServerProperties.getLootingLimiterSpawners();
@@ -289,18 +290,18 @@ public class LootingLimiter implements Listener {
 					player.sendActionBar(Component.text("The sound alerts nearby enemies and accelerates nearby spawners!", NamedTextColor.RED));
 					if (player.hasPermission(DEBUG_PERMISSION)) {
 						player.sendMessage("LL blockedByKills: kills sum="
-							+ players.stream().mapToInt(p -> mPlayerMobKills.getOrDefault(player, 0)).sum());
+							+ players.stream().mapToInt(p -> mPlayerMobKills.getOrDefault(p.getUniqueId(), 0)).sum());
 						player.sendMessage("    requiredKills=" + ServerProperties.getLootingLimiterMobKills());
 						for (Player p : players) {
 							player.sendMessage("    " + p.getName() + " kills="
-								+ mPlayerMobKills.getOrDefault(player, 0));
+								+ mPlayerMobKills.getOrDefault(p.getUniqueId(), 0));
 						}
 						player.sendMessage("LL: blockedBySpawners spawnerBreaks sum="
-							+ players.stream().mapToInt(p -> mPlayerSpawnerBreaks.getOrDefault(player, 0)).sum());
+							+ players.stream().mapToInt(p -> mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0)).sum());
 						player.sendMessage("    requiredSpawners=" + ServerProperties.getLootingLimiterSpawners());
 						for (Player p : players) {
 							player.sendMessage("    " + p.getName() + " spawners="
-								+ mPlayerSpawnerBreaks.getOrDefault(player, 0));
+								+ mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0));
 						}
 					}
 					if (totalMobScore == 0 || totalSpawnerScore == 0) {
@@ -312,11 +313,11 @@ public class LootingLimiter implements Listener {
 					player.sendActionBar(Component.text("The sound alerts nearby enemies! Fight them off!", NamedTextColor.RED));
 					if (player.hasPermission(DEBUG_PERMISSION)) {
 						player.sendMessage("LL blockedByKills: kills sum="
-							+ players.stream().mapToInt(p -> mPlayerMobKills.getOrDefault(player, 0)).sum());
+							+ players.stream().mapToInt(p -> mPlayerMobKills.getOrDefault(p.getUniqueId(), 0)).sum());
 						player.sendMessage("    requiredKills=" + ServerProperties.getLootingLimiterMobKills());
 						for (Player p : players) {
 							player.sendMessage("    " + p.getName() + " kills="
-								+ mPlayerMobKills.getOrDefault(player, 0));
+								+ mPlayerMobKills.getOrDefault(p.getUniqueId(), 0));
 						}
 					}
 					if (totalMobScore == 0) {
@@ -331,11 +332,11 @@ public class LootingLimiter implements Listener {
 					player.sendActionBar(Component.text("It can't be safe to open this chest with so many spawners around...", NamedTextColor.RED));
 					if (player.hasPermission(DEBUG_PERMISSION)) {
 						player.sendMessage("LL: blockedBySpawners spawnerBreaks sum="
-							+ players.stream().mapToInt(p -> mPlayerSpawnerBreaks.getOrDefault(player, 0)).sum());
+							+ players.stream().mapToInt(p -> mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0)).sum());
 						player.sendMessage("    requiredSpawners=" + ServerProperties.getLootingLimiterSpawners());
 						for (Player p : players) {
 							player.sendMessage("    " + p.getName() + " spawners="
-								+ mPlayerSpawnerBreaks.getOrDefault(player, 0));
+								+ mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0));
 						}
 					}
 					if (totalMobScore == 0) {
@@ -350,26 +351,26 @@ public class LootingLimiter implements Listener {
 			if (hasMobs) {
 				int remaining = ServerProperties.getLootingLimiterMobKills();
 				for (Player p : players) {
-					int playerScore = mPlayerMobKills.getOrDefault(player, 0);
+					int playerScore = mPlayerMobKills.getOrDefault(p.getUniqueId(), 0);
 					if (playerScore >= remaining) {
-						mPlayerMobKills.put(p, playerScore - remaining);
+						mPlayerMobKills.put(p.getUniqueId(), playerScore - remaining);
 						break;
 					} else if (playerScore > 0) {
 						remaining -= playerScore;
-						mPlayerMobKills.put(p, 0);
+						mPlayerMobKills.put(p.getUniqueId(), 0);
 					}
 				}
 			}
 			if (hasSpawners) {
 				int remaining = ServerProperties.getLootingLimiterSpawners();
 				for (Player p : players) {
-					int playerScore = mPlayerSpawnerBreaks.getOrDefault(player, 0);
+					int playerScore = mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0);
 					if (playerScore >= remaining) {
-						mPlayerSpawnerBreaks.put(p, playerScore - remaining);
+						mPlayerSpawnerBreaks.put(p.getUniqueId(), playerScore - remaining);
 						break;
 					} else if (playerScore > 0) {
 						remaining -= playerScore;
-						mPlayerSpawnerBreaks.put(p, 0);
+						mPlayerSpawnerBreaks.put(p.getUniqueId(), 0);
 					}
 				}
 			}
@@ -377,9 +378,9 @@ public class LootingLimiter implements Listener {
 				player.sendMessage("LL: chestOpened");
 				for (Player p : players) {
 					player.sendMessage("    " + p.getName() + " spawners="
-						+ mPlayerSpawnerBreaks.getOrDefault(player, 0));
+						+ mPlayerSpawnerBreaks.getOrDefault(p.getUniqueId(), 0));
 					player.sendMessage("    " + p.getName() + " kills="
-						+ mPlayerMobKills.getOrDefault(player, 0));
+						+ mPlayerMobKills.getOrDefault(p.getUniqueId(), 0));
 				}
 			}
 
@@ -488,24 +489,24 @@ public class LootingLimiter implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void playerQuitEvent(PlayerQuitEvent event) {
-		mPlayerMobKills.remove(event.getPlayer());
-		mPlayerSpawnerBreaks.remove(event.getPlayer());
+		mPlayerMobKills.remove(event.getPlayer().getUniqueId());
+		mPlayerSpawnerBreaks.remove(event.getPlayer().getUniqueId());
 	}
 
 	// Access / Manipulation methods
 
 	public void setBankedChests(Player player, int bankedChests) {
 		bankedChests = Math.clamp(0, bankedChests, ServerProperties.getLootingLimiterBankedChests());
-		mPlayerMobKills.put(player, bankedChests * ServerProperties.getLootingLimiterMobKills());
-		mPlayerSpawnerBreaks.put(player, bankedChests * ServerProperties.getLootingLimiterSpawners());
+		mPlayerMobKills.put(player.getUniqueId(), bankedChests * ServerProperties.getLootingLimiterMobKills());
+		mPlayerSpawnerBreaks.put(player.getUniqueId(), bankedChests * ServerProperties.getLootingLimiterSpawners());
 	}
 
 	public int getMobsKilled(@NotNull Player player) {
-		return mPlayerMobKills.getOrDefault(player, 0);
+		return mPlayerMobKills.getOrDefault(player.getUniqueId(), 0);
 	}
 
 	public int getSpawnersBroken(@NotNull Player player) {
-		return mPlayerSpawnerBreaks.getOrDefault(player, 0);
+		return mPlayerSpawnerBreaks.getOrDefault(player.getUniqueId(), 0);
 	}
 
 	// Helper methods
