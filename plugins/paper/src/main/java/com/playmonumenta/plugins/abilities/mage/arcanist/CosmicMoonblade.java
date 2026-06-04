@@ -102,7 +102,7 @@ public class CosmicMoonblade extends Ability {
 			return false;
 		}
 		putOnCooldown();
-		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mDamage);
+		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mDamage);
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
 		cancelOnDeath(new BukkitRunnable() {

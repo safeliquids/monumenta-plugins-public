@@ -177,11 +177,11 @@ public class Spellshock extends Ability {
 				EntityUtils.applyVulnerability(mPlugin, ENHANCEMENT_EFFECT_DURATION, mEnhanceVulnPotency, enemy);
 			} else if (eventAbility == ClassAbility.THUNDER_STEP) {
 				// RNG 5 mob damage in 5 blocks, prioritizing elites and bosses
-				float dmg = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mEnhanceLightningDamage);
+				double dmg = SpellPower.getSpellDamage(mPlugin, mPlayer, mEnhanceLightningDamage);
 				spellShockThunder(mPlayer, enemy, mEnhanceLightningRange, dmg, ENHANCE_THUNDER, mCosmetic);
 			} else if (ARCANE_ABILITIES.contains(eventAbility)) {
 				// 3 magic dot per second for 3s
-				float dotDmg = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mEnhanceDoTDamage);
+				double dotDmg = SpellPower.getSpellDamage(mPlugin, mPlayer, mEnhanceDoTDamage);
 				CustomDamageOverTime dot = new CustomDamageOverTime(mEnhanceDoTDuration, dotDmg, Constants.TICKS_PER_SECOND, mPlayer, ENHANCE_ARCANE, DamageEvent.DamageType.MAGIC);
 				dot.setVisuals(this.mCosmetic::damageOverTimeEffects);
 				mPlugin.mEffectManager.addEffect(enemy, ENHANCE_DOT_EFFECT_NAME, dot);
@@ -222,8 +222,10 @@ public class Spellshock extends Ability {
 						new PercentSpeed(SPEED_DURATION, mSpeedPotency, SPEED_SRC).deleteOnAbilityUpdate(true));
 				}
 
-				// spellshock triggering other spellshocks propagates the damage at 100%
-				final double spellShockDamage = eventAbility == ClassAbility.SPELLSHOCK ? event.getDamage() : event.getDamage() * mSpellDamageMult;
+				// To propagate 100%, do not recount the damage multiplier
+				double spellShockDamage = eventAbility == ClassAbility.SPELLSHOCK ?
+					event.getBaseDamage() :
+					event.getBaseDamage() * mSpellDamageMult;
 				final Location loc = LocationUtils.getHalfHeightLocation(enemy);
 				final Hitbox hitbox = new Hitbox.SphereHitbox(loc, mRadius);
 				for (final LivingEntity hitMob : hitbox.getHitMobs()) {
@@ -232,7 +234,7 @@ public class Spellshock extends Ability {
 					}
 					// Only damage a mob once per tick
 					if (MetadataUtils.checkOnceThisTick(mPlugin, hitMob, DAMAGED_THIS_TICK_METAKEY)) {
-						DamageUtils.damage(mPlayer, hitMob, DamageType.UNSCALABLE_SKILL, spellShockDamage, ClassAbility.SPELLSHOCK, true);
+						DamageUtils.damage(mPlayer, hitMob, DamageType.MAGIC, spellShockDamage, ClassAbility.SPELLSHOCK, true);
 					}
 				}
 			} else { // no static on the mob, apply new static

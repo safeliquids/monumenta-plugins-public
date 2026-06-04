@@ -152,7 +152,7 @@ public class AstralOmen extends Ability {
 		}
 
 		if (combo >= mStackThreshold) { // Adding 1 more stack would hit threshold, which removes all stacks anyway, so don't bother adding then removing
-			float spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mDamage);
+			double spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, mDamage);
 			Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(enemy), mRadius);
 			for (LivingEntity mob : hitbox.getHitMobs()) {
 				if (MetadataUtils.checkOnceThisTick(mPlugin, mob, DAMAGED_THIS_TICK_METAKEY)) {

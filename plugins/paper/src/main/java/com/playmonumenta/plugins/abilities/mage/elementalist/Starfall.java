@@ -100,7 +100,7 @@ public class Starfall extends Ability {
 		World world = mPlayer.getWorld();
 
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
-		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
+		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
 		mCosmetic.starfallCastEffect(world, mPlayer, mPlayer.getLocation());
 		Vector dir = loc.getDirection().normalize();
 
@@ -135,7 +135,7 @@ public class Starfall extends Ability {
 		return true;
 	}
 
-	private void launchMeteor(final Location loc, final Location ogPlayerLoc, final ItemStatManager.PlayerItemStats playerItemStats, final float damage) {
+	private void launchMeteor(final Location loc, final Location ogPlayerLoc, final ItemStatManager.PlayerItemStats playerItemStats, final double damage) {
 		Location ogLoc = loc.clone();
 		loc.add(0, 40, 0);
 

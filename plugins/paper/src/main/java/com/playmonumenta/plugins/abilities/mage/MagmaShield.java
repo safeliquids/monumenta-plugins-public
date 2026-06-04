@@ -113,7 +113,7 @@ public class MagmaShield extends MultipleChargeAbility {
 			return false;
 		}
 
-		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) (mLevelDamage + mEnhancementDamageBonus * (consumedCharges - 1)));
+		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage + mEnhancementDamageBonus * (consumedCharges - 1));
 		double angle = Math.min(CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_CONE, ANGLE), 180);
 		Hitbox hitbox = Hitbox.approximateCylinderSegment(
 			LocationUtils.getHalfHeightLocation(mPlayer).add(0, -HEIGHT, 0), 2 * HEIGHT, mRadius, Math.toRadians(angle));

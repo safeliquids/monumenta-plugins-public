@@ -38,7 +38,7 @@ public class WandAspect extends WeaponAspectDepthsAbility {
 			if (event.getType() == DamageType.MELEE) {
 				event.addBaseDamage(DAMAGE);
 			} else if (event.getAbility() != null && !event.getAbility().isFake() && event.getType() == DamageType.MAGIC) {
-				float spellMultiplier = SpellPower.getSpellDamage(playerItemStats, 1);
+				double spellMultiplier = SpellPower.getSpellDamage(playerItemStats, 1);
 				event.updateDamageWithMultiplier(1 + (spellMultiplier - 1) * SPELL_MOD, EnumSet.of(DamageType.MAGIC));
 			}
 		}

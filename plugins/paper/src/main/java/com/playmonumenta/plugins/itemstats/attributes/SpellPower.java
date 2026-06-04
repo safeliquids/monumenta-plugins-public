@@ -30,21 +30,21 @@ public class SpellPower implements Attribute {
 		return 1;
 	}
 
-	public static float getSpellDamage(Plugin plugin, @Nullable Player player, int damage) {
+	public static double getSpellDamage(Plugin plugin, @Nullable Player player, int damage) {
 		return getSpellDamage(plugin, player, (float) damage);
 	}
 
-	public static float getSpellDamage(Plugin plugin, @Nullable Player player, float damage) {
+	public static double getSpellDamage(Plugin plugin, @Nullable Player player, double damage) {
 		if (player == null) {
 			return damage;
 		}
 		return getSpellDamage(plugin.mItemStatManager.getPlayerItemStats(player), damage);
 	}
 
-	public static float getSpellDamage(@Nullable ItemStatManager.PlayerItemStats playerItemStats, float damage) {
+	public static double getSpellDamage(@Nullable ItemStatManager.PlayerItemStats playerItemStats, double damage) {
 		if (playerItemStats == null) {
 			return damage;
 		}
-		return (float) (damage * playerItemStats.getItemStats().get(AttributeType.SPELL_DAMAGE));
+		return damage * playerItemStats.getItemStats().get(AttributeType.SPELL_DAMAGE);
 	}
 }

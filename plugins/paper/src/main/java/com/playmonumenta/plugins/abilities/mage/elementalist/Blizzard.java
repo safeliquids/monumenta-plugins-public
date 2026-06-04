@@ -102,7 +102,7 @@ public class Blizzard extends Ability {
 		mCosmetic.onCast(mPlayer, world, mPlayer.getLocation());
 
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
-		float spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
+		double spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
 
 		cancelOnDeath(new BukkitRunnable() {
 			int mTicks = 0;
