@@ -30,7 +30,7 @@ import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 public class CleansingTotem extends TotemAbility {
 	private static final int COOLDOWN = 30 * 20;
 	private static final int AOE_RANGE = 6;
-	private static final double HEAL_PERCENT = 0.04;
+	private static final double HEAL_PERCENT = 0.05;
 	private static final int INTERVAL = 20;
 	private static final int DURATION_1 = 8 * 20;
 	private static final int DURATION_2 = 12 * 20;

@@ -29,7 +29,9 @@ import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.MetadataUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import com.playmonumenta.plugins.utils.VectorUtils;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Bukkit;
@@ -53,8 +55,15 @@ import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.St
 import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 public class QuiverStorm extends Ability implements AbilityWithChargesOrStacks {
+
+	private interface ProjectileInStack {
+		void shoot();
+	}
+
 	public static final String ARROW_METADATA = "QuiverStormArrow_HasConvertedDamage"; // false if the arrow is a QStorm arrow that has not hit its enemy, true if it has already hit its enemy. Used in Explosive.
 	public static final double ENCHANT_RATIO = 0.35;
+
+	private static final int MAX_ARROW_IN_QUEUE = 10;
 	private static final String LOCKDOWN_HIT = "LockdownHitThisTick";
 	private static final String PREDATOR_HIT = "PredatorStrikeHitThisTick";
 	private static final String SPAWN_TICK = "SpawnTick";
@@ -113,6 +122,8 @@ public class QuiverStorm extends Ability implements AbilityWithChargesOrStacks {
 	private final QuiverStormCS mCosmetic;
 
 	private @Nullable Sharpshooter mSharpshooter;
+	private final Deque<ProjectileInStack> mQuiver = new ArrayDeque<>(MAX_ARROW_IN_QUEUE);
+	private @Nullable BukkitRunnable mStormRunnable;
 
 	public QuiverStorm(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
@@ -167,7 +178,6 @@ public class QuiverStorm extends Ability implements AbilityWithChargesOrStacks {
 			}
 		}
 
-		final int arrows = mPassive + consumeAllCharges();
 		final Vector projVelocity = projectile.getVelocity();
 		double gearProjSpeed = 0;
 		if (map != null) {
@@ -191,22 +201,46 @@ public class QuiverStorm extends Ability implements AbilityWithChargesOrStacks {
 		}
 		projVelocity.subtract(playerVelocity);
 
-		cancelOnDeath(new BukkitRunnable() {
-			int mArrows = arrows;
+		// Quiver Storm now queues arrows instead of firing instantly (up to 10 in a queue)
+		final int arrows = mPassive + consumeAllCharges();
+		for (int i = 0; i < arrows; i++) {
+			mQuiver.offerLast(() -> shootProjectile(projType, projVelocity, playerDirection, projItem, stats));
+		}
 
-			@Override
-			public void run() {
-				if (mArrows <= 0) {
-					this.cancel();
-					return;
+		if (mStormRunnable == null) {
+			mStormRunnable = new BukkitRunnable() {
+				@Override
+				public void run() {
+					ProjectileInStack task = mQuiver.pollFirst();
+
+					if (task == null
+						|| AbilityManager.getManager().getPlayerAbilities(mPlayer).isSilenced()) {
+						this.cancel();
+						return;
+					}
+
+					mCosmetic.arrowLaunch(mPlayer);
+					task.shoot();
 				}
-				mCosmetic.arrowLaunch(mPlayer);
-				shootProjectile(projType, projVelocity, playerDirection, projItem, stats);
-				mArrows--;
-			}
-		}.runTaskTimer(mPlugin, mDelay, mDelay));
+
+				@Override
+				public synchronized void cancel() {
+					super.cancel();
+					mStormRunnable = null;
+					mQuiver.clear();
+				}
+			};
+			cancelOnDeath(mStormRunnable.runTaskTimer(mPlugin, mDelay, mDelay));
+		}
 
 		return true;
+	}
+
+	@Override
+	public void invalidate() {
+		if (mStormRunnable != null) {
+			mStormRunnable.cancel();
+		}
 	}
 
 	private void shootProjectile(final EntityType projectileType, Vector initVelocity, Vector initPlayerDirection, ItemStack weapon, ItemStatManager.PlayerItemStats stats) {
@@ -362,22 +396,22 @@ public class QuiverStorm extends Ability implements AbilityWithChargesOrStacks {
 			.addDashedLine()
 			.addLine("Firing a projectile will fire extra shots that")
 			.addLine("inherit %p of non-damage enchants.")
-			.statValues(stat(ENCHANT_RATIO))
+				.statValues(stat(ENCHANT_RATIO))
 			.addLine()
 			.addStat("Damage: %p1 (of weapon damage) (p) (per shot)")
-			.statValues(stat(a -> a.mDamagePercent, DAMAGE_PERCENT_L1))
+				.statValues(stat(a -> a.mDamagePercent, DAMAGE_PERCENT_L1))
 			.addStat("Fire Rate: %t1")
-			.statValues(stat(a -> a.mDelay, DELAY_L1))
+				.statValues(stat(a -> a.mDelay, DELAY_L1))
 			.addStat("Shots: %d")
-			.statValues(stat(a -> a.mPassive, PASSIVE_ARROW))
+				.statValues(stat(a -> a.mPassive, PASSIVE_ARROW))
 			.addLine()
 			.addLine("Landing *Lockdown* adds %d shots to your next").styles(UNDERLINED)
-			.statValues(stat(a -> a.mLockdownRefund, LD_ARROW))
+				.statValues(stat(a -> a.mLockdownRefund, LD_ARROW))
 			.addLine("shot, whereas landing *Predator Strike* adds %d shots.").styles(UNDERLINED)
-			.statValues(stat(a -> a.mPstrikeArrowRefund, PSTRIKE_ARROW))
+				.statValues(stat(a -> a.mPstrikeArrowRefund, PSTRIKE_ARROW))
 			.addLine()
 			.addStat("Max Shots: %d1")
-			.statValues(stat(a -> a.mMaxCharges, MAX_ARROW_L1))
+				.statValues(stat(a -> a.mMaxCharges, MAX_ARROW_L1))
 			.addDashedLine();
 	}
 
@@ -388,11 +422,11 @@ public class QuiverStorm extends Ability implements AbilityWithChargesOrStacks {
 			.addLine("fire rate, and max shot count.")
 			.addLine()
 			.addStatComparison("Damage: %p1 -> %p2")
-			.statValues(stat(DAMAGE_PERCENT_L1), stat(a -> a.mDamagePercent, DAMAGE_PERCENT_L2))
+				.statValues(stat(DAMAGE_PERCENT_L1), stat(a -> a.mDamagePercent, DAMAGE_PERCENT_L2))
 			.addStatComparison("Fire Rate: %t1 -> %t2")
-			.statValues(stat(DELAY_L1), stat(a -> a.mDelay, DELAY_L2))
+				.statValues(stat(DELAY_L1), stat(a -> a.mDelay, DELAY_L2))
 			.addStatComparison("Max Shots: %d1 -> %d2")
-			.statValues(stat(MAX_ARROW_L1), stat(a -> a.mMaxCharges, MAX_ARROW_L2))
+				.statValues(stat(MAX_ARROW_L1), stat(a -> a.mMaxCharges, MAX_ARROW_L2))
 			.addDashedLine();
 	}
 
