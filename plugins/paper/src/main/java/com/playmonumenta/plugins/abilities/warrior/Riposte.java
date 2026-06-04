@@ -38,8 +38,9 @@ import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 public class Riposte extends Ability implements AbilityWithDuration {
 	private static final int RIPOSTE_1_COOLDOWN = Constants.TICKS_PER_SECOND * 15;
 	private static final int RIPOSTE_2_COOLDOWN = Constants.TICKS_PER_SECOND * 12;
-	private static final int RIPOSTE_SWORD_DURATION = Constants.TICKS_PER_SECOND * 2;
-	private static final int RIPOSTE_AXE_DURATION = Constants.TICKS_PER_SECOND * 3;
+	private static final int RIPOSTE_DURATION = Constants.TICKS_PER_SECOND * 2;
+	private static final int RIPOSTE_AXE_DURATION = Constants.TICKS_PER_SECOND * 2;
+	private static final int RIPOSTE_AXE_RADIUS = 2;
 	private static final float RIPOSTE_KNOCKBACK_SPEED = 0.15f;
 	private static final double RIPOSTE_SWORD_BONUS_DAMAGE = 1;
 	private static final double ENHANCEMENT_DAMAGE = 15;
@@ -47,8 +48,9 @@ public class Riposte extends Ability implements AbilityWithDuration {
 	private static final int ENHANCEMENT_ROOT_DURATION = (int) (Constants.TICKS_PER_SECOND * 1.5);
 
 	public static final String CHARM_COOLDOWN = "Riposte Cooldown";
-	public static final String CHARM_DAMAGE_DURATION = "Riposte Sword Bonus Damage Duration";
+	public static final String CHARM_DURATION = "Riposte Duration";
 	public static final String CHARM_STUN_DURATION = "Riposte Axe Stun Duration";
+	public static final String CHARM_STUN_RADIUS = "Riposte Axe Stun Radius";
 	public static final String CHARM_KNOCKBACK = "Riposte Knockback";
 	public static final String CHARM_BONUS_DAMAGE = "Riposte Sword Bonus Damage";
 	public static final String CHARM_DAMAGE = "Riposte Enhancement Damage";
@@ -61,14 +63,15 @@ public class Riposte extends Ability implements AbilityWithDuration {
 			.scoreboardId("Obliteration")
 			.shorthandName("Rip")
 			.descriptions(getDescription1(), getDescription2(), getDescriptionEnhancement())
-			.simpleDescription("While wielding a sword or axe, block a mob's melee attack to stun the mob or gain damage.")
+			.simpleDescription("While wielding a sword or axe, block a mob's melee attack.")
 			.cooldown(RIPOSTE_1_COOLDOWN, RIPOSTE_2_COOLDOWN, CHARM_COOLDOWN)
 			.displayItem(Material.SKELETON_SKULL);
 	private static final EnumSet<DamageType> AFFECTED_TYPES = EnumSet.of(DamageType.MELEE, DamageType.MELEE_ENCH);
 
 	private final double mSwordDamage;
-	private final int mMaxSwordDuration;
+	private final int mMaxDuration;
 	private final int mStunDuration;
+	private final double mStunRadius;
 	private final float mKnockAwaySpeed;
 	private final double mEnhancementDamage;
 	private final double mEnhancementRadius;
@@ -77,13 +80,14 @@ public class Riposte extends Ability implements AbilityWithDuration {
 
 	private @Nullable BukkitRunnable mRunnable = null;
 	private int mCurrDuration = -1;
-	private boolean mHasTriggeredSwordL2 = false;
+	private boolean mHasTriggeredL2 = false;
 
 	public Riposte(final Plugin plugin, final Player player) {
 		super(plugin, player, INFO);
 		mSwordDamage = RIPOSTE_SWORD_BONUS_DAMAGE + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_BONUS_DAMAGE);
-		mMaxSwordDuration = CharmManager.getDuration(mPlayer, CHARM_DAMAGE_DURATION, RIPOSTE_SWORD_DURATION);
+		mMaxDuration = CharmManager.getDuration(mPlayer, CHARM_DURATION, RIPOSTE_DURATION);
 		mStunDuration = CharmManager.getDuration(mPlayer, CHARM_STUN_DURATION, RIPOSTE_AXE_DURATION);
+		mStunRadius = CharmManager.getRadius(mPlayer, CHARM_STUN_RADIUS, RIPOSTE_AXE_RADIUS);
 		mKnockAwaySpeed = (float) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, RIPOSTE_KNOCKBACK_SPEED);
 		mEnhancementDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, ENHANCEMENT_DAMAGE);
 		mEnhancementRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, ENHANCEMENT_RADIUS);
@@ -106,14 +110,14 @@ public class Riposte extends Ability implements AbilityWithDuration {
 		final World world = mPlayer.getWorld();
 		final Location playerLoc = mPlayer.getLocation();
 
-		if (isLevelTwo() && holdingSword) {
+		if (isLevelTwo()) {
 			mCurrDuration = 0;
-			mHasTriggeredSwordL2 = false;
+			mHasTriggeredL2 = false;
 			mRunnable = new BukkitRunnable() {
 				@Override
 				public void run() {
 					mCurrDuration++;
-					if (mCurrDuration >= mMaxSwordDuration) {
+					if (mCurrDuration >= mMaxDuration) {
 						this.cancel();
 					}
 				}
@@ -126,9 +130,6 @@ public class Riposte extends Ability implements AbilityWithDuration {
 				}
 			};
 			cancelOnDeath(mRunnable.runTaskTimer(mPlugin, 0, 1));
-		} else if (isLevelTwo() && holdingAxe) {
-			EntityUtils.applyStun(mPlugin, mStunDuration, source);
-			mCosmetic.onAxeStun(world, playerLoc);
 		}
 
 		MovementUtils.knockAway(mPlayer, source, mKnockAwaySpeed, true);
@@ -151,33 +152,43 @@ public class Riposte extends Ability implements AbilityWithDuration {
 
 	@Override
 	public boolean onDamage(final DamageEvent event, final LivingEntity enemy) {
-		if (AFFECTED_TYPES.contains(event.getType())
-			&& ItemUtils.isSword(mPlayer.getInventory().getItemInMainHand())
-			&& mCurrDuration != -1) {
-			event.updateDamageWithMultiplier(1 + mSwordDamage, AFFECTED_TYPES);
-			if (mRunnable != null && !mRunnable.isCancelled() && !mHasTriggeredSwordL2) {
-				// Disable next tick, buff only for this tick
-				Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
-					if (mRunnable != null) {
-						mRunnable.cancel();
-					}
-				}, 1);
-				mHasTriggeredSwordL2 = true;
-				// Prevent it from making one Runnable per event - optimisation
+		if (AFFECTED_TYPES.contains(event.getType()) && mCurrDuration != -1) {
+			if (ItemUtils.isSword(mPlayer.getInventory().getItemInMainHand())) {
+				event.updateDamageWithMultiplier(1 + mSwordDamage, AFFECTED_TYPES);
+				mCosmetic.onSwordAttack(mPlayer.getWorld(), mPlayer.getLocation());
+				removeRunnable();
+			} else if (ItemUtils.isAxe(mPlayer.getInventory().getItemInMainHand())) {
+				for (LivingEntity mob : new Hitbox.SphereHitbox(enemy.getLocation().add(0, 1, 0), mStunRadius).getHitMobs()) {
+					EntityUtils.applyStun(mPlugin, mStunDuration, mob);
+				}
+				mCosmetic.onAxeStun(mPlayer.getWorld(), mPlayer.getLocation());
+				removeRunnable();
 			}
-			mCosmetic.onSwordAttack(mPlayer.getWorld(), mPlayer.getLocation());
 		}
 		return false; // prevents multiple applications itself by clearing mSwordTimer
 	}
 
+	private void removeRunnable() {
+		if (mRunnable != null && !mRunnable.isCancelled() && !mHasTriggeredL2) {
+			// Disable next tick, buff only for this tick
+			Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
+				if (mRunnable != null) {
+					mRunnable.cancel();
+				}
+			}, 1);
+			mHasTriggeredL2 = true;
+			// Prevent it from making one Runnable per event - optimisation
+		}
+	}
+
 	@Override
 	public int getInitialAbilityDuration() {
-		return mMaxSwordDuration;
+		return mMaxDuration;
 	}
 
 	@Override
 	public int getRemainingAbilityDuration() {
-		return mCurrDuration == -1 ? 0 : Math.min(mMaxSwordDuration, mMaxSwordDuration - mCurrDuration);
+		return mCurrDuration == -1 ? 0 : Math.min(mMaxDuration, mMaxDuration - mCurrDuration);
 	}
 
 	private static Description<Riposte> getDescription1() {
@@ -187,7 +198,7 @@ public class Riposte extends Ability implements AbilityWithDuration {
 			.addLine("block an incoming melee attack.")
 			.addLine()
 			.addStat("Cooldown: %t1")
-				.statValues(cooldown(RIPOSTE_1_COOLDOWN))
+			.statValues(cooldown(RIPOSTE_1_COOLDOWN))
 			.addDashedLine();
 	}
 
@@ -197,21 +208,23 @@ public class Riposte extends Ability implements AbilityWithDuration {
 			.addLine("Reduce *Riposte*'s cooldown.").styles(UNDERLINED)
 			.addLine()
 			.addStatComparison("Cooldown: %t1 -> %t2")
-				.statValues(cooldown(RIPOSTE_1_COOLDOWN), cooldown(RIPOSTE_2_COOLDOWN))
+			.statValues(cooldown(RIPOSTE_1_COOLDOWN), cooldown(RIPOSTE_2_COOLDOWN))
 			.addLine()
 			.addLine("Activating *Riposte* while holding a sword").styles(UNDERLINED)
-			.addLine("makes your next sword attack within %t")
-				.statValues(stat(a -> a.mMaxSwordDuration, RIPOSTE_SWORD_DURATION))
-			.addLine("deal increased damage.")
+			.addLine("or axe empowers your next attack within %t.")
+			.statValues(stat(a -> a.mMaxDuration, RIPOSTE_DURATION))
+			.addLine()
+			.addLine("Sword attacks deal increased damage.")
 			.addLine()
 			.addStat("Damage Boost: +%p (m)")
-				.statValues(stat(a -> a.mSwordDamage, RIPOSTE_SWORD_BONUS_DAMAGE))
+			.statValues(stat(a -> a.mSwordDamage, RIPOSTE_SWORD_BONUS_DAMAGE))
 			.addLine()
-			.addLine("Activating *Riposte* while holding an axe").styles(UNDERLINED)
-			.addLine("stuns the attacking mob.")
+			.addLine("Axe attacks stun mobs in a radius.")
 			.addLine()
 			.addStat("Effect: Stun for %t")
-				.statValues(stat(a -> a.mStunDuration, RIPOSTE_AXE_DURATION))
+			.statValues(stat(a -> a.mStunDuration, RIPOSTE_AXE_DURATION))
+			.addStat("Radius: %r")
+			.statValues(stat(a -> a.mStunRadius, RIPOSTE_AXE_RADIUS))
 			.addDashedLine();
 	}
 
@@ -222,11 +235,11 @@ public class Riposte extends Ability implements AbilityWithDuration {
 			.addLine("to nearby mobs and root them.")
 			.addLine()
 			.addStat("Damage: %d (m)")
-				.statValues(stat(a -> a.mEnhancementDamage, ENHANCEMENT_DAMAGE))
+			.statValues(stat(a -> a.mEnhancementDamage, ENHANCEMENT_DAMAGE))
 			.addStat("Effect: Root for %t")
-				.statValues(stat(a -> a.mEnhancementRootDuration, ENHANCEMENT_ROOT_DURATION))
+			.statValues(stat(a -> a.mEnhancementRootDuration, ENHANCEMENT_ROOT_DURATION))
 			.addStat("Radius: %r")
-				.statValues(stat(a -> a.mEnhancementRadius, ENHANCEMENT_RADIUS))
+			.statValues(stat(a -> a.mEnhancementRadius, ENHANCEMENT_RADIUS))
 			.addDashedLine();
 	}
 }

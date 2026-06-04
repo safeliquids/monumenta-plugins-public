@@ -5,6 +5,7 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.common.collect.ImmutableMap;
 import com.playmonumenta.plugins.Constants.Materials;
 import com.playmonumenta.plugins.Plugin;
+import com.playmonumenta.plugins.abilities.warrior.guardian.Endurance;
 import com.playmonumenta.plugins.depths.charmfactory.CharmFactory;
 import com.playmonumenta.plugins.itemstats.enchantments.Multitool;
 import com.playmonumenta.plugins.itemstats.enchantments.ThrowingKnife;
@@ -18,6 +19,7 @@ import com.playmonumenta.plugins.itemstats.enums.Region;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
 import com.playmonumenta.plugins.itemstats.enums.Tier;
 import com.playmonumenta.plugins.itemstats.infusions.Shattered;
+import com.playmonumenta.plugins.itemstats.infusions.Sturdy;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.PotionUtils.PotionInfo;
@@ -1901,6 +1903,12 @@ public class ItemUtils {
 			return new ArrayList<>();
 		}
 		return new ArrayList<>(lore);
+	}
+
+	public static int getShieldStunDuration(Player player, int ticks) {
+		int stunTicks = Sturdy.updateStunCooldown(ticks, Plugin.getInstance().mItemStatManager.getInfusionLevel(player, InfusionType.STURDY));
+		stunTicks = Endurance.updateStunCooldown(player, stunTicks);
+		return stunTicks;
 	}
 
 	public static EquipmentItems getEquipmentItems(EntityEquipment equipment) {

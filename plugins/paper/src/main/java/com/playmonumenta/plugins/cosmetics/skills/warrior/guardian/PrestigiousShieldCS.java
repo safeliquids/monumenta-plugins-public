@@ -149,4 +149,13 @@ public class PrestigiousShieldCS extends ShieldWallCS implements PrestigeCS {
 				.spawnAsPlayerActive(player);
 		}
 	}
+
+	@Override
+	public void shieldWallBash(Player player, World world, Location eLoc) {
+		new PartialParticle(Particle.CLOUD, eLoc, 30, 0.2, 0.2, 0.2, 0.35f).spawnAsPlayerActive(player);
+		new PartialParticle(Particle.REDSTONE, eLoc, 15, 0.5, 0.8, 0.5, 0, GOLD_DUST).spawnAsPlayerActive(player);
+		world.playSound(eLoc, Sound.ENTITY_IRON_GOLEM_HURT, SoundCategory.PLAYERS, 0.8f * 1, 1.4f);
+		world.playSound(eLoc, Sound.ENTITY_IRON_GOLEM_HURT, SoundCategory.PLAYERS, 0.9f * 1, 1.6f);
+		world.playSound(eLoc, Sound.ENTITY_IRON_GOLEM_HURT, SoundCategory.PLAYERS, 0.95f * 1, 1.75f);
+	}
 }

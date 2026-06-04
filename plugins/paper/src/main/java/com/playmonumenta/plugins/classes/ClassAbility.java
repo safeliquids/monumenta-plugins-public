@@ -153,6 +153,7 @@ public enum ClassAbility {
 	BODYGUARD("Bodyguard"),
 	CHALLENGE("Challenge"),
 	SHIELD_WALL("Shield Wall"),
+	ENDURANCE("Endurance"),
 
 	// [Alchemist]
 	ALCHEMIST_POTION("Alchemist Potion"),

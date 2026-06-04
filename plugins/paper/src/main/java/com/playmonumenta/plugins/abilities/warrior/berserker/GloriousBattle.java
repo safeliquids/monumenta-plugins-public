@@ -54,12 +54,11 @@ import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 public class GloriousBattle extends Ability {
 	private static final int BLOODLUST_COST = 2;
-	private static final int PIERCE_DAMAGE_1 = 5;
-	private static final int PIERCE_DAMAGE_2 = 8;
-	private static final double AOE_DAMAGE_1 = 0.3;
-	private static final double AOE_DAMAGE_2 = 0.4;
-	private static final double CRITICAL_DAMAGE_1 = 0.5;
-	private static final double CRITICAL_DAMAGE_2 = 0.6;
+	private static final int PIERCE_DAMAGE_L1 = 5;
+	private static final int PIERCE_DAMAGE_L2 = 8;
+	private static final double AOE_DAMAGE_1 = 0.35;
+	private static final double AOE_DAMAGE_2 = 0.45;
+	private static final double CRITICAL_DAMAGE = 0.6;
 	private static final double VELOCITY = 1.5;
 	private static final double VERTICAL_SPEED_CAP = 0.3;
 	private static final double RADIUS = 2.5;
@@ -70,7 +69,7 @@ public class GloriousBattle extends Ability {
 	private static final String IMPACT_EFFECT_SOURCE = "GloriousBattleImpact";
 
 	public static final String CHARM_DAMAGE = "Glorious Battle Damage";
-	public static final String CHARM_PIERCE_DAMAGE = "Glorious Battle Pierce Damage";
+	public static final String CHARM_PIERCE_DAMAGE = "Glorious Battle Collision Damage";
 	public static final String CHARM_RADIUS = "Glorious Battle Attack Radius";
 	public static final String CHARM_VELOCITY = "Glorious Battle Velocity";
 	public static final String CHARM_KNOCKBACK = "Glorious Battle Knockback";
@@ -112,9 +111,9 @@ public class GloriousBattle extends Ability {
 		super(plugin, player, INFO);
 
 		mAoeDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, isLevelOne() ? AOE_DAMAGE_1 : AOE_DAMAGE_2);
-		mCriticalDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, isLevelOne() ? CRITICAL_DAMAGE_1 : CRITICAL_DAMAGE_2);
+		mCriticalDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, CRITICAL_DAMAGE);
 		mCriticalMultiplier = CharmManager.getLevelPercentDecimal(mPlayer, CHARM_CRITICAL_DAMAGE);
-		mPierceDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_PIERCE_DAMAGE, isLevelOne() ? PIERCE_DAMAGE_1 : PIERCE_DAMAGE_2);
+		mPierceDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_PIERCE_DAMAGE, isLevelOne() ? PIERCE_DAMAGE_L1 : PIERCE_DAMAGE_L2);
 		mVelocity = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_VELOCITY, VELOCITY);
 		mRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, RADIUS);
 		mBloodlustCost = BLOODLUST_COST + (int) CharmManager.getLevel(mPlayer, CHARM_BLOODLUST_COST);
@@ -258,8 +257,10 @@ public class GloriousBattle extends Ability {
 
 		List<LivingEntity> targets = EntityUtils.getNearbyMobs(enemy.getLocation(), mRadius);
 
-		hitMob(enemy, baseDamage * (mCriticalDamage + mCriticalMultiplier));
-		targets.remove(enemy);
+		if (isLevelTwo()) {
+			hitMob(enemy, baseDamage * (mCriticalDamage + mCriticalMultiplier));
+			targets.remove(enemy);
+		}
 
 		targets.forEach(e -> hitMob(e, baseDamage * mAoeDamage));
 
@@ -290,15 +291,13 @@ public class GloriousBattle extends Ability {
 			.addLine("while airborne.")
 			.addLine()
 			.addStat("Collision Damage: %d1 (m)")
-				.statValues(stat(a -> a.mPierceDamage, PIERCE_DAMAGE_1))
+				.statValues(stat(a -> a.mPierceDamage, PIERCE_DAMAGE_L1))
 			.addLine()
 			.addLine("Your next critical attack while airborne or for %t")
 				.statValues(stat(a -> a.mDuration, DURATION))
 			.addLine("after landing causes a large swing that deals")
-			.addLine("bonus damage to the target and nearby mobs.")
+			.addLine("bonus damage to nearby mobs.")
 			.addLine()
-			.addStat("Direct Damage: %p1 (m) (of the attack's damage)")
-				.statValues(stat(a -> a.mCriticalDamage, CRITICAL_DAMAGE_1))
 			.addStat("Area Damage: %p1 (m) (of the attack's damage)")
 				.statValues(stat(a -> a.mAoeDamage, AOE_DAMAGE_1))
 			.addStat("Area Radius: %r")
@@ -313,11 +312,15 @@ public class GloriousBattle extends Ability {
 			.addLine("you can now lunge in any direction.")
 			.addLine()
 			.addStatComparison("Collision Damage: %d1 -> %d2 (m)")
-				.statValues(stat(PIERCE_DAMAGE_1), stat(a -> a.mPierceDamage, PIERCE_DAMAGE_2))
-			.addStatComparison("Direct Damage: %p1 -> %p2 (m)")
-				.statValues(stat(CRITICAL_DAMAGE_1), stat(a -> a.mCriticalDamage, CRITICAL_DAMAGE_2))
+				.statValues(stat(PIERCE_DAMAGE_L1), stat(a -> a.mPierceDamage, PIERCE_DAMAGE_L2))
 			.addStatComparison("Area Damage: %p1 -> %p2 (m) ")
-			.statValues(stat(AOE_DAMAGE_1), stat(a -> a.mAoeDamage, AOE_DAMAGE_2))
+				.statValues(stat(AOE_DAMAGE_1), stat(a -> a.mAoeDamage, AOE_DAMAGE_2))
+			.addLine()
+			.addLine("*Glorious Battle* deals bonus damage").styles(UNDERLINED)
+			.addLine("to the target mob.")
+			.addLine()
+			.addStat("Direct Damage: %p (m) (of the attack's damage)")
+				.statValues(stat(a -> a.mCriticalDamage + a.mCriticalMultiplier, CRITICAL_DAMAGE))
 			.addDashedLine();
 	}
 

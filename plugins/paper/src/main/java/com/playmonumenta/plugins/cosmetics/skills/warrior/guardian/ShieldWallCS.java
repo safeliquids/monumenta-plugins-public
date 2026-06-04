@@ -459,4 +459,17 @@ public class ShieldWallCS implements CosmeticSkill {
 				.spawnAsPlayerActive(player);
 		}
 	}
+
+	public void shieldWallBash(Player player, World world, Location eLoc) {
+		new PartialParticle(Particle.EXPLOSION_NORMAL, eLoc, 50, 0, 0, 0, 0.35f).spawnAsPlayerActive(player);
+		world.playSound(eLoc, Sound.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 1, 1f);
+	}
+
+	public void shieldToggleOn(World world, Location loc, Player player) {
+		world.playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 1f, 1f);
+	}
+
+	public void shieldToggleOff(World world, Location loc, Player player) {
+		world.playSound(loc, Sound.BLOCK_BEACON_DEACTIVATE, 1f, 1f);
+	}
 }
