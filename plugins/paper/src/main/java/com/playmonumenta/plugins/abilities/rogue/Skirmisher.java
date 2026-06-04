@@ -15,6 +15,7 @@ import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.InventoryUtils;
+import java.util.EnumSet;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -37,6 +38,7 @@ public class Skirmisher extends Ability {
 	private static final int ENHANCEMENT_SPLASH_TARGETS = 1;
 	private static final double ENHANCEMENT_SPLASH_RADIUS = 3;
 	private static final double ENHANCEMENT_SPLASH_PERCENT_DAMAGE = 0.3;
+	private static final EnumSet<DamageType> AFFECTED_TYPES = DamageType.getAllMeleeTypes();
 
 	public static final String CHARM_DAMAGE = "Skirmisher Damage Multiplier";
 	public static final String CHARM_RADIUS = "Skirmisher Damage Radius";
@@ -94,11 +96,11 @@ public class Skirmisher extends Ability {
 				}
 			}
 
-			if (event.getAbility() != mInfo.getLinkedSpell()) {
+			if (event.getAbility() != mInfo.getLinkedSpell() && AFFECTED_TYPES.contains(event.getType())) {
 				if (EntityUtils.getNearbyMobs(loc, mFriendlyRadius, enemy).size() >= MOB_COUNT_CUTOFF
 					|| (isLevelTwo() && enemy instanceof Mob mob && !mPlayer.equals(mob.getTarget()))) {
-					event.addFinalDamage(mGroupedFlatDamage, DamageType.getAllMeleeTypes());
-					event.updateDamageWithMultiplier(1 + mGroupedPercentDamage, DamageType.getAllMeleeTypes());
+					event.addFinalDamage(mGroupedFlatDamage, AFFECTED_TYPES);
+					event.updateDamageWithMultiplier(1 + mGroupedPercentDamage, AFFECTED_TYPES);
 					mCosmetic.aesthetics(mPlayer, loc, world, enemy);
 				}
 			}
