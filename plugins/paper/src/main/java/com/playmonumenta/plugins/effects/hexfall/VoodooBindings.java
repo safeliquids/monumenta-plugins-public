@@ -33,8 +33,8 @@ public class VoodooBindings extends Effect {
 	private final BossBar mBossBar;
 	private @Nullable TextDisplay mDisplay;
 	public final Queue<VoodooBinding> mBindings;
-	public static final String CIRCLE = "⦿";
-	public static final String DONUT = "⦾";
+	public static final String CIRCLE = "⏺";
+	public static final String DONUT = "⭘";
 
 	public enum VoodooBinding {
 		WHITE_CIRCLE(0, NamedTextColor.WHITE, CIRCLE, "conform", "WC"),
