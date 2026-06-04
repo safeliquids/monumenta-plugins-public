@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.AbsorptionUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.MetadataUtils;
@@ -29,6 +30,11 @@ public class AbsorbingBarrier implements Enchantment {
 	@Override
 	public String getName() {
 		return "Absorbing Barrier";
+	}
+
+	@Override
+	public StatPriority getPriorityAmount() {
+		return StatPriority.LAST;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.effects.PercentSpeed;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
@@ -35,8 +36,8 @@ public class TwoHanded implements Enchantment {
 	// throw rate has priority of 1000, and creates a new snowball
 	// want this enchant to cancel the event before throw rate checks for cancelled event
 	@Override
-	public double getPriorityAmount() {
-		return 999;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.FIRST;
 	}
 
 	public static boolean checkForOffhand(Plugin plugin, Player player) {

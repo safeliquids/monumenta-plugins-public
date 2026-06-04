@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.potion.PotionManager.PotionID;
 import com.playmonumenta.plugins.utils.AbsorptionUtils;
@@ -38,8 +39,8 @@ public class Resurrection implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 10000;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.RESURRECTION;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.FastUtils;
@@ -36,8 +37,8 @@ public class Galvanic implements Infusion {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 14;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.ASPECTS;
 	}
 
 	@Override

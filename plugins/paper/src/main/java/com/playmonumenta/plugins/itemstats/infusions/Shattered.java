@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.effects.RespawnStasis;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.itemstats.enums.Tier;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.potion.PotionManager;
@@ -62,8 +63,8 @@ public class Shattered implements Infusion {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 4998; // just before region scaling
+	public StatPriority getPriorityAmount() {
+		return StatPriority.SHATTERED; // just before region scaling
 	}
 
 	public static double getMultiplier(int level) {

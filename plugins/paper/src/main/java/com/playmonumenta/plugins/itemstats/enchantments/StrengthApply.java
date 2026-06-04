@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -28,8 +29,8 @@ public class StrengthApply implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 1001; // after default item stats to multiply most damage
+	public StatPriority getPriorityAmount() {
+		return StatPriority.BEFORE_DEFAULT;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.itemstats.enums.AttributeType;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Operation;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.managers.GlowingManager;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
@@ -65,11 +66,11 @@ public class Snowy implements Enchantment {
 		return EnumSet.of(Slot.MAINHAND, Slot.PROJECTILE);
 	}
 
-	// throw rate has priority of 1000, and it creates a new snowball
+	// throw rate creates a new snowball
 	// must add metadata of mode before creating a new snowball since projectileLaunch does not catch the new one
 	@Override
-	public double getPriorityAmount() {
-		return 999;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.FIRST;
 	}
 
 	// projectile hit event is caught in the WinterListener class

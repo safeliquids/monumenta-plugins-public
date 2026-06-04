@@ -31,10 +31,6 @@ public final class Momentum implements Enchantment {
 		return EnchantmentType.MOMENTUM;
 	}
 
-	@Override
-	public double getPriorityAmount() {
-		return 30;
-	}
 	/*
 	| check if the player is sprinting.
 	| If the player is not sprinting, add disable effect for 20 ticks (activation requirement).

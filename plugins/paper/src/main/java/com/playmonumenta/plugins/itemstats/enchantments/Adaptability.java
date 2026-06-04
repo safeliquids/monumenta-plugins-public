@@ -2,6 +2,7 @@ package com.playmonumenta.plugins.itemstats.enchantments;
 
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.jetbrains.annotations.NotNull;
 
 public class Adaptability implements Enchantment {
@@ -16,4 +17,8 @@ public class Adaptability implements Enchantment {
 		return EnchantmentType.ADAPTABILITY;
 	}
 
+	@Override
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DEFENSE_SITUATIONAL;
+	}
 }

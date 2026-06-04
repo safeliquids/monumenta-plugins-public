@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.EnumSet;
 import org.bukkit.entity.LivingEntity;
@@ -30,8 +31,8 @@ public class Slayer implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 5;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.WEAPON_BASE_DAMAGE;
 	}
 
 	@Override

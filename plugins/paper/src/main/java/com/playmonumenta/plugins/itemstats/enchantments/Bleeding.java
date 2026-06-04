@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.EnumSet;
@@ -33,8 +34,8 @@ public class Bleeding implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 17;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGING_ENCHANTMENT;
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,8 +25,8 @@ public class SKTQuestDamageTaken implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 0;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DEFENSE_ENCHANTMENT;
 	}
 
 	@Override

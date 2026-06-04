@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.effects.PercentSpeed;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.itemstats.infusions.Shattered;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
@@ -32,8 +33,8 @@ public class RegionScalingDamageTaken implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 4999; // second to last damage taken modifier, just before second wind
+	public StatPriority getPriorityAmount() {
+		return StatPriority.REGION_SCALING;
 	}
 
 	@Override

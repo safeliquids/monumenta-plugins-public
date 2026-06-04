@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,14 +39,12 @@ public class Trivium implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 5500;
-		// This needs to be decently high as we need the final damage (After calculation of other enchants)
-		// The damage type will be set to "Other" to prevent iteration.
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGING_ENCHANTMENT;
 	}
 
 	@Override
-	public void onDamage(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
+	public void onDamageDelayed(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
 		ClassAbility ca = event.getAbility();
 		if (ca != null && event.getType() == DamageEvent.DamageType.MAGIC) {
 			// Exception for Arcane Strike which can deal 2 different class abilities at once

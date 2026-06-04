@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.FastUtils;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +44,8 @@ public class CurseOfInstability implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 1;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.FIRST;
 	}
 
 	@Override
