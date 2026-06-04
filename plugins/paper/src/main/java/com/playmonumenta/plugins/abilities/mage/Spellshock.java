@@ -23,6 +23,7 @@ import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.MetadataUtils;
+import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -58,8 +59,8 @@ public class Spellshock extends Ability {
 	private static final int ENHANCE_DOT_DURATION = Constants.TICKS_PER_SECOND * 3;
 	private static final double DAMAGE_1 = 0.2;
 	private static final double DAMAGE_2 = 0.3;
-	private static final double MELEE_BONUS_1 = 0.1;
-	private static final double MELEE_BONUS_2 = 0.15;
+	private static final double MELEE_BONUS_1 = 0.2;
+	private static final double MELEE_BONUS_2 = 0.3;
 	private static final int SPELLSHOCK_RADIUS = 3;
 	private static final int STATIC_DURATION = Constants.TICKS_PER_SECOND * 6;
 	private static final double SPEED_POTENCY = 0.2;
@@ -183,14 +184,15 @@ public class Spellshock extends Ability {
 				// 3 magic dot per second for 3s
 				double dotDmg = SpellPower.getSpellDamage(mPlugin, mPlayer, mEnhanceDoTDamage);
 				CustomDamageOverTime dot = new CustomDamageOverTime(mEnhanceDoTDuration, dotDmg, Constants.TICKS_PER_SECOND, mPlayer, ENHANCE_ARCANE, DamageEvent.DamageType.MAGIC);
-				dot.setVisuals(this.mCosmetic::damageOverTimeEffects);
+				dot.setVisuals(mCosmetic::damageOverTimeEffects);
 				mPlugin.mEffectManager.addEffect(enemy, ENHANCE_DOT_EFFECT_NAME, dot);
 			}
 		}
 
 		if (type == DamageType.MELEE
 			&& mPlugin.mItemStatManager.getPlayerItemStats(mPlayer).getItemStats().get(EnchantmentType.MAGIC_WAND) > 0
-			&& existingStatic != null) {
+			&& existingStatic != null
+			&& PlayerUtils.isFallingAttack(mPlayer)) {
 			event.updateDamageWithMultiplier(1 + mMeleeBonusMult, EnumSet.of(DamageType.MELEE));
 			EntityUtils.applySlow(mPlugin, SLOW_DURATION, mSlowPotency, enemy);
 			existingStatic.trigger();
@@ -302,8 +304,8 @@ public class Spellshock extends Ability {
 			.addStat("Radius: %r")
 				.statValues(stat(a -> a.mRadius, SPELLSHOCK_RADIUS))
 			.addLine()
-			.addLine("Attacks against mobs with *Static* clear it").styles(STATIC_COLOR)
-			.addLine("to deal increased damage and inflict slowness.")
+			.addLine("Critical attacks against mobs with *Static* clear").styles(STATIC_COLOR)
+			.addLine("it to deal increased damage and inflict slowness.")
 			.addLine()
 			.addStat("Damage Boost: +%p1 (m)")
 				.statValues(stat(a -> a.mMeleeBonusMult, MELEE_BONUS_1))
