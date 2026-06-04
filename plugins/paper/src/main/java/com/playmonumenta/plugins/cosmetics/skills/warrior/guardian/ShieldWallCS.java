@@ -347,7 +347,7 @@ public class ShieldWallCS implements CosmeticSkill {
 		Vector tiltedVertical = new Vector(0, 1, 0).add(radial.clone().multiply(-0.05)).normalize();
 		Vector delta = tiltedVertical.clone().multiply(2).add(tiltedVertical.getCrossProduct(tangential).multiply(0.7));
 
-		Location circleLoc = centerLoc.add(radial.clone().multiply(radius));
+		Location circleLoc = centerLoc.clone().add(radial.clone().multiply(radius));
 		circleLoc.setY(projLoc.getY()); // projLoc is inaccurate for high projectile speeds
 		new BukkitRunnable() {
 			int mTicks = 0;
@@ -355,7 +355,7 @@ public class ShieldWallCS implements CosmeticSkill {
 			@Override
 			public void run() {
 				if (mTicks >= 3) {
-					this.cancel();
+					cancel();
 				}
 
 				new PPCircle(Particle.CRIT_MAGIC, circleLoc, 0.1)
