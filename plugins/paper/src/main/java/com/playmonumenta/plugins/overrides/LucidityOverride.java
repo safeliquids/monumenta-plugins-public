@@ -4,9 +4,13 @@ import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.effects.ItemCooldown;
 import com.playmonumenta.plugins.utils.BlockUtils;
+import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
+import it.unimi.dsi.fastutil.Pair;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
@@ -48,7 +52,7 @@ public class LucidityOverride extends BaseOverride {
 	private static final TextColor TEXT_COLOR = TextColor.color(COLOR.asRGB());
 	private static final BlockData DISPLAY_DATA = Material.TINTED_GLASS.createBlockData();
 
-	private static final Map<Location, UUID> mLuciditySpawners = new HashMap<>();
+	private static final Map<Location, UUID> luciditySpawners = new HashMap<>();
 
 	@Override
 	public boolean rightClickItemInteraction(Plugin plugin, Player player, Action action, ItemStack item, @Nullable Block ignored) {
@@ -93,7 +97,13 @@ public class LucidityOverride extends BaseOverride {
 	}
 
 	private static boolean revealSpawners(Location playerLocation, World world) {
-		HashMap<Location, UUID> displays = new HashMap<>(40);
+		// Cleanup map in case spawner highlights despawned
+		luciditySpawners.entrySet().removeIf(entry -> {
+			Entity entity = Bukkit.getEntity(entry.getValue());
+			return entity == null || !entity.isValid();
+		});
+
+		List<Pair<Location, UUID>> displays = new ArrayList<>(40);
 		for (Block block : BlockUtils.getBlocksInCube(playerLocation, RANGE)) {
 			if (block.getState() instanceof CreatureSpawner spawner) {
 				if (spawner.getRequiredPlayerRange() <= 0) {
@@ -110,13 +120,17 @@ public class LucidityOverride extends BaseOverride {
 					));
 					display.setGlowColorOverride(COLOR);
 					display.setGlowing(true);
+
+					EntityUtils.setRemoveEntityOnUnload(display);
 				});
-				displays.put(loc, blockDisplay.getUniqueId());
+				displays.add(Pair.of(loc, blockDisplay.getUniqueId()));
 			}
 		}
-		displays.forEach((location, uuid) -> {
+		displays.forEach(pair -> {
+			Location location = pair.first();
+			UUID uuid = pair.second();
 			@Nullable
-			UUID existingDisplay = mLuciditySpawners.remove(location);
+			UUID existingDisplay = luciditySpawners.remove(location);
 			if (existingDisplay != null) {
 				@Nullable
 				Entity displayEntity = Bukkit.getEntity(existingDisplay);
@@ -125,7 +139,7 @@ public class LucidityOverride extends BaseOverride {
 				}
 			}
 
-			mLuciditySpawners.put(location, uuid);
+			luciditySpawners.put(location, uuid);
 		});
 
 		return !displays.isEmpty();
@@ -133,7 +147,7 @@ public class LucidityOverride extends BaseOverride {
 
 	public static void removeDisplay(Block block) {
 		@Nullable
-		UUID remove = mLuciditySpawners.remove(block.getLocation());
+		UUID remove = luciditySpawners.remove(block.getLocation());
 		if (remove == null) {
 			return;
 		}
@@ -142,17 +156,5 @@ public class LucidityOverride extends BaseOverride {
 		if (displayEntity != null) {
 			displayEntity.remove();
 		}
-	}
-
-	// Runs if the server stops3
-	public static void removeAllDisplays() {
-		mLuciditySpawners.forEach((location, uuid) -> {
-			@Nullable
-			Entity displayEntity = Bukkit.getEntity(uuid);
-			if (displayEntity != null) {
-				displayEntity.remove();
-			}
-		});
-		mLuciditySpawners.clear();
 	}
 }
