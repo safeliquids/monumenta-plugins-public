@@ -461,7 +461,7 @@ public class TradeListener implements Listener {
 					return to;
 				};
 			} else if (source.getType() == Material.SHIELD) {
-				// Using Bukkit's shield API doesn't work properly and doesn't support shields without banners), so edit NBT directly
+				// Using Bukkit's shield API doesn't work properly and doesn't support shields without banners, so edit NBT directly
 				clearDye = itemStack -> {
 					ItemStack result = itemStack.clone();
 					NBT.modify(result, nbt -> {

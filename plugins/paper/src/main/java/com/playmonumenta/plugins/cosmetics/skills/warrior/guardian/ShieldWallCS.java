@@ -72,7 +72,7 @@ public class ShieldWallCS implements CosmeticSkill {
 			.data(getBlockData(loc))
 			.count(30)
 			.spawnAsPlayerActive(player);
-		shieldOnHit(loc, subdivide(loc, radius, angle, height), null, radius, 1);
+		shieldOnHit(player, loc, subdivide(loc, radius, angle, height), null, radius, 1);
 	}
 
 	public List<Pair<Float, Double>> wallParticles(Player player, Location center, double radius, double angle, double height, int ticks) {
@@ -380,7 +380,7 @@ public class ShieldWallCS implements CosmeticSkill {
 		world.playSound(projLoc, Sound.ITEM_TRIDENT_HIT_GROUND, SoundCategory.PLAYERS, 0.85f, 1.5f);
 	}
 
-	public void shieldOnHit(Location center, List<Pair<Float, Double>> arcHeights, @Nullable LivingEntity enemy, double radius, float multiplier) {
+	public void shieldOnHit(Player player, Location center, List<Pair<Float, Double>> arcHeights, @Nullable LivingEntity enemy, double radius, float multiplier) {
 		// Calculation
 		float leftEndYaw = arcHeights.getFirst().first();
 		float rightEndYaw = arcHeights.getLast().first();

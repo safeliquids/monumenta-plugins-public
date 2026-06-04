@@ -223,10 +223,10 @@ public class ShieldWall extends Ability implements AbilityWithChargesOrStacks {
 					if (!enteredWall) {
 						y -= 0.15f;
 					}
-					mCosmetic.shieldOnHit(loc, mArcHeights, le, mRadius, enteredWall ? 1 : 0.25f);
+					mCosmetic.shieldOnHit(mPlayer, loc, mArcHeights, le, mRadius, enteredWall ? 1 : 0.25f);
 					MovementUtils.knockAway(loc, le, mKnockback, y, true);
 				} else {
-					mCosmetic.shieldOnHit(loc, mArcHeights, le, mRadius, enteredWall ? 1 : 0.2f);
+					mCosmetic.shieldOnHit(mPlayer, loc, mArcHeights, le, mRadius, enteredWall ? 1 : 0.2f);
 				}
 				mPlugin.mEffectManager.addEffect(le, ON_HIT_EFFECT + mPlayer.getName(), new OnHitTimerEffect(5));
 			}

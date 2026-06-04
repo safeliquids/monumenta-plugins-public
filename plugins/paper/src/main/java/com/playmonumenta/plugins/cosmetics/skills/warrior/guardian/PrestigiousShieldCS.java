@@ -99,7 +99,7 @@ public class PrestigiousShieldCS extends ShieldWallCS implements PrestigeCS {
 			.data(getBlockData(loc))
 			.count(30)
 			.spawnAsPlayerActive(player);
-		shieldOnHit(loc, subdivide(loc, radius, angle, height), null, radius, 1);
+		shieldOnHit(player, loc, subdivide(loc, radius, angle, height), null, radius, 1);
 	}
 
 	@Override
