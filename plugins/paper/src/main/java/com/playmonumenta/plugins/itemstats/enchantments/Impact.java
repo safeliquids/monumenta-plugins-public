@@ -140,7 +140,7 @@ public class Impact implements Enchantment {
 		}.runTaskTimer(plugin, 1, 2);
 	}
 
-	private boolean checkForImpact(double fallDistanceLastTick, Vector direction, LivingEntity target) {
+	public static boolean checkForImpact(double fallDistanceLastTick, Vector direction, LivingEntity target) {
 
 		if (fallDistanceLastTick > 2.0 && target.isOnGround()) {
 
@@ -172,7 +172,7 @@ public class Impact implements Enchantment {
 		return false;
 	}
 
-	private void onImpact(Player player, LivingEntity target, double originalDamage, int level) {
+	public static void onImpact(Player player, LivingEntity target, double originalDamage, int level) {
 
 		double finalDamage = originalDamage * DAMAGE_PER_LEVEL * level;
 
