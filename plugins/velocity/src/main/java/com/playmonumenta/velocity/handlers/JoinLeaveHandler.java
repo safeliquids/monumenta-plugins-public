@@ -9,6 +9,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent.LoginStatus;
 import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import java.util.Collection;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.slf4j.helpers.MessageFormatter;
 
 public class JoinLeaveHandler {
 	final boolean mVanishEnabled;
@@ -138,6 +140,17 @@ public class JoinLeaveHandler {
 				joinLeaveEvent(player, " left the game",
 					mVanishEnabled && PremiumVanishIntegration.isInvisible(player));
 			}
+		}
+	}
+
+	@Subscribe(priority = Short.MAX_VALUE / 2)
+	public void serverKickEvent(KickedFromServerEvent event) {
+		final var player = event.getPlayer();
+		final var component = event.getServerKickReason().orElse(null);
+		if (component != null && MonumentaVelocity.MINIMESSAGE_ALL.serialize(component).contains("disconnect.exceeded_packet_rate")) {
+			final var string = MessageFormatter.format("{} was disconnected from {} for exceeding packet ratelimit (suspicious)", player.getUsername(), event.getServer().getServerInfo().getName()).getMessage();
+			mPlugin.mLogger.warn(string);
+			NetworkRelayIntegration.sendAuditLogSevereMessage(string);
 		}
 	}
 

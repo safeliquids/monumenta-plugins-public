@@ -22,6 +22,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -47,6 +49,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 	}
 )
 public class MonumentaVelocity {
+	public static final MiniMessage MINIMESSAGE_ALL = MiniMessage.builder().tags(TagResolver.standard()).build();
 	public final ProxyServer mServer;
 	public final Logger mLogger;
 	public boolean mLoaded = false;

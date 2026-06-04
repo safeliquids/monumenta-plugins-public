@@ -21,6 +21,15 @@ import org.slf4j.Logger;
 public class NetworkRelayIntegration {
 	public static final String VOTE_NOTIFY_CHANNEL = "Monumenta.Bungee.VoteNotify";
 	public static final String BAN_CHANNEL = "Monumenta.Velocity.BanOnLogout";
+	public static final String AUDIT_LOG_CHANNEL = "Monumenta.Automation.AuditLog";
+	public static final String AUDIT_LOG_SEVERE_CHANNEL = "Monumenta.Automation.AuditLogSevere";
+	public static final String AUDIT_LOG_CHAT_MOD_CHANNEL = "Monumenta.Automation.ChatModAuditLog";
+	public static final String AUDIT_LOG_DEATH_CHANNEL = "Monumenta.Automation.DeathAuditLog";
+	public static final String AUDIT_LOG_PLAYERS_CHANNEL = "Monumenta.Automation.PlayerAuditLog";
+	public static final String AUDIT_LOG_MAIL_CHANNEL = "Monumenta.Automation.MailAuditLog";
+	public static final String AUDIT_LOG_MARKET_CHANNEL = "Monumenta.Automation.MarketAuditLog";
+	public static final String AUDIT_LOG_REPORT_CHANNEL = "Monumenta.Automation.ReportAuditLog";
+	public static final String ADMIN_ALERT_CHANNEL = "Monumenta.Automation.AdminNotification";
 	private static final String BAN_LOGOUT_LISTEN = "logoutListen";
 	private static final String BAN_LOGOUT_ALERT = "logoutAlert";
 
@@ -175,6 +184,9 @@ public class NetworkRelayIntegration {
 	}
 
 	public static void setScore(String scoreHolder, String score, int value) {
+		if (INSTANCE == null) {
+			return;
+		}
 		try {
 			NetworkRelayAPI.sendBroadcastCommand("execute if entity %1$s run scoreboard players set %1$s %2$s %3$d".formatted(scoreHolder, score, value), NetworkRelayAPI.ServerType.MINECRAFT);
 		} catch (Exception e) {
@@ -183,18 +195,30 @@ public class NetworkRelayIntegration {
 	}
 
 	public static void sendAdminMessage(String message) {
+		sendAuditLogMessageImmediate(message, ADMIN_ALERT_CHANNEL);
+	}
+
+	public static void sendAuditLogSevereMessage(String message) {
+		sendAuditLogMessageImmediate(message, AUDIT_LOG_SEVERE_CHANNEL);
+	}
+
+	private static void sendAuditLogMessageImmediate(String message, String channel) {
+		if (INSTANCE == null) {
+			return;
+		}
 		JsonObject data = new JsonObject();
 		data.addProperty("message", message);
 		try {
-			// See MonumentaNetworkRelayIntegration
-			NetworkRelayAPI.sendMessage("*", "Monumenta.Automation.AdminNotification", data);
+			NetworkRelayAPI.sendMessage("*", channel, data);
 		} catch (Exception ex) {
-			// TODO: pls use MMLog that paper can use
-			INSTANCE.mLogger.error("Failed to send admin alert message", ex);
+			INSTANCE.mLogger.error("Failed to send audit log message to " + channel, ex);
 		}
 	}
 
 	public static void sendLogoutNotifyRequest(String playerName) {
+		if (INSTANCE == null) {
+			return;
+		}
 		JsonObject data = new JsonObject();
 		data.addProperty("type", BAN_LOGOUT_LISTEN);
 		data.addProperty("player", playerName);
@@ -208,6 +232,9 @@ public class NetworkRelayIntegration {
 	}
 
 	public static void sendLogoutAlert(String playerName) {
+		if (INSTANCE == null) {
+			return;
+		}
 		JsonObject data = new JsonObject();
 		data.addProperty("type", BAN_LOGOUT_ALERT);
 		data.addProperty("player", playerName);
