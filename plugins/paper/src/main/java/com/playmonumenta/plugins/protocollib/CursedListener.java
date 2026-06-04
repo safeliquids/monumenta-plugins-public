@@ -95,7 +95,7 @@ public class CursedListener extends PacketAdapter {
 	// TODO: make npc features
 	public static final boolean NPCS_ENABLED = false;
 
-	private record EntityData(UUID entityUuid, String entityName, SkinData entitySkin,
+	private record EntityData(UUID entityUuid, String fakeName, SkinData entitySkin,
 	                          FakePlayerBoss.Parameters params, Set<UUID> visibleToPlayers,
 	                          @Nullable NametagData nametag) {
 
@@ -178,7 +178,7 @@ public class CursedListener extends PacketAdapter {
 		}
 
 		@SuppressWarnings("unused") // I need kill switches
-		public static EntityData getOrCreateEntityData(Entity entity) {
+		public static @Nullable EntityData getOrCreateEntityData(Entity entity) {
 			return entityDataMap.computeIfAbsent(entity.getEntityId(), key -> generateEntityData(entity));
 		}
 
@@ -201,7 +201,7 @@ public class CursedListener extends PacketAdapter {
 
 				return new EntityData(
 					oldData.entityUuid,
-					oldData.entityName,
+					oldData.fakeName,
 					newSkin == null ? oldData.entitySkin : newSkin,
 					parameters,
 					oldData.visibleToPlayers,
@@ -221,7 +221,7 @@ public class CursedListener extends PacketAdapter {
 					continue;
 				}
 				if (data.nametag != null) {
-					sendDestroyNametagPacket(data.nametag.entityId);
+					sendDestroyNametagPacket(player, data);
 					sendSpawnNametagPacket(player, newNameTag);
 					sendPassengerPacket(player, entity, newNameTag);
 				}
@@ -486,7 +486,7 @@ public class CursedListener extends PacketAdapter {
 		// setting the fake player's name to the recievingPlayer's name makes the nametag completely invisible
 		// setting the fake player's name to an empty string will show a nametag but it is very subtle (Wynncraft)
 		// but we can set this string to anything, as long as it is within the 16 character limit
-		GameProfileHandle playerData = GameProfileHandle.createNew(entity.getUniqueId(), entityData.entityName);
+		GameProfileHandle playerData = GameProfileHandle.createNew(entity.getUniqueId(), entityData.fakeName);
 		// use player's current skin
 		// playerData.setAllProperties(GameProfileHandle.getForPlayer(recievingPlayer));
 		SkinData textureData;
@@ -511,7 +511,7 @@ public class CursedListener extends PacketAdapter {
 		// we don't cancel this event, since we want these entities to also be removed on the client
 
 		// Lookup to see if one of the entity ids has a uuid match
-		List<UUID> uuids = new ArrayList<>(1);
+		List<UUID> uuids = new ArrayList<>(8);
 		List<Integer> newIds = new ArrayList<>(Arrays.stream(entityIds).boxed().toList());
 		for (int entityId : entityIds) {
 			@Nullable
@@ -535,11 +535,16 @@ public class CursedListener extends PacketAdapter {
 					continue;
 				}
 				@Nullable
-				Team entityTeam = ScoreboardUtils.getEntityTeam(entity);
-				if (entityTeam != null) {
-					entityTeam.removeEntry(uuid.toString());
+				EntityData data = PlayerData.getOrCreateEntityData(entity);
+				if (data == null) {
+					continue;
 				}
-				sendDestroyNametagPacket(entity.getEntityId());
+				sendTeamLeavePacket(player, entity, data);
+				sendDestroyNametagPacket(player, data);
+				// Cleanup entity data when the fake player mob exits the view of all players and eventually unloads
+				if (data.visibleToPlayers.isEmpty()) {
+					PlayerData.removeEntity(entity.getEntityId());
+				}
 			}
 			sendPlayerInfoRemovePacket(player, uuids);
 		}
@@ -558,19 +563,12 @@ public class CursedListener extends PacketAdapter {
 		sendPacket(player, playerInfoPacket);
 	}
 
-	private static void sendDestroyNametagPacket(int entityId) {
-		EntityData data = PlayerData.getEntityData(entityId);
-		if (data == null || data.nametag == null) {
+	private static void sendDestroyNametagPacket(Player player, EntityData data) {
+		if (data.nametag == null) {
 			return;
 		}
 		PacketPlayOutEntityDestroyHandle handle = PacketPlayOutEntityDestroyHandle.createNewSingle(data.nametag.entityId);
-		for (UUID uuid : data.visibleToPlayers) {
-			Player player = Bukkit.getPlayer(uuid);
-			if (player == null) {
-				continue;
-			}
-			sendPacket(player, handle);
-		}
+		sendPacket(player, handle);
 	}
 
 	/**
@@ -616,6 +614,7 @@ public class CursedListener extends PacketAdapter {
 				// not a uuid
 				continue;
 			}
+			@Nullable
 			EntityData data = PlayerData.getEntityDataByUUID(uuid);
 			if (data == null) {
 				Entity entity = Bukkit.getEntity(uuid);
@@ -633,7 +632,7 @@ public class CursedListener extends PacketAdapter {
 			if (data != null) {
 				changed = true;
 				namesIterator.remove();
-				String newName = data.entityName;
+				String newName = data.fakeName;
 				MMLog.debug("Changing team name from " + name + " to " + newName);
 				if (newName != null && !copy.contains(newName)) {
 					namesIterator.add(newName);
@@ -664,8 +663,23 @@ public class CursedListener extends PacketAdapter {
 			PacketPlayOutScoreboardTeamHandle join = PacketPlayOutScoreboardTeamHandle.createNew();
 			join.setName(teamName);
 			join.setMethod(PacketPlayOutScoreboardTeamHandle.METHOD_JOIN);
-			join.setPlayers(List.of(data.entityName));
+			join.setPlayers(List.of(data.fakeName));
 			sendPacketNoFilters(player, join);
+		}
+	}
+
+	private static void sendTeamLeavePacket(Player player, Entity entity, EntityData data) {
+		if (GlowingManager.isCustomGlowingForPlayer(entity, player)) {
+			return;
+		}
+		Team team = ScoreboardUtils.getEntityTeam(entity);
+		if (team != null) {
+			String teamName = team.getName();
+			PacketPlayOutScoreboardTeamHandle leave = PacketPlayOutScoreboardTeamHandle.createNew();
+			leave.setName(teamName);
+			leave.setMethod(PacketPlayOutScoreboardTeamHandle.METHOD_LEAVE);
+			leave.setPlayers(List.of(data.fakeName));
+			sendPacketNoFilters(player, leave);
 		}
 	}
 
@@ -716,10 +730,6 @@ public class CursedListener extends PacketAdapter {
 	 */
 	public static void scheduleRemove(int entityId) {
 		Bukkit.getScheduler().runTask(Plugin.getInstance(), () -> PlayerData.removeEntity(entityId));
-	}
-
-	public static boolean seesFakePlayer(Player player) {
-		return PlayerData.containsPlayer(player.getUniqueId());
 	}
 
 	/**

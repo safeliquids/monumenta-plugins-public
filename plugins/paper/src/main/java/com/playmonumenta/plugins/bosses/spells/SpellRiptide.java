@@ -12,7 +12,6 @@ import com.playmonumenta.plugins.bosses.parameters.SoundsList;
 import com.playmonumenta.plugins.effects.Blindness;
 import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.effects.PercentSpeed;
-import com.playmonumenta.plugins.protocollib.CursedListener;
 import com.playmonumenta.plugins.utils.FastUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.LocationUtils;
@@ -58,7 +57,7 @@ public class SpellRiptide extends Spell {
 	private final HashSet<UUID> mHitPlayers = new HashSet<>();
 
 	public SpellRiptide(Plugin plugin, LivingEntity boss, int cooldown, double minRange, EntityTargets target,
-						boolean preferTarget, double velocity, double hitboxSize, int telegraphDuration, int duration,
+	                    boolean preferTarget, double velocity, double hitboxSize, int telegraphDuration, int duration,
 	                    SoundsList soundTelegraph, SoundsList soundsStart, SoundsList soundsHit, SoundsList soundsLand,
 	                    ParticlesList particleTelegraph, ParticlesList particlesStart, ParticlesList particlesAir, ParticlesList particlesHit, ParticlesList particlesLand,
 	                    BiConsumer<Location, Player> hitAction) {
@@ -207,9 +206,7 @@ public class SpellRiptide extends Spell {
 
 		mBoss.setPose(Pose.SPIN_ATTACK, true);
 		for (Player viewer : mBoss.getTrackedBy()) {
-			if (CursedListener.seesFakePlayer(viewer)) {
-				sendMetadataPacket(viewer, mBoss.getEntityId(), true);
-			}
+			sendMetadataPacket(viewer, mBoss.getEntityId(), true);
 		}
 	}
 
@@ -247,9 +244,7 @@ public class SpellRiptide extends Spell {
 
 		mBoss.setPose(Pose.STANDING);
 		for (Player viewer : mBoss.getTrackedBy()) {
-			if (CursedListener.seesFakePlayer(viewer)) {
-				sendMetadataPacket(viewer, mBoss.getEntityId(), false);
-			}
+			sendMetadataPacket(viewer, mBoss.getEntityId(), false);
 		}
 	}
 }
