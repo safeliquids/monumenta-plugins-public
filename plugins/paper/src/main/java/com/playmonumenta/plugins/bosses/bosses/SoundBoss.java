@@ -11,6 +11,7 @@ import java.util.List;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 public class SoundBoss extends BossAbilityGroup {
@@ -39,11 +40,16 @@ public class SoundBoss extends BossAbilityGroup {
 		@BossParam(help = "sounds played each time the mobs does a step")
 		public SoundsList STEP_SOUND = SoundsList.EMPTY;
 
+		@BossParam(help = "distance the mobs must travel to play a footstep")
+		public double STEP_SOUND_DISTANCE = 1F;
+
 		@BossParam(help = "sounds played when the mob dies")
 		public SoundsList DEATH_SOUND = SoundsList.EMPTY;
 	}
 
 	private final Parameters mParams;
+
+	private final double DISTANCE_TRAVELED_FACTOR = 0.6;
 
 	public SoundBoss(Plugin plugin, LivingEntity boss) {
 		super(plugin, identityTag, boss);
@@ -57,6 +63,9 @@ public class SoundBoss extends BossAbilityGroup {
 			final boolean mHasLegs = !(EntityUtils.isFlyingMob(mBoss) || EntityUtils.isWaterMob(mBoss));
 			int mHalfSecondTimer = 0;
 			int mAmbientTimer = 0;
+			double mDistanceTraveled = 0;
+			double mNextStepSoundDistance = mParams.STEP_SOUND_DISTANCE;
+			Vector mPreviousPosition = mBoss.getLocation().toVector();
 
 			@Override
 			public void run() {
@@ -72,9 +81,35 @@ public class SoundBoss extends BossAbilityGroup {
 					mParams.AMBIENT_SOUND.play(mBoss.getEyeLocation());
 				}
 
-				if (mHasLegs && !mParams.STEP_SOUND.isEmpty() && mBoss.isOnGround() && !EntityUtils.isInWater(mBoss) && mBoss.getVelocity().length() > 0.079) {
-					mParams.STEP_SOUND.play(mBoss.getLocation(), 0.15F);
+				playStepSoundsIfApplicable();
+			}
+
+			private void playStepSoundsIfApplicable() {
+				// If the entity should not make any sounds, skip this section.
+				if (!mHasLegs || mParams.STEP_SOUND.isEmpty()) {
+					return;
 				}
+
+				// Get horizontal velocity and add its magnitude to distance traveled.
+				// The vanilla code multiplies this number by 0.6 for some reason.
+				final boolean isOnGround = mBoss.isOnGround();
+				final boolean isClimbing = mBoss.isClimbing();
+				final Vector newPosition = mBoss.getLocation().toVector();
+				final Vector delta = newPosition.clone().subtract(mPreviousPosition);
+				mPreviousPosition = newPosition;
+				if (isOnGround || !isClimbing) {
+					delta.setY(0);
+				}
+				mDistanceTraveled += delta.length() * DISTANCE_TRAVELED_FACTOR;
+
+				// If the entity has traveled far enough and is on ground, make a sound and advance
+				// nextStepSound. (Vanilla logic is a bit more complicated. Sound is only played if the
+				// 'landing block' is not air.)
+				if (mDistanceTraveled < mNextStepSoundDistance || (!isOnGround && !isClimbing)) {
+					return;
+				}
+				mNextStepSoundDistance = mDistanceTraveled + mParams.STEP_SOUND_DISTANCE;
+				mParams.STEP_SOUND.play(mBoss.getLocation(), 0.15F);
 			}
 
 			@Override
