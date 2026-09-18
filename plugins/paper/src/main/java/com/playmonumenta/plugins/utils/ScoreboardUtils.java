@@ -46,6 +46,14 @@ public class ScoreboardUtils {
 	public static String getScoreHolderName(Entity entity) {
 		if (entity instanceof Player) {
 			return entity.getName();
+		} else {
+			return entity.getUniqueId().toString();
+		}
+	}
+
+	public static String getPacketScoreHolderName(Entity entity) {
+		if (entity instanceof Player) {
+			return entity.getName();
 		} else if (FakePlayerBoss.is(entity)) {
 			return FakePlayerBoss.convertIdToFakeName(entity.getEntityId());
 		} else {
@@ -62,11 +70,7 @@ public class ScoreboardUtils {
 	}
 
 	public static void setScoreboardValue(Entity entity, String objectiveName, int value) {
-		if (entity instanceof Player) {
-			setScoreboardValue(entity.getName(), objectiveName, value);
-		} else {
-			setScoreboardValue(entity.getUniqueId().toString(), objectiveName, value);
-		}
+		setScoreboardValue(getScoreHolderName(entity), objectiveName, value);
 	}
 
 	public static void resetScoreboardValue(String entryName, String objectiveName) {
@@ -78,11 +82,7 @@ public class ScoreboardUtils {
 	}
 
 	public static void resetScoreboardValue(Entity entity, String objectiveName) {
-		if (entity instanceof Player) {
-			resetScoreboardValue(entity.getName(), objectiveName);
-		} else {
-			resetScoreboardValue(entity.getUniqueId().toString(), objectiveName);
-		}
+		resetScoreboardValue(getScoreHolderName(entity), objectiveName);
 	}
 
 	public static boolean toggleBinaryScoreboard(Player player, String scoreboard) {
@@ -157,22 +157,12 @@ public class ScoreboardUtils {
 
 	public static void addEntityToTeam(Entity entity, String teamName) {
 		Team team = getExistingTeamOrCreate(teamName);
-
-		if (entity instanceof Player player) {
-			team.addEntry(player.getName());
-		} else {
-			team.addEntry(entity.getUniqueId().toString());
-		}
+		team.addEntry(getScoreHolderName(entity));
 	}
 
 	public static Team addEntityToTeam(Entity entity, String teamName, NamedTextColor color) {
 		Team team = getExistingTeamOrCreate(teamName, color);
-
-		if (entity instanceof Player player) {
-			team.addEntry(player.getName());
-		} else {
-			team.addEntry(entity.getUniqueId().toString());
-		}
+		team.addEntry(getScoreHolderName(entity));
 		return team;
 	}
 
@@ -218,11 +208,6 @@ public class ScoreboardUtils {
 
 	public static void removeEntityToTeam(LivingEntity entity, String teamName) {
 		Team team = getExistingTeamOrCreate(teamName);
-
-		if (entity instanceof Player player) {
-			team.removeEntry(player.getName());
-		} else {
-			team.removeEntry(entity.getUniqueId().toString());
-		}
+		team.removeEntry(getScoreHolderName(entity));
 	}
 }

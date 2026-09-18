@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.effects.IchorCooldown;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.listeners.IchorListener;
 import com.playmonumenta.plugins.particle.PPCircle;
 import com.playmonumenta.plugins.utils.EntityUtils;
@@ -51,8 +52,8 @@ public class IchorShadowdancer implements Infusion {
 
 	// Want it to run before healing enchants/infusions i.e. kapple.
 	@Override
-	public double getPriorityAmount() {
-		return 999;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.BEFORE_DEFAULT;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PPCircle;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.DamageUtils;
@@ -28,6 +29,11 @@ public class Reflection implements Infusion {
 	@Override
 	public String getName() {
 		return "Reflection";
+	}
+
+	@Override
+	public StatPriority getPriorityAmount() {
+		return StatPriority.LAST;
 	}
 
 	@Override

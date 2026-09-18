@@ -17,7 +17,7 @@ import com.playmonumenta.plugins.effects.CustomRegeneration;
 import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.effects.EffectManager;
 import com.playmonumenta.plugins.effects.PercentDamageDealt;
-import com.playmonumenta.plugins.effects.PercentDamageReceived;
+import com.playmonumenta.plugins.effects.PercentSpeed;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
 import com.playmonumenta.plugins.network.ClientModHandler;
@@ -45,39 +45,41 @@ import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.St
 import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 public final class Rampage extends Ability implements AbilityWithChargesOrStacks {
+	// 8s
 
-	private static final int COOLDOWN = 6 * Constants.TICKS_PER_SECOND;
-	private static final double DAMAGE_L1 = 6;
-	private static final double DAMAGE_L2 = 10;
+	private static final int COOLDOWN = 10 * Constants.TICKS_PER_SECOND;
+	private static final int MAX_DURATION = 8 * Constants.TICKS_PER_SECOND;
+	private static final double DAMAGE = 10;
 	private static final double RADIUS = 4;
 	private static final int BLOODLUST_COST = 4;
-	private static final int MAX_BLOODLUST_GAIN_L1 = 3;
-	private static final int MAX_BLOODLUST_GAIN_L2 = 5;
+	private static final int BLOODLUST_EXTEND_COST = 2;
+	private static final int MAX_EXTENSIONS_L1 = 2;
+	private static final int MAX_EXTENSIONS_L2 = 4;
 	private static final double HEAL_PERCENT = 0.01;
-	private static final double DAMAGE_PERCENT_L1 = 0.10;
-	private static final double DAMAGE_PERCENT_L2 = 0.15;
-	private static final double MELEE_RESISTANCE_PERCENT = 0.1;
+	private static final double SPEED_PER_EXTENSION = 0.05;
+	private static final double DAMAGE_PER_EXTENSION = 0.05;
 	private static final double KNOCKBACK = 0.45;
-	private static final int DURATION_PER_STACK = Constants.TICKS_PER_SECOND;
-	private static final int INITIAL_DURATION = Constants.TICKS_PER_SECOND * 5;
-	private static final String DAMAGE_EFFECT_NAME = "RampagePercentDamageEffect";
+	private static final int DURATION_PER_EXTENSION = Constants.TICKS_PER_SECOND * 4;
+	private static final int INITIAL_DURATION = Constants.TICKS_PER_SECOND * 6;
 	private static final String REGENERATION_EFFECT_NAME = "RampageCustomRegenerationEffect";
-	private static final String RESISTANCE_EFFECT_NAME = "RampageMeleeResistanceEffect";
+	private static final String SPEED_EFFECT_NAME = "RampageCustomSpeedEffect";
+	private static final String DAMAGE_EFFECT_NAME = "RampageCustomDamageEffect";
 	private static final String AESTHETICS_EFFECT_NAME = "RampageAestheticEffect";
 
 	public static final String CHARM_DAMAGE = "Rampage Damage";
-	public static final String CHARM_MAX_BLOODLUST_GAIN = "Rampage Max Bloodlust Gain";
+	public static final String CHARM_MAX_RECAST = "Rampage Max Recast";
 	public static final String CHARM_COOLDOWN = "Rampage Cooldown";
 
-	public static final String CHARM_DAMAGE_BUFF = "Rampage Damage Buff";
-	public static final String CHARM_MELEE_RESISTANCE = "Rampage Melee Resistance";
+	public static final String CHARM_SPEED_EFFECT = "Rampage Speed Amplifier Per Recast";
+	public static final String CHARM_DAMAGE_EFFECT = "Rampage Damage Amplifier Per Recast";
 	public static final String CHARM_HEALING = "Rampage Healing";
 
 	public static final String CHARM_BLOODLUST_COST = "Rampage Bloodlust Cost";
+	public static final String CHARM_BLOODLUST_RECAST_COST = "Rampage Recast Bloodlust Cost";
 	public static final String CHARM_RADIUS = "Rampage Range";
 	public static final String CHARM_KNOCKBACK = "Rampage Knockback";
 	public static final String CHARM_INITIAL_DURATION = "Rampage Initial Duration";
-	public static final String CHARM_DURATION_PER_STACK = "Rampage Duration Per Stack";
+	public static final String CHARM_DURATION_PER_RECAST = "Rampage Duration Per Recast";
 	public static final String CHARM_MAX_DURATION = "Rampage Max Duration";
 
 	public static final AbilityInfo<Rampage> INFO =
@@ -95,16 +97,17 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 	private final double mDamage;
 	private final double mRadius;
 	private final double mHealing;
-	private final double mDamageBuff;
-	private final double mMeleeResistance;
+	private final double mSpeedEffect;
+	private final double mDamageEffect;
 	private final double mKnockback;
 	private final int mBloodlustCost;
+	private final int mBloodlustExtensionCost;
 	private final int mMaxDuration;
-	private final int mMaxBloodlustGain;
-	private final int mDurationPerStack;
+	private final int mMaxExtensions;
+	private final int mDurationExtension;
 	private final int mInitialDuration;
 
-	private int mBloodlustExtension = 0;
+	private int mRecasts = 0;
 
 	private @Nullable Bloodlust mBloodlust;
 	private int mLastCastTicks = 0;
@@ -115,19 +118,20 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 	public Rampage(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
 
-		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, isLevelOne() ? DAMAGE_L1 : DAMAGE_L2);
+		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, DAMAGE);
 		mRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, RADIUS);
-		mDurationPerStack = CharmManager.getDuration(mPlayer, CHARM_DURATION_PER_STACK, DURATION_PER_STACK);
-		mMaxBloodlustGain = (isLevelOne() ? MAX_BLOODLUST_GAIN_L1 : MAX_BLOODLUST_GAIN_L2) + (int) CharmManager.getLevel(mPlayer, CHARM_MAX_BLOODLUST_GAIN);
+		mDurationExtension = CharmManager.getDuration(mPlayer, CHARM_DURATION_PER_RECAST, DURATION_PER_EXTENSION);
+		mMaxExtensions = (isLevelOne() ? MAX_EXTENSIONS_L1 : MAX_EXTENSIONS_L2) + (int) CharmManager.getLevel(mPlayer, CHARM_MAX_RECAST);
 		mInitialDuration = CharmManager.getDuration(mPlayer, CHARM_INITIAL_DURATION, INITIAL_DURATION);
 
 		mHealing = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_HEALING, HEAL_PERCENT);
-		mDamageBuff = (isLevelOne() ? DAMAGE_PERCENT_L1 : DAMAGE_PERCENT_L2) + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_DAMAGE_BUFF);
 		mKnockback = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, KNOCKBACK);
-		mMeleeResistance = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_MELEE_RESISTANCE, MELEE_RESISTANCE_PERCENT);
+		mSpeedEffect = SPEED_PER_EXTENSION + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_SPEED_EFFECT);
+		mDamageEffect = DAMAGE_PER_EXTENSION + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_DAMAGE_EFFECT);
 
 		mBloodlustCost = BLOODLUST_COST + (int) CharmManager.getLevel(mPlayer, CHARM_BLOODLUST_COST);
-		mMaxDuration = CharmManager.getDuration(mPlayer, CHARM_MAX_DURATION, mDurationPerStack * mMaxBloodlustGain + mInitialDuration);
+		mBloodlustExtensionCost = BLOODLUST_EXTEND_COST + (int) CharmManager.getLevel(mPlayer, CHARM_BLOODLUST_RECAST_COST);
+		mMaxDuration = CharmManager.getDuration(mPlayer, CHARM_MAX_DURATION, MAX_DURATION);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new RampageCS());
 
 		Bukkit.getScheduler().runTask(mPlugin, () ->
@@ -139,33 +143,69 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 			return false;
 		}
 
-		int stacks = mBloodlust.getStacks();
-		if (stacks < mBloodlustCost || mActive) {
+		if (mRecasts >= mMaxExtensions) {
+			mCosmetic.cannotRecast(mPlayer);
 			return false;
 		}
 
-		mBloodlust.useStacks(mBloodlustCost);
-		mBloodlustExtension = 0;
-
-		World world = mPlayer.getWorld();
-
 		EffectManager effectManager = mPlugin.mEffectManager;
 
-		effectManager.addEffect(mPlayer, AESTHETICS_EFFECT_NAME, new Aesthetics(mInitialDuration,
-			(entity, fourHertz, twoHertz, oneHertz) -> rampageTick(fourHertz, twoHertz, oneHertz),
-			(entity) -> rampageEnd()).deleteOnAbilityUpdate(true));
-
-		effectManager.addEffect(mPlayer, DAMAGE_EFFECT_NAME,
-			new PercentDamageDealt(mInitialDuration, mDamageBuff).damageTypes(EnumSet.of(DamageType.MELEE, DamageType.MELEE_SKILL)).deleteOnAbilityUpdate(true));
-
-		effectManager.addEffect(mPlayer, REGENERATION_EFFECT_NAME,
-			new CustomRegeneration(mInitialDuration, mHealing * EntityUtils.getMaxHealth(mPlayer), 5, null, false, mPlugin));
-
-		if (isLevelTwo()) {
-			effectManager.addEffect(mPlayer, RESISTANCE_EFFECT_NAME,
-				new PercentDamageReceived(mInitialDuration, -mMeleeResistance, EnumSet.of(DamageType.MELEE)).deleteOnAbilityUpdate(true));
+		int stackCost = mActive ? mBloodlustExtensionCost : mBloodlustCost;
+		if (mBloodlust.getStacks() < stackCost) {
+			return false;
 		}
-		mActive = true;
+
+		mBloodlust.useStacks(stackCost);
+
+		if (!mActive) {
+			mActive = true;
+
+			effectManager.addEffect(mPlayer, AESTHETICS_EFFECT_NAME, new Aesthetics(mInitialDuration,
+				(entity, fourHertz, twoHertz, oneHertz) -> rampageTick(fourHertz, twoHertz, oneHertz),
+				(entity) -> rampageEnd()).deleteOnAbilityUpdate(true));
+
+			effectManager.addEffect(mPlayer, REGENERATION_EFFECT_NAME,
+				new CustomRegeneration(mInitialDuration, mHealing * EntityUtils.getMaxHealth(mPlayer), 5, null, false, mPlugin));
+		} else {
+			mRecasts++;
+			mCosmetic.onStackGain(mPlayer.getWorld(), mPlayer, mPlayer.getLocation());
+
+			Effect rampage = effectManager.getActiveEffect(mPlayer, AESTHETICS_EFFECT_NAME);
+			Effect regen = effectManager.getActiveEffect(mPlayer, REGENERATION_EFFECT_NAME);
+
+			if (rampage != null) {
+				rampage.setDuration(Math.min(rampage.getDuration() + mDurationExtension, mMaxDuration));
+			}
+
+			if (regen != null) {
+				regen.setDuration(Math.min(regen.getDuration() + mDurationExtension, mMaxDuration));
+			}
+		}
+
+		if (isLevelTwo() && mRecasts > 0) {
+			Effect rampage = effectManager.getActiveEffect(mPlayer, AESTHETICS_EFFECT_NAME);
+
+			// Rampage shouldn't be null...
+			if (rampage != null) {
+				effectManager.clearEffects(mPlayer, SPEED_EFFECT_NAME);
+				effectManager.addEffect(mPlayer, SPEED_EFFECT_NAME,
+					new PercentSpeed(
+						Math.min(rampage.getDuration(), mMaxDuration),
+						mSpeedEffect * mRecasts, SPEED_EFFECT_NAME)
+						.deleteOnAbilityUpdate(true));
+
+				effectManager.clearEffects(mPlayer, DAMAGE_EFFECT_NAME);
+				effectManager.addEffect(mPlayer, DAMAGE_EFFECT_NAME,
+					new PercentDamageDealt(
+						Math.min(rampage.getDuration(), mMaxDuration),
+						mDamageEffect * mRecasts)
+						.damageTypes(EnumSet.of(DamageType.MELEE, DamageType.MELEE_SKILL))
+						.deleteOnAbilityUpdate(true));
+			}
+		}
+
+
+		World world = mPlayer.getWorld();
 
 		Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(mPlayer), mRadius);
 		for (LivingEntity mob : hitbox.getHitMobs()) {
@@ -180,42 +220,6 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 		return true;
 	}
 
-	public void triggerOnBloodlust(int stacks) {
-		EffectManager effectManager = mPlugin.mEffectManager;
-
-		if (!effectManager.hasEffect(mPlayer, DAMAGE_EFFECT_NAME)) {
-			return;
-		}
-
-		Effect rampage = effectManager.getActiveEffect(mPlayer, AESTHETICS_EFFECT_NAME);
-		Effect regen = effectManager.getActiveEffect(mPlayer, REGENERATION_EFFECT_NAME);
-		Effect dmg = effectManager.getActiveEffect(mPlayer, DAMAGE_EFFECT_NAME);
-		Effect res = isLevelTwo() ? effectManager.getActiveEffect(mPlayer, RESISTANCE_EFFECT_NAME) : null;
-
-		if (rampage == null) {
-			return;
-		}
-
-		for (int i = 0; i < stacks && mBloodlustExtension < mMaxBloodlustGain; i++) {
-			rampage.setDuration(Math.min(rampage.getDuration() + mDurationPerStack, mMaxDuration));
-
-			if (regen != null) {
-				regen.setDuration(Math.min(regen.getDuration() + mDurationPerStack, mMaxDuration));
-			}
-
-			if (dmg != null) {
-				dmg.setDuration(Math.min(dmg.getDuration() + mDurationPerStack, mMaxDuration));
-			}
-
-			if (res != null) {
-				res.setDuration(Math.min(res.getDuration() + mDurationPerStack, mMaxDuration));
-			}
-			ClientModHandler.updateAbility(mPlayer, this);
-			mBloodlustExtension++;
-			mCosmetic.onStackGain(mPlayer.getWorld(), mPlayer, mPlayer.getLocation());
-		}
-	}
-
 	private void rampageTick(boolean fourHertz, boolean twoHertz, boolean oneHertz) {
 		mCosmetic.tick(mPlayer, fourHertz, twoHertz, oneHertz);
 		if (oneHertz) {
@@ -226,6 +230,7 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 	private void rampageEnd() {
 		mCosmetic.loseEffect(mPlayer);
 		mActive = false;
+		mRecasts = 0;
 		putOnCooldown();
 		ClientModHandler.updateAbility(mPlayer, this);
 	}
@@ -294,46 +299,44 @@ public final class Rampage extends Ability implements AbilityWithChargesOrStacks
 			.addLine("nearby mobs and knock them back and enter a")
 			.addLine("rampage for the next %t.")
 				.statValues(stat(a -> a.mInitialDuration, INITIAL_DURATION))
-			.addLine("(Rampage's damage doesn't contribute to Bloodlust)")
 			.addLine()
-			.addStat("Damage: %d1 (m)")
-				.statValues(stat(a -> a.mDamage, DAMAGE_L1))
+			.addStat("Damage: %d (m)")
+				.statValues(stat(a -> a.mDamage, DAMAGE))
 			.addStat("Radius: %r")
 				.statValues(stat(a -> a.mRadius, RADIUS))
+			.addStat("Healing: %p HP every %t")
+				.statValues(stat(a -> a.mHealing, HEAL_PERCENT), stat(5))
 			.addStat("Cooldown: %t")
 				.statValues(cooldown(COOLDOWN))
 			.addLine()
-			.addLine("While *Rampage* is active, you deal more melee").styles(UNDERLINED)
-			.addLine("damage and are continuously healed, and gaining")
-			.addLine("*Bloodlust* stacks extends its duration.").styles(Bloodlust.BLOODLUST_COLOR, UNDERLINED)
+			.addLine("Recasting while *Rampage* is active spends %d *Bloodlust*").styles(UNDERLINED, Bloodlust.BLOODLUST_COLOR)
+				.statValues(stat(a -> a.mBloodlustExtensionCost, BLOODLUST_EXTEND_COST))
+			.addLine("stacks to extend the duration and deal damage again.")
 			.addLine()
-			.addStat("Effect: +%p1 Melee Damage")
-				.statValues(stat(a -> a.mDamageBuff, DAMAGE_PERCENT_L1))
-			.addStat("Healing: %p HP every %t")
-			.statValues(stat(a -> a.mHealing, HEAL_PERCENT), stat(5))
-			.addStat("Duration Increase: +%t per stack (max +%t1)")
-				.statValues(stat(a -> a.mDurationPerStack, DURATION_PER_STACK), stat(a -> a.mMaxBloodlustGain * a.mDurationPerStack, MAX_BLOODLUST_GAIN_L1 * DURATION_PER_STACK))
+			.addStat("Duration Increase: +%t per recast")
+				.statValues(stat(a -> a.mDurationExtension, DURATION_PER_EXTENSION))
+			.addStat("Max Recast: %d1")
+				.statValues(stat(a -> a.mMaxExtensions, MAX_EXTENSIONS_L1))
+			.addStat("Max Duration: %t")
+				.statValues(stat(a -> a.mMaxDuration, MAX_DURATION))
 			.addDashedLine();
 	}
 
 	private static Description<Rampage> getDescription2() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
-			.addLine("Increase *Rampage*'s damage, damage boost,").styles(UNDERLINED)
-			.addLine("and the number of times its duration can")
-			.addLine("be increased.")
+			.addLine("Increase *Rampage*'s max recast.").styles(UNDERLINED)
 			.addLine()
-			.addStatComparison("Damage: %d1 -> %d2 (m)")
-				.statValues(stat(DAMAGE_L1), stat(a -> a.mDamage, DAMAGE_L2))
-			.addStatComparison("Effect: +%p1 -> +%p2 Melee Damage")
-				.statValues(stat(DAMAGE_PERCENT_L1), stat(a -> a.mDamageBuff, DAMAGE_PERCENT_L2))
-			.addStatComparison("Max Duration Increase: +%t1 -> +%t2")
-				.statValues(stat(MAX_BLOODLUST_GAIN_L1 * DURATION_PER_STACK), stat(a -> a.mMaxBloodlustGain * a.mDurationPerStack, MAX_BLOODLUST_GAIN_L2 * DURATION_PER_STACK))
+			.addStatComparison("Max Recast: %d1 ->  %d2")
+				.statValues(stat(MAX_EXTENSIONS_L1), stat(a -> a.mMaxExtensions, MAX_EXTENSIONS_L2))
 			.addLine()
-			.addLine("Gain melee resistance while *Rampage* is active.").styles(UNDERLINED)
+			.addLine("Gain speed and increased melee damage")
+			.addLine("for each *Rampage* recast.").styles(UNDERLINED)
 			.addLine()
-			.addStat("Effect: +%p Melee Resistance")
-				.statValues(stat(a -> a.mMeleeResistance, MELEE_RESISTANCE_PERCENT))
+			.addStat("Effect: +%p Speed per recast")
+				.statValues(stat(a -> a.mSpeedEffect, SPEED_PER_EXTENSION))
+			.addStat("Effect: +%p Melee Damage per recast")
+				.statValues(stat(a -> a.mDamageEffect, DAMAGE_PER_EXTENSION))
 			.addDashedLine();
 	}
 }

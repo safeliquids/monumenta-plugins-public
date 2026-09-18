@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.effects.IchorCooldown;
 import com.playmonumenta.plugins.effects.PercentHeal;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.listeners.IchorListener;
 import com.playmonumenta.plugins.particle.PPCircle;
 import com.playmonumenta.plugins.utils.PlayerUtils;
@@ -38,6 +39,11 @@ public class IchorDawnbringer implements Infusion {
 	@Override
 	public InfusionType getInfusionType() {
 		return InfusionType.ICHOR_DAWNBRINGER;
+	}
+
+	@Override
+	public StatPriority getPriorityAmount() {
+		return StatPriority.BEFORE_DEFAULT;
 	}
 
 	@Override

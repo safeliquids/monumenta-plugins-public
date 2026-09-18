@@ -75,59 +75,63 @@ public class PlotBorderCustomInventory extends CustomInventory {
 		}
 	}
 	/* Page Info
-	 * Page 0: Common for 1-9
-	 * Page 1: Region 1
-	 * Page 2: Region 2
-	 * Page 3: Plots
-	 * Page 10: Common for 11-19
-	 * Page 11: Region Instance Choice
+	 * Page 0: Base Plot Borders
+	 * Page 1: Season Pass Plot Borders
+	 * Page 2: Unlockable Plot Borders
+	 * Page 3: Patreon Plot Borders
 	 */
 
 
 	private static final ArrayList<TeleportEntry> BORDER_ITEMS = new ArrayList<>();
 
 	static {
-		BORDER_ITEMS.add(new TeleportEntry(0, 47, "Base Choices", "Click to view the plot borders with no requirements.", Material.GRASS_BLOCK, null, 0, "page 1"));
-		BORDER_ITEMS.add(new TeleportEntry(0, 49, "Unlockable Choices", "Click to view plot borders locked behind completion of content.", Material.IRON_INGOT, null, 0, "page 2"));
-		BORDER_ITEMS.add(new TeleportEntry(0, 51, "Patreon Choices", "Click to view options only available to Patrons.", Material.GOLD_INGOT, Constants.Objectives.PATREON_DOLLARS, Constants.PATREON_TIER_2, "page 3"));
+		// Selection Items
+		BORDER_ITEMS.add(new TeleportEntry(0, 46, "Base Choices", "Click to view the plot borders with no requirements.", Material.GRASS_BLOCK, null, 0, "page 1"));
+		BORDER_ITEMS.add(new TeleportEntry(0, 48, "Seasonal Pass Choices", "Click to view plot borders locked behind the Seasonal Pass.", Material.CLOCK, null, 0, "page 2"));
+		BORDER_ITEMS.add(new TeleportEntry(0, 50, "Unlockable Choices", "Click to view plot borders locked behind completion of content.", Material.IRON_INGOT, null, 0, "page 3"));
+		BORDER_ITEMS.add(new TeleportEntry(0, 52, "Patreon Choices", "Click to view options only available to Patrons.", Material.GOLD_INGOT, Constants.Objectives.PATREON_DOLLARS, Constants.PATREON_TIER_2, "page 4"));
 
+		// Base (Page 1)
+		BORDER_ITEMS.add(new TeleportEntry(1, 19, "Narsen Village", "A small town of Narsen citizens, bearing some resemblance to the old plots world.", Material.LIGHT_BLUE_CONCRETE, null, 0, "narsen_village"));
+		BORDER_ITEMS.add(new TeleportEntry(1, 20, "King's Valley Jungle", "A plot nestled in the jungles of the King's Valley.", Material.GREEN_CONCRETE, null, 0, "kings_valley_jungle"));
+		BORDER_ITEMS.add(new TeleportEntry(1, 24, "Flat Grass Field", "A flat and boring field of grass.", Material.GRASS_BLOCK, null, 0, "flatgrass"));
+		BORDER_ITEMS.add(new TeleportEntry(1, 25, "Void", "Nothing to see here.", Material.BLACK_STAINED_GLASS, null, 0, "void"));
 
-		BORDER_ITEMS.add(new TeleportEntry(1, 20, "Narsen Village", "A small town of Narsen citizens, bearing some resemblance to the old plots world.", Material.LIGHT_BLUE_CONCRETE, null, 0, "narsen_village"));
-		BORDER_ITEMS.add(new TeleportEntry(1, 21, "King's Valley Jungle", "A plot nestled in the jungles of the King's Valley.", Material.GREEN_CONCRETE, null, 0, "kings_valley_jungle"));
-		BORDER_ITEMS.add(new TeleportEntry(1, 23, "Flat Grass Field", "A flat and boring field of grass.", Material.GRASS_BLOCK, null, 0, "flatgrass"));
-		BORDER_ITEMS.add(new TeleportEntry(1, 24, "Void", "Nothing to see here.", Material.BLACK_STAINED_GLASS, null, 0, "void"));
+		// Season Pass (Page 2)
+		BORDER_ITEMS.add(new TeleportEntry(2, 10, "Verdant Remnants", "A plot located right in the middle of Verdant Remnants.", Material.JUNGLE_SAPLING, "Verdant Remnants", "dungeons/verdant_remnants"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 11, "Corsair's Claw", "Located under a looming claw on the beach.", Material.SAND, "Corsair's Claw", "pois/corsairs_claw"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 12, "SKT Teal Arena", "The silver knights keep watch over this plot.", Material.IRON_SWORD, "SKT Teal Arena", "pass/skttealarena"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 13, "Monumenta Spawn Box", "Pulled directly from the new spawn location, with its scenic views and stylized signage.", Material.OAK_SIGN, "Monumenta Spawn Box", "pass/spawnbox"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 14, "Sierhaven", "Located right in the town square of Sierhaven.", Material.GREEN_CONCRETE, "Sierhaven", "pass/sierhaven"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 15, "Ta'Ksaav", "The mystical village only seen in dreams.", Material.WHEAT, "taksaav", "pass/taksaav"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 16, "Port Manteau", "Located right in the middle of the Architect's Ring's very own fishing town.", Material.ACACIA_BOAT, "portmanteau", "pass/portmanteau"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 19, "Al Malakut", "A view from the fiery end of the Valley of Forgotten Pharoahs.", Material.CHISELED_SANDSTONE, "valleyofforgottenpharaohs", "pass/valleyofforgottenpharaohs"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 20, "The Vesperidys Arena", "A plot right in the heart of the glistening Stars Above.", Material.BLACK_CONCRETE, "vesperidys_arena", "pass/vesperidys_arena"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 21, "Hycenea", "Long separated by Silver, here Wolf and Witch united once more.", Material.JUNGLE_WOOD, "Hycenea", "pass/hexfallwitch"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 22, "Steampunk Factory", "A view of the mechanical factory within the Cradle of the Broken God.", Material.PISTON, "Cradle of the Broken God", "brown_factory"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 23, "Twisted Agony", "A chunk of the chaos taken from the Rush of Dissonance.", Material.NETHER_WART_BLOCK, "Twisted Agony", "pass/dissonance"));
+		BORDER_ITEMS.add(new TeleportEntry(2, 24, "Anniversary Spawn Box", "A snapshot of the new spawn box featured for Monumenta's 10th Anniversary.", Material.CAKE, "Anniversary Spawn Box", "pass/anniversary_spawnbox"));
 
+		// Unlockable (Page 3)
+		BORDER_ITEMS.add(new TeleportEntry(3, 10, "Celsian Isles: Chillwind", "Located in the frosty forests of Chillwind.", Material.SNOW_BLOCK, "Quest101", 13, "celsian_isles_chillwind"));
+		BORDER_ITEMS.add(new TeleportEntry(3, 11, "Celsian Isles: Ishnir", "Located in the desert of Ishnir.", Material.SANDSTONE, "Quest101", 13, "celsian_isles_ishnir"));
+		BORDER_ITEMS.add(new TeleportEntry(3, 12, "Kaul's Arena", "Located in the Kaul arena.", Material.JUNGLE_LEAVES, "KaulWins", 1, "kaul_arena"));
+		BORDER_ITEMS.add(new TeleportEntry(3, 13, "Eldrask's Arena", "Located in the Eldrask arena.", Material.PACKED_ICE, "FGWins", 1, "eldrask_arena"));
+		BORDER_ITEMS.add(new TeleportEntry(3, 14, "Hekawt's Arena", "Located in the Hekawt arena.", Material.RED_SANDSTONE, "LichWins", 1, "hekawt_arena"));
+		BORDER_ITEMS.add(new TeleportEntry(3, 15, "Dissonant Vision", "Located in a realm of pale bones rising from a sea of crimson mist.", Material.RED_STAINED_GLASS, "Dissonant Vision", "red_salad_discovery"));
 
-		BORDER_ITEMS.add(new TeleportEntry(2, 11, "Celsian Isles: Chillwind", "Located in the frosty forests of Chillwind.", Material.SNOW_BLOCK, "Quest101", 13, "celsian_isles_chillwind"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 12, "Celsian Isles: Ishnir", "Located in the desert of Ishnir.", Material.SANDSTONE, "Quest101", 13, "celsian_isles_ishnir"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 13, "Kaul's Arena", "Located in the Kaul arena.", Material.JUNGLE_LEAVES, "KaulWins", 1, "kaul_arena"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 14, "Eldrask's Arena", "Located in the Eldrask arena.", Material.PACKED_ICE, "FGWins", 1, "eldrask_arena"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 15, "Hekawt's Arena", "Located in the Hekawt arena.", Material.RED_SANDSTONE, "LichWins", 1, "hekawt_arena"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 20, "Verdant Remnants", "A plot located right in the middle of Verdant Remnants.", Material.JUNGLE_SAPLING, "Verdant Remnants", "dungeons/verdant_remnants"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 21, "Corsair's Claw", "Located under a looming claw on the beach.", Material.SAND, "Corsair's Claw", "pois/corsairs_claw"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 22, "SKT Teal Arena", "The silver knights keep watch over this plot.", Material.IRON_SWORD, "SKT Teal Arena", "pass/skttealarena"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 23, "Monumenta Spawn Box", "Pulled directly from the new spawn location, with its scenic views and stylized signage.", Material.OAK_SIGN, "Monumenta Spawn Box", "pass/spawnbox"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 24, "Sierhaven", "Located right in the town square of Sierhaven.", Material.GREEN_CONCRETE, "Sierhaven", "pass/sierhaven"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 28, "Twisted Agony", "A chunk of the chaos taken from the Rush of Dissonance.", Material.NETHER_WART_BLOCK, "Twisted Agony", "pass/dissonance"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 29, "Steampunk Factory", "A view of the mechanical factory within the Cradle of the Broken God.", Material.PISTON, "Cradle of the Broken God", "brown_factory"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 30, "Hycenea", "Long separated by Silver, here Wolf and Witch united once more.", Material.JUNGLE_WOOD, "Hycenea", "pass/hexfallwitch"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 31, "Ta'Ksaav", "The mystical village only seen in dreams.", Material.WHEAT, "taksaav", "pass/taksaav"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 32, "Port Manteau", "Located right in the middle of the Architect's Ring's very own fishing town.", Material.ACACIA_BOAT, "portmanteau", "pass/portmanteau"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 33, "Al Malakut", "A view from the fiery end of the Valley of Forgotten Pharoahs", Material.CHISELED_SANDSTONE, "valleyofforgottenpharaohs", "pass/valleyofforgottenpharaohs"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 34, "The Vesperidys Arena", "A plot right in the heart of the glistening Stars Above", Material.BLACK_CONCRETE, "vesperidys_arena", "pass/vesperidys_arena"));
-		BORDER_ITEMS.add(new TeleportEntry(2, 35, "Dissonant Vision", "Located in a realm of pale bones rising from a sea of crimson mist.", Material.RED_STAINED_GLASS, "Dissonant Vision", "red_salad_discovery"));
-
-		BORDER_ITEMS.add(new TeleportEntry(3, 18, "Halls of Wind and Blood", "A plot right in the middle of the main room.", Material.WHITE_WOOL, "White", 1, "dungeons/white"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 19, "Arcane Rivalry", "Located in the lake looking in towards the first castle.", Material.LIGHT_BLUE_WOOL, "LightBlue", 1, "dungeons/lightblue"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 20, "Malevolent Reverie", "The best destination for corrupted nightmares of Sierhaven!", Material.NETHER_WART_BLOCK, "Corrupted", 1, "dungeons/reverie"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 21, "Celsian Isles Ocean", "A plot drowned beneath the waters of the Celsian Isles.", Material.BUBBLE_CORAL, "Quest101", 13, "celsian_isles_ocean"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 22, "Snow Wool Spirit's Arena", "A festive snowglobe.", Material.WHITE_STAINED_GLASS, "Quest58", 8, "snow_spirit_arena"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 23, "Salazar's Folly", "Located right in the middle of the Viridian City.", Material.LIME_WOOL, "Lime", 1, "dungeons/lime"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 24, "Valley of Forgotten Pharaohs", "A plot in the hostile town within the gray dungeon.", Material.GRAY_WOOL, "Gray", 1, "dungeons/gray"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 25, "Grasp of Avarice", "A plot found at the end of the orange branch of the dungeon.", Material.PURPLE_WOOL, "Purple", 1, "dungeons/purple"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 26, "Echoes of Oblivion", "Warp to another time with this plot located in Era 3!", Material.CYAN_CONCRETE_POWDER, "Teal", 1, "dungeons/teal"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 30, "Christmas Night", "Not a creature was stirring, not even a mouse...", Material.SPRUCE_SAPLING, null, 0, "christmas_night"));
-		BORDER_ITEMS.add(new TeleportEntry(3, 32, "Gyrhaeddant's Lair", "A plot directly below the tentacles of the depths boss", Material.CRIMSON_HYPHAE, null, 0, "pois/gyrhaeddant"));
+		// Patreon (Page 4)
+		BORDER_ITEMS.add(new TeleportEntry(4, 18, "Halls of Wind and Blood", "A plot right in the middle of the main room.", Material.WHITE_WOOL, "White", 1, "dungeons/white"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 19, "Arcane Rivalry", "Located in the lake looking in towards the first castle.", Material.LIGHT_BLUE_WOOL, "LightBlue", 1, "dungeons/lightblue"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 20, "Malevolent Reverie", "The best destination for corrupted nightmares of Sierhaven!", Material.NETHER_WART_BLOCK, "Corrupted", 1, "dungeons/reverie"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 21, "Celsian Isles Ocean", "A plot drowned beneath the waters of the Celsian Isles.", Material.BUBBLE_CORAL, "Quest101", 13, "celsian_isles_ocean"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 22, "Snow Wool Spirit's Arena", "A festive snowglobe.", Material.WHITE_STAINED_GLASS, "Quest58", 8, "snow_spirit_arena"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 23, "Salazar's Folly", "Located right in the middle of the Viridian City.", Material.LIME_WOOL, "Lime", 1, "dungeons/lime"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 24, "Valley of Forgotten Pharaohs", "A plot in the hostile town within the gray dungeon.", Material.GRAY_WOOL, "Gray", 1, "dungeons/gray"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 25, "Grasp of Avarice", "A plot found at the end of the orange branch of the dungeon.", Material.PURPLE_WOOL, "Purple", 1, "dungeons/purple"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 26, "Echoes of Oblivion", "Warp to another time with this plot located in Era 3!", Material.CYAN_CONCRETE_POWDER, "Teal", 1, "dungeons/teal"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 30, "Christmas Night", "Not a creature was stirring, not even a mouse...", Material.SPRUCE_SAPLING, null, 0, "christmas_night"));
+		BORDER_ITEMS.add(new TeleportEntry(4, 32, "Gyrhaeddant's Lair", "A plot directly below the tentacles of the Darkest Depths boss.", Material.CRIMSON_HYPHAE, null, 0, "pois/gyrhaeddant"));
 	}
 
 	private int mCurrentPage;

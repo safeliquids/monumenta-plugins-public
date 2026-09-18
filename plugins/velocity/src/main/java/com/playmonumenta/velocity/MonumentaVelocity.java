@@ -1,6 +1,7 @@
 package com.playmonumenta.velocity;
 
 import com.google.inject.Inject;
+import com.playmonumenta.velocity.commands.BanOnLogout;
 import com.playmonumenta.velocity.commands.Vote;
 import com.playmonumenta.velocity.handlers.JoinLeaveHandler;
 import com.playmonumenta.velocity.integrations.LuckPermsIntegration;
@@ -21,6 +22,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -46,6 +49,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 	}
 )
 public class MonumentaVelocity {
+	public static final MiniMessage MINIMESSAGE_ALL = MiniMessage.builder().tags(TagResolver.standard()).build();
 	public final ProxyServer mServer;
 	public final Logger mLogger;
 	public boolean mLoaded = false;
@@ -54,6 +58,8 @@ public class MonumentaVelocity {
 	public MonumentaVelocityConfiguration mConfig = new MonumentaVelocityConfiguration(); // class with actual data
 
 	private @Nullable VoteManager mVoteManager = null;
+	public @Nullable JoinLeaveHandler mJoinLeaveHandler;
+	public @Nullable BanOnLogout mBanOnLogout;
 
 	@Inject
 	public MonumentaVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -73,7 +79,7 @@ public class MonumentaVelocity {
 	public void proxyInitializeEvent(ProxyInitializeEvent event) {
 		mLoaded = true;
 		final PluginManager plugins = mServer.getPluginManager();
-		final CommandManager commandManager = mServer.getCommandManager();
+		CommandManager commandManager = mServer.getCommandManager();
 
 		if (plugins.isLoaded("premiumvanish")) {
 			PremiumVanishIntegration.enable();
@@ -93,14 +99,21 @@ public class MonumentaVelocity {
 				CommandMeta voteCommandMeta = commandManager.metaBuilder("vote")
 					.plugin(this)
 					.build();
-				mServer.getCommandManager().register(voteCommandMeta, new Vote(mVoteManager));
+				commandManager.register(voteCommandMeta, new Vote(mVoteManager));
 				mServer.getEventManager().register(this, mVoteManager);
 			} catch (IllegalArgumentException ex) {
 				mLogger.warn("Failed to initialize voting system:", ex);
 			}
 		}
+		mJoinLeaveHandler = new JoinLeaveHandler(this);
+		mServer.getEventManager().register(this, mJoinLeaveHandler);
 
-		mServer.getEventManager().register(this, new JoinLeaveHandler(this));
+		mBanOnLogout = new BanOnLogout(mServer, mJoinLeaveHandler);
+		CommandMeta banonlogoutMeta = commandManager.metaBuilder("banonlogout")
+			.plugin(this)
+			.build();
+		commandManager.register(banonlogoutMeta, mBanOnLogout);
+
 
 		String envAllowsPacketsPublicizeContent = System.getenv("ALLOW_PACKETS_PUBLICIZE_CONTENT");
 		mServer.getEventManager().register(this, new VelocityClientModHandler(envAllowsPacketsPublicizeContent.equalsIgnoreCase("true")));

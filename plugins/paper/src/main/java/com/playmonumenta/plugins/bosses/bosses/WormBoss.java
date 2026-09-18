@@ -9,8 +9,10 @@ import com.playmonumenta.plugins.bosses.parameters.LoSPool;
 import com.playmonumenta.plugins.delves.DelvesManager;
 import com.playmonumenta.plugins.effects.ProjectileIframe;
 import com.playmonumenta.plugins.events.CustomEffectApplyEvent;
+import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.HemorrhageEvent;
 import com.playmonumenta.plugins.listeners.MobListener;
+import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.MetadataUtils;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
@@ -70,42 +73,42 @@ public class WormBoss extends BossAbilityGroup {
 	private final List<LivingEntity> mParts = new ArrayList<>();
 	private final Parameters mParams;
 	private final WormMovement mMovement;
+	private double mHeadDamageThisTick = 0;
 
 	public WormBoss(Plugin plugin, LivingEntity boss) {
 		super(plugin, identityTag, boss);
 
 		mParams = BossParameters.getParameters(boss, identityTag, new Parameters());
 
+		double bossInitialHp = EntityUtils.getAttributeBaseOrDefault(mBoss, Attribute.GENERIC_MAX_HEALTH, boss.getHealth());
 		for (int i = 1; i < mParams.LENGTH - 1; i++) {
-			summonPart(mParams, i, false);
+			summonPart(mParams, i, false, bossInitialHp);
 		}
-		summonPart(mParams, mParams.LENGTH - 1, true);
+		summonPart(mParams, mParams.LENGTH - 1, true, bossInitialHp);
 
 		mMovement = mParams.SNAKE_MOVEMENT ? new SnakeMovement(boss.getLocation().toVector()) : new FollowMovement();
 
 		new BukkitRunnable() {
+			private double mLastMaxHealth = -1;
 			@Override
 			public void run() {
 				if (!mBoss.isValid()) {
 					cancel();
 					return;
 				}
-
-				// Simple damage sharing: make all parts have the lowest health of any of them every tick
-				double lowestHealth = mBoss.getHealth();
+				double maxHealth = EntityUtils.getAttributeBaseOrDefault(mBoss, Attribute.GENERIC_MAX_HEALTH, 1);
+				double health = Math.clamp(mBoss.getHealth(), 0, maxHealth);
+				boolean setMaxHealth = false;
+				if (mLastMaxHealth != maxHealth) {
+					mLastMaxHealth = maxHealth;
+					setMaxHealth = true;
+				}
 				for (LivingEntity part : mParts) {
-					if (part.isDead()) {
-						mBoss.damage(0.001, part.getKiller()); // Make sure that the head gets the correct killer set
-						mBoss.setHealth(0);
-						return;
+					if (setMaxHealth) {
+						EntityUtils.setAttributeBase(part, Attribute.GENERIC_MAX_HEALTH, maxHealth);
 					}
-					lowestHealth = Math.min(lowestHealth, part.getHealth());
+					part.setHealth(health);
 				}
-				mBoss.setHealth(lowestHealth);
-				for (LivingEntity part : mParts) {
-					part.setHealth(lowestHealth);
-				}
-
 				mMovement.move();
 			}
 		}.runTaskTimer(plugin, 0, 1);
@@ -113,7 +116,7 @@ public class WormBoss extends BossAbilityGroup {
 		super.constructBoss(SpellManager.EMPTY, Collections.emptyList(), mParams.DETECTION, null);
 	}
 
-	private void summonPart(Parameters params, int index, boolean tail) {
+	private void summonPart(Parameters params, int index, boolean tail, double health) {
 		double logIndex = Math.log(1 + index / 6.0);
 		Location spawnLocation = mBoss.getLocation().add(VectorUtils.rotateYAxis(new Vector(mBoss.getWidth() * (0.8 + logIndex), 0, 0), 500 * logIndex));
 		LivingEntity part = null;
@@ -128,7 +131,7 @@ public class WormBoss extends BossAbilityGroup {
 		part.addScoreboardTag(EntityUtils.IGNORE_DEATH_TRIGGERS_TAG);
 		part.addScoreboardTag(EntityUtils.DONT_ENTER_BOATS_TAG);
 		try {
-			BossManager.getInstance().manuallyRegisterBoss(part, new WormSegmentBoss(mPlugin, part, mBoss));
+			BossManager.getInstance().manuallyRegisterBoss(part, new WormSegmentBoss(mPlugin, part, mBoss, this));
 		} catch (Exception e) {
 			MMLog.severe("Failed to create boss WormSegmentBoss", e);
 		}
@@ -147,7 +150,7 @@ public class WormBoss extends BossAbilityGroup {
 			passenger.addScoreboardTag(EntityUtils.DONT_ENTER_BOATS_TAG);
 			if (passenger instanceof LivingEntity livingEntity) {
 				try {
-					BossManager.getInstance().manuallyRegisterBoss(livingEntity, new WormSegmentBoss(mPlugin, livingEntity, null));
+					BossManager.getInstance().manuallyRegisterBoss(livingEntity, new WormSegmentBoss(mPlugin, livingEntity, null, null));
 					// We still want the bosstag so that it doesn't proc Cloaked or UA or whatever, but we don't want damage transference, so set the head to null
 				} catch (Exception e) {
 					MMLog.severe("Failed to create boss WormSegmentBoss", e);
@@ -167,12 +170,27 @@ public class WormBoss extends BossAbilityGroup {
 		EntityUtils.setRemoveEntityOnUnload(part);
 		part.setAI(false);
 		mBoss.getCollidableExemptions().add(part.getUniqueId());
-		EntityUtils.setAttributeBase(part, Attribute.GENERIC_MAX_HEALTH, EntityUtils.getMaxHealth(mBoss));
-		part.setHealth(mBoss.getHealth());
+		EntityUtils.setAttributeBase(part, Attribute.GENERIC_MAX_HEALTH, health);
+		part.setHealth(health);
 
 		// prevent dropping XP (and items)
 		MetadataUtils.setMetadata(part, Constants.SPAWNER_COUNT_METAKEY, MobListener.SPAWNER_DROP_THRESHOLD + 1);
 
+	}
+
+	public void segmentDamage(@Nullable LivingEntity livingDamager, double segmentDamageThisTick) {
+		if (segmentDamageThisTick > mHeadDamageThisTick) {
+			DamageUtils.damage(livingDamager, mBoss, DamageEvent.DamageType.UNSCALABLE, segmentDamageThisTick - mHeadDamageThisTick, null, false);
+		}
+	}
+
+	@Override
+	public void onHurt(DamageEvent event) {
+		mHeadDamageThisTick = Math.max(mHeadDamageThisTick, event.getDamage());
+		if (!MetadataUtils.checkOnceThisTick(mPlugin, mBoss, "ResetHeadDamage")) {
+			return;
+		}
+		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mHeadDamageThisTick = 0, 1);
 	}
 
 	@Override

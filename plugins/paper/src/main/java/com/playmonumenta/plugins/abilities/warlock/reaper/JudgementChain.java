@@ -213,7 +213,7 @@ public class JudgementChain extends MultipleChargeAbility {
 	@Override
 	public boolean onDamage(DamageEvent event, LivingEntity enemy) {
 		if (mPlugin.mEffectManager.hasEffect(enemy, EFFECT_NAME)) {
-			event.updateDamageWithMultiplier(1 + mChainDmgBonus, DamageEvent.DamageType.getScalableDamageType());
+			event.updateDamageWithMultiplier(1 + mChainDmgBonus, DamageEvent.DamageType.getScalableDamageTypes());
 			// This is badly written. JudgementChainMobEffect should instead extend SelfishVulnerability or PercentDamageDealt.
 			// I don't really care, because Warlock rework is coming up in a few months or less. This is a bandaid patch.
 		}

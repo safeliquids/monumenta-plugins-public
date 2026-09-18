@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Silverfish;
 
@@ -31,7 +32,7 @@ public class SilverfishTracking implements EntityTracking {
 		Iterator<Silverfish> silverfishIter = mEntities.iterator();
 		while (silverfishIter.hasNext()) {
 			Silverfish silverfish = silverfishIter.next();
-			if (silverfish != null && silverfish.isValid() && silverfish.getLocation().isChunkLoaded()) {
+			if (silverfish != null && silverfish.isValid() && silverfish.getLocation().isWorldLoaded() && silverfish.getLocation().isChunkLoaded()) {
 				if (ZoneUtils.hasZoneProperty(silverfish, ZoneProperty.ADVENTURE_MODE)) {
 					// Remove next tick to avoid ConcurrentModificationException
 					Bukkit.getScheduler().runTask(Plugin.getInstance(), () -> {
@@ -52,6 +53,10 @@ public class SilverfishTracking implements EntityTracking {
 				silverfishIter.remove();
 			}
 		}
+	}
+
+	public void clearWorld(World world) {
+		mEntities.removeIf(sf -> sf == null || world.equals(sf.getWorld()));
 	}
 
 	@Override

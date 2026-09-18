@@ -14,11 +14,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-public class PagedGui extends Gui {
+public class PagedFloweyGui extends FloweyGui {
 	public abstract static class Page {
-		protected final PagedGui mGui;
+		protected final PagedFloweyGui mGui;
 
-		protected Page(PagedGui gui) {
+		protected Page(PagedFloweyGui gui) {
 			mGui = gui;
 		}
 
@@ -76,7 +76,7 @@ public class PagedGui extends Gui {
 	 * @param player The player who will interact with this GUI
 	 * @param filler The item used to fill empty inventory slots
 	 */
-	protected PagedGui(Player player, ItemStack filler, PageType defaultPage) {
+	protected PagedFloweyGui(Player player, ItemStack filler, PageType defaultPage) {
 		super(player, filler, defaultPage.name(), defaultPage.size());
 		mCurrPageType = ReactiveValue.of(this, defaultPage);
 	}

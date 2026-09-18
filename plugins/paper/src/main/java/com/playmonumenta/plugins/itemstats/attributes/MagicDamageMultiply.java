@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Attribute;
 import com.playmonumenta.plugins.itemstats.enums.AttributeType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import java.util.EnumSet;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -23,8 +24,8 @@ public class MagicDamageMultiply implements Attribute {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 22;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGE_MULTIPLY;
 	}
 
 	@Override

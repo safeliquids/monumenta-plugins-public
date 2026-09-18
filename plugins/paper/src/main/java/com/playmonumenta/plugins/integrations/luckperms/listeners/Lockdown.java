@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.integrations.luckperms.listeners;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkRelayIntegration;
 import com.playmonumenta.plugins.integrations.luckperms.GuildPlotUtils;
 import com.playmonumenta.plugins.integrations.luckperms.LuckPermsIntegration;
@@ -223,7 +223,7 @@ public class Lockdown implements Listener {
 				checkPlayerLockout(player, guild, true);
 			}
 
-			if (Gui.getOpenGui(player) instanceof TeleportGuildGui teleportGuildGui) {
+			if (NjolGui.getOpenGui(player) instanceof TeleportGuildGui teleportGuildGui) {
 				teleportGuildGui.refresh();
 			}
 		}

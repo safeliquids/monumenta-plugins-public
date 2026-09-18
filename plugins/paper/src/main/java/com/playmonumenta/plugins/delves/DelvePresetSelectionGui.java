@@ -1,8 +1,8 @@
 package com.playmonumenta.plugins.delves;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class DelvePresetSelectionGui extends Gui {
+public class DelvePresetSelectionGui extends NjolGui {
 	private final String mDungeon;
 	private final boolean mGuiTextures;
 
@@ -53,8 +53,8 @@ public class DelvePresetSelectionGui extends Gui {
 		});
 	}
 
-	private GuiItem createItem(DelvePreset preset) {
+	private NjolGuiItem createItem(DelvePreset preset) {
 		ItemStack item = GUIUtils.createBasicItem(preset.mDisplayItem, preset.mName, NamedTextColor.DARK_AQUA, false, "Delve preset of level " + preset.mLevel, NamedTextColor.WHITE);
-		return new GuiItem(item).onClick((event) -> new DelveCustomInventory(mPlayer, mDungeon, new DelveCustomInventory.Config().editable(true).startable(true).preset(preset)).openInventory(mPlayer, Plugin.getInstance()));
+		return new NjolGuiItem(item).onClick((event) -> new DelveCustomInventory(mPlayer, mDungeon, new DelveCustomInventory.Config().editable(true).startable(true).preset(preset)).openInventory(mPlayer, Plugin.getInstance()));
 	}
 }

@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PPCircle;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.MovementUtils;
@@ -35,14 +36,14 @@ public class Orbital implements Infusion {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 150;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DEFENSE_ENCHANTMENT;
 	}
 
 	@Override
 	public void onHurt(Plugin plugin, Player player, double value, DamageEvent event, @Nullable Entity damager, @Nullable LivingEntity source) {
 		if (source != null && !source.isOnGround()) {
-			event.updateDamageWithMultiplier(getDamageTakenMultiplier(value), DamageEvent.DamageType.getScalableDamageType());
+			event.updateDamageWithMultiplier(getDamageTakenMultiplier(value), DamageEvent.DamageType.getScalableDamageTypes());
 			knockDown(player, source);
 		}
 	}

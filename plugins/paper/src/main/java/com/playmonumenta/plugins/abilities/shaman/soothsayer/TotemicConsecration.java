@@ -42,7 +42,7 @@ import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 public class TotemicConsecration extends MultipleChargeAbility {
 	private static final int CHARGES = 2;
-	private static final int COOLDOWN = 20 * 20;
+	private static final int COOLDOWN_1 = 20 * 20;
 	private static final int COOLDOWN_2 = 16 * 20;
 	private static final double DAMAGE_1 = 10;
 	private static final double DAMAGE_2 = 13;
@@ -81,7 +81,7 @@ public class TotemicConsecration extends MultipleChargeAbility {
 			.shorthandName("TC")
 			.descriptions(getDescription1(), getDescription2())
 			.simpleDescription("Mark totems as Sacred, instantly dealing damage around them and protecting players within their range.")
-			.cooldown(COOLDOWN, COOLDOWN_2, CHARM_COOLDOWN)
+			.cooldown(COOLDOWN_1, COOLDOWN_2, CHARM_COOLDOWN)
 			.addTrigger(new AbilityTriggerInfo<>("cast", "cast", TotemicConsecration::cast, new AbilityTrigger(AbilityTrigger.Key.LEFT_CLICK).sneaking(false).doubleClick()
 				.keyOptions(AbilityTrigger.KeyOptions.NO_PICKAXE)
 				.keyOptions(AbilityTrigger.KeyOptions.NO_USABLE_ITEMS)))
@@ -257,15 +257,17 @@ public class TotemicConsecration extends MultipleChargeAbility {
 			.addStat("Charges: %d")
 				.statValues(stat(a -> a.mMaxCharges, CHARGES))
 			.addStat("Cooldown: %t1 (per charge)")
-				.statValues(cooldown(COOLDOWN))
+				.statValues(cooldown(COOLDOWN_1))
 			.addLine()
 			.addLine("*Sacred Totems* grant resistance to players inside.").styles(SACRED_COLOR)
+			.addLine()
+			.addStat("Effect: +%p Resistance")
+			.statValues(stat(a -> a.mResistance, RESISTANCE))
+			.addLine()
 			.addLine("If a player's health drops below %p HP, the *Totem*").styles(Shaman.TOTEM_COLOR)
 				.statValues(stat(a -> a.mHealthThreshold, HEALTH_THRESHOLD))
 			.addLine("loses its *Sacred* power to grant them absorption.").styles(SACRED_COLOR)
 			.addLine()
-			.addStat("Effect: +%p Resistance")
-				.statValues(stat(a -> a.mResistance, RESISTANCE))
 			.addStat("Effect: +%p Absorption for %t")
 				.statValues(stat(a -> a.mAbsorption, ABSORPTION_PERCENT), stat(ABSORPTION_DURATION))
 			.addDashedLine();
@@ -274,10 +276,12 @@ public class TotemicConsecration extends MultipleChargeAbility {
 	private static Description<TotemicConsecration> getDescription2() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
-			.addLine("Increase *Totemic Consecration*'s damage.").styles(UNDERLINED)
+			.addLine("Increase *Totemic Consecration*'s damage and decrease its cooldown.").styles(UNDERLINED)
 			.addLine()
 			.addStatComparison("Damage: %d1 -> %d2 (s)")
 				.statValues(stat(DAMAGE_1), stat(a -> a.mBaseDamage, DAMAGE_2))
+			.addStatComparison("Cooldown: %t1 -> %t2")
+				.statValues(cooldown(COOLDOWN_1), cooldown(COOLDOWN_2))
 			.addLine()
 			.addLine("Consecrating a *Totem* as a *Sacred Totem*").styles(Shaman.TOTEM_COLOR, SACRED_COLOR)
 			.addLine("now increases its radius and silences all")

@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.managers.travelanchor.gui;
 
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.managers.travelanchor.AnchorGroup;
 import com.playmonumenta.plugins.managers.travelanchor.EntityTravelAnchor;
 import com.playmonumenta.plugins.managers.travelanchor.TravelAnchorManager;
@@ -23,7 +23,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class AnchorGroupGui extends Gui {
+public class AnchorGroupGui extends NjolGui {
 	protected EntityTravelAnchor mTravelAnchorEntity;
 	protected WorldAnchorGroups mWorldAnchorGroups;
 	protected AnchorGroupView mView;

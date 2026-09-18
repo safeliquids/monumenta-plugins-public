@@ -10,18 +10,18 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * An item in a {@link Gui}.
+ * An item in a {@link NjolGui}.
  */
-public class GuiItem {
+public class NjolGuiItem {
 
 	final ItemStack mItem;
 	private final List<Consumer<InventoryClickEvent>> mClickListeners = new ArrayList<>(0);
 
-	public GuiItem(ItemStack item) {
+	public NjolGuiItem(ItemStack item) {
 		this(item, true);
 	}
 
-	public GuiItem(ItemStack item, boolean setPlainTag) {
+	public NjolGuiItem(ItemStack item, boolean setPlainTag) {
 		if (setPlainTag) {
 			ItemUtils.setPlainTag(item);
 		}
@@ -32,9 +32,9 @@ public class GuiItem {
 	/**
 	 * Defines an action to be executed when this item is left-clicked.
 	 *
-	 * @return This {@link GuiItem} (for method chaining)
+	 * @return This {@link NjolGuiItem} (for method chaining)
 	 */
-	public GuiItem onLeftClick(Runnable onClick) {
+	public NjolGuiItem onLeftClick(Runnable onClick) {
 		return onClick(event -> {
 			if (event.getClick() == ClickType.LEFT) {
 				onClick.run();
@@ -45,9 +45,9 @@ public class GuiItem {
 	/**
 	 * Defines an action to be executed when this item is right-clicked.
 	 *
-	 * @return This {@link GuiItem} (for method chaining)
+	 * @return This {@link NjolGuiItem} (for method chaining)
 	 */
-	public GuiItem onRightClick(Runnable onClick) {
+	public NjolGuiItem onRightClick(Runnable onClick) {
 		return onClick(event -> {
 			if (event.getClick() == ClickType.RIGHT) {
 				onClick.run();
@@ -59,9 +59,9 @@ public class GuiItem {
 	 * Defines an action to be executed when this item is clicked. Will handle all click types - <b>make sure to check for click type</b>,
 	 * as some are most likely unwanted (e.g. drop or swap with hotbar).
 	 *
-	 * @return This {@link GuiItem} (for method chaining)
+	 * @return This {@link NjolGuiItem} (for method chaining)
 	 */
-	public GuiItem onClick(Consumer<InventoryClickEvent> onClick) {
+	public NjolGuiItem onClick(Consumer<InventoryClickEvent> onClick) {
 		mClickListeners.add(onClick);
 		return this;
 	}

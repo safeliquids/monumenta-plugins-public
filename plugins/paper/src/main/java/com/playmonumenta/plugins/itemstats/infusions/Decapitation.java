@@ -5,6 +5,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.EnumSet;
 import org.bukkit.entity.LivingEntity;
@@ -25,8 +26,8 @@ public class Decapitation implements Infusion {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 23;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGE_MULTIPLY;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.EnumSet;
@@ -37,8 +38,8 @@ public class Sniper implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 7;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.WEAPON_BASE_DAMAGE;
 	}
 
 	@Override
@@ -59,7 +60,11 @@ public class Sniper implements Enchantment {
 
 	public static double apply(Player player, Location target, double level) {
 		if (level > 0) {
-			float distanceScaling = Math.min((float) player.getEyeLocation().distance(target) / DISTANCE, 1);
+			Location eyeLoc = player.getEyeLocation();
+			if (eyeLoc.getWorld() == null || !eyeLoc.getWorld().equals(target.getWorld())) {
+				return 0;
+			}
+			float distanceScaling = Math.min((float) eyeLoc.distance(target) / DISTANCE, 1);
 			particles(target, player, distanceScaling);
 			return (level * DAMAGE_PER_LEVEL * distanceScaling);
 		}

@@ -6,6 +6,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Attribute;
 import com.playmonumenta.plugins.itemstats.enums.AttributeType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -22,8 +23,8 @@ public class ProjectileDamageMultiply implements Attribute {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 20;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGE_MULTIPLY;
 	}
 
 	@Override

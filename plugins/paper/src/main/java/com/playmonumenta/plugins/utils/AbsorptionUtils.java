@@ -78,6 +78,9 @@ public class AbsorptionUtils {
 
 	// Returns the amount of absorption that was added.
 	public static double addAbsorption(LivingEntity entity, @Nullable UUID source, double amount, double maxAmount, int duration) {
+		if (amount <= 0) {
+			return 0;
+		}
 		double absorption = getAbsorption(entity);
 		EntityGainAbsorptionEvent event = new EntityGainAbsorptionEvent(entity, source, amount, maxAmount, duration);
 		Bukkit.getPluginManager().callEvent(event);

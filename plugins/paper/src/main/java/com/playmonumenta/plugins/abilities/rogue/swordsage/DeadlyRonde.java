@@ -46,8 +46,11 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 	private static final double RONDE_RADIUS = 4.5;
 	private static final double RONDE_ANGLE = 35;
 	private static final float RONDE_KNOCKBACK_SPEED = 0.14f;
-	private static final double RONDE_ATTACK_SPEED_SCALING_PORTION = 0.35;
+	private static final float RONDE_KNOCKBACK_VERTICAL = 0.5f;
+	private static final double RONDE_ATTACK_SPEED_SCALING_PORTION = 1;
 	private static final int RONDE_STACKS_REQ = 1;
+	private static final int RONDE_SLASHES = 1;
+	private static final int RONDE_SLASH_INTERVAL = 3;
 
 	public static final String CHARM_DAMAGE = "Deadly Ronde Damage";
 	public static final String CHARM_RADIUS = "Deadly Ronde Radius";
@@ -59,6 +62,8 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 	public static final String CHARM_DECAY_TIME = "Deadly Ronde Stack Decay Time";
 	public static final String CHARM_STACKS_REQ = "Deadly Ronde Stack Requirement";
 	public static final String CHARM_ATTACK_SPEED_SCALING_PORTION = "Deadly Ronde Attack Speed Scaling";
+	public static final String CHARM_SLASHES = "Deadly Ronde Slashes";
+	public static final String CHARM_SLASH_INTERVAL = "Deadly Ronde Slashes Interval";
 
 	public static final AbilityInfo<DeadlyRonde> INFO =
 		new AbilityInfo<>(DeadlyRonde.class, "Deadly Ronde", DeadlyRonde::new)
@@ -69,18 +74,23 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 			.simpleDescription("Damage nearby mobs when striking after casting an ability.")
 			.displayItem(Material.BLAZE_ROD);
 
+	private @Nullable BukkitRunnable mActiveRunnable = null;
 	private int mRondeStacks = 0;
 	private int mTimeUntilDecay = -1;
 
 	private final double mRadius;
+	private final double mAngle;
 	private final double mDamage;
 	private final float mKnockback;
+	private final float mKnockbackVertical;
 	private final int mMaxStacks;
 	private final int mStackGain;
 	private final double mSpeed;
 	private final int mDecayTime;
 	private final int mStacksReq;
 	private final double mAttackSpeedScalingPortion;
+	private final int mSlashes;
+	private final int mSlashInterval;
 	private final DeadlyRondeCS mCosmetic;
 
 	public DeadlyRonde(Plugin plugin, Player player) {
@@ -90,14 +100,18 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 			: AbilityUtils.getRegionScaled(player, RONDE_2_DAMAGE);
 
 		mRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, RONDE_RADIUS);
+		mAngle = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_ANGLE, RONDE_ANGLE);
 		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, rondeDamage);
 		mKnockback = (float) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, RONDE_KNOCKBACK_SPEED);
+		mKnockbackVertical = (float) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, RONDE_KNOCKBACK_VERTICAL);
 		mMaxStacks = (isLevelOne() ? RONDE_1_MAX_STACKS : RONDE_2_MAX_STACKS) + (int) CharmManager.getLevel(mPlayer, CHARM_STACKS);
 		mSpeed = RONDE_SPEED_BONUS + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_SPEED);
 		mDecayTime = CharmManager.getDuration(mPlayer, CHARM_DECAY_TIME, RONDE_DECAY_TIMER);
 		mStacksReq = RONDE_STACKS_REQ + (int) CharmManager.getLevel(mPlayer, CHARM_STACKS_REQ);
 		mStackGain = 1 + (int) CharmManager.getLevel(mPlayer, CHARM_STACK_GAIN);
 		mAttackSpeedScalingPortion = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_ATTACK_SPEED_SCALING_PORTION, RONDE_ATTACK_SPEED_SCALING_PORTION);
+		mSlashes = RONDE_SLASHES + (int) CharmManager.getLevel(mPlayer, CHARM_SLASHES);
+		mSlashInterval = CharmManager.getDuration(mPlayer, CHARM_SLASH_INTERVAL, RONDE_SLASH_INTERVAL);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new DeadlyRondeCS());
 	}
 
@@ -122,7 +136,10 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 		if (mTimeUntilDecay != -1) {
 			mTimeUntilDecay = mDecayTime;
 		}
-		cancelOnDeath(new BukkitRunnable() {
+		if (mActiveRunnable != null) {
+			mActiveRunnable.cancel();
+		}
+		BukkitRunnable bukkitRunnable = new BukkitRunnable() {
 			private final int mTimeout = mDecayTime * mMaxStacks;
 			int mTicks = 0;
 
@@ -141,7 +158,9 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 					this.cancel();
 				}
 			}
-		}.runTaskTimer(mPlugin, 0, 1));
+		};
+		mActiveRunnable = bukkitRunnable;
+		cancelOnDeath(bukkitRunnable.runTaskTimer(mPlugin, 0, 1));
 
 		mTimeUntilDecay = mDecayTime;
 
@@ -169,17 +188,21 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 			double damageRatio = (1 - mAttackSpeedScalingPortion) + (mAttackSpeedScalingPortion * cooldownRatio);
 			double damage = mDamage * damageRatio;
 
-			double angle = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_ANGLE, RONDE_ANGLE);
-			double radius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, RONDE_RADIUS);
-			Hitbox hitbox = Hitbox.approximateCone(mPlayer.getEyeLocation(), radius, Math.toRadians(angle));
+			doSlash(enemy, damage);
+			if (mSlashes > 1) {
+				new BukkitRunnable() {
+					int mT = 1;
 
-			for (LivingEntity mob : hitbox.getHitMobs()) {
-				DamageUtils.damage(mPlayer, mob, DamageType.MELEE_SKILL, damage, mInfo.getLinkedSpell(), true);
-				MovementUtils.knockAway(mPlayer, mob, mKnockback, true);
+					@Override
+					public void run() {
+						doSlash(enemy, damage);
+						mT++;
+						if (mT >= mSlashes) {
+							this.cancel();
+						}
+					}
+				}.runTaskTimer(mPlugin, mSlashInterval, mSlashInterval);
 			}
-
-			World world = mPlayer.getWorld();
-			mCosmetic.rondeHitEffect(world, mPlayer, enemy, mRadius, RONDE_RADIUS, isLevelTwo());
 
 			mTimeUntilDecay = mDecayTime;
 
@@ -189,6 +212,18 @@ public class DeadlyRonde extends Ability implements AbilityWithChargesOrStacks {
 			return true; // only trigger once per attack
 		}
 		return false;
+	}
+
+	private void doSlash(LivingEntity enemy, double damage) {
+		Hitbox hitbox = Hitbox.approximateCone(mPlayer.getEyeLocation(), mRadius, Math.toRadians(mAngle));
+
+		for (LivingEntity mob : hitbox.getHitMobs()) {
+			DamageUtils.damage(mPlayer, mob, DamageType.MELEE_SKILL, damage, mInfo.getLinkedSpell(), true);
+			MovementUtils.knockAway(mPlayer, mob, mKnockback, mKnockbackVertical, true);
+		}
+
+		World world = mPlayer.getWorld();
+		mCosmetic.rondeHitEffect(world, mPlayer, enemy, mRadius, mAngle, isLevelTwo());
 	}
 
 	@Override

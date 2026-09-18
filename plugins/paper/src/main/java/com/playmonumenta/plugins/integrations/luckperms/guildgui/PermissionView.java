@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.integrations.luckperms.guildgui;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.integrations.luckperms.GuildAccessLevel;
 import com.playmonumenta.plugins.integrations.luckperms.GuildPermission;
 import com.playmonumenta.plugins.integrations.luckperms.GuildPermission.GuildPermissionResult;
@@ -76,7 +76,7 @@ public class PermissionView extends View {
 		int targetRow = 1;
 
 		Component targetName = mTargetIcon.getItemMeta().displayName();
-		GuiItem targetIcon = mGui.setItem(targetRow, TARGET_X, mTargetIcon);
+		NjolGuiItem targetIcon = mGui.setItem(targetRow, TARGET_X, mTargetIcon);
 		if (mOnTargetClick != null) {
 			targetIcon.onClick(mOnTargetClick);
 		}

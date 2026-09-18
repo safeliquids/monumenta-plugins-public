@@ -31,11 +31,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -66,9 +66,9 @@ public class MonumentaNetworkChatIntegration {
 
 				PlayerClass playerClass = new MonumentaClasses().getClassById(AbilityUtils.getClassNum(player));
 				PlayerSpec playerSpec = playerClass == null ? null : playerClass.getSpecById(AbilityUtils.getSpecNum(player));
-				StringBuilder lore = new StringBuilder();
+				StringBuilder abilityStrBuilder = new StringBuilder();
 
-				lore.append(playerClass == null ? "No Class" : playerClass.mClassName + " (" + (playerSpec == null ? "No Specialization" : playerSpec.mSpecName) + ")");
+				abilityStrBuilder.append(playerClass == null ? "No Class" : playerClass.mClassName + " (" + (playerSpec == null ? "No Specialization" : playerSpec.mSpecName) + ")");
 				if (playerClass != null) {
 					(playerSpec != null ? Stream.concat(playerClass.mAbilities.stream(), playerSpec.mAbilities.stream()) : playerClass.mAbilities.stream()).forEach(abilityInfo -> {
 						if (abilityInfo.getScoreboard() == null) {
@@ -77,12 +77,12 @@ public class MonumentaNetworkChatIntegration {
 
 						var score = ScoreboardUtils.getScoreboardValue(player, abilityInfo.getScoreboard());
 						if (score > 0) {
-							lore.append("\n").append(abilityInfo.getDisplayName()).append(": ").append(score > 2 ? score - 2 + "*" : score);
+							abilityStrBuilder.append("\n").append(abilityInfo.getDisplayName()).append(": ").append(score > 2 ? score - 2 + "*" : score);
 						}
 					});
 				}
 
-				return Component.text("ABILITIES").decoration(TextDecoration.BOLD, true).hoverEvent(Component.text(lore.toString()));
+				return Component.text("ABILITIES").decoration(TextDecoration.BOLD, true).hoverEvent(Component.text(abilityStrBuilder.toString()));
 			});
 		}
 	}
@@ -91,7 +91,6 @@ public class MonumentaNetworkChatIntegration {
 		@RegExp
 		private static final String CHARMS_REGEX = "<charms>";
 		private final CharmManager.CharmType mCharmType = CharmManager.CharmType.NORMAL;
-		private static int charmPowerUsed = 0;
 
 		public CharmsHover() {
 			super("Charms Hover", "(?<=^|[^\\\\])<(charms)>", "charmshover");
@@ -100,26 +99,28 @@ public class MonumentaNetworkChatIntegration {
 				if (!(sender instanceof Player player)) {
 					return Component.text("<charms>");
 				}
-				charmPowerUsed = 0;
+				int charmPowerUsed = 0;
 				List<ItemStack> charms = mCharmType.mPlayerCharms.get(player.getUniqueId());
-				List<Component> lore = new ArrayList<>();
 
+				List<Component> lines = new ArrayList<>();
 				if (charms == null || charms.isEmpty()) {
 					return Component.text("<charms>");
 				} else {
 					for (ItemStack charm : charms) {
-						lore.add(charm.displayName().decoration(TextDecoration.ITALIC, false));
+						lines.add(charm.displayName());
 						charmPowerUsed += ItemStatUtils.getCharmPower(charm);
 					}
 				}
 
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta meta = item.getItemMeta();
-				meta.displayName(Component.text(player.getName() + "'s Charms (" + charmPowerUsed + "/" + mCharmType.getTotalCharmPower(player) + " Charm Power used)", NamedTextColor.WHITE, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
-				meta.lore(lore);
-				item.setItemMeta(meta);
+				lines.addFirst(Component.text(
+					player.getName() + "'s Charms ("
+					+ charmPowerUsed + "/" + mCharmType.getTotalCharmPower(player)
+					+ " Charm Power used)",
+					NamedTextColor.WHITE, TextDecoration.BOLD
+				));
 
-				return Component.text("CHARMS").decoration(TextDecoration.BOLD, true).hoverEvent(item);
+				return Component.text("CHARMS").decoration(TextDecoration.BOLD, true)
+					.hoverEvent(Component.join(JoinConfiguration.newlines(), lines));
 			});
 		}
 	}

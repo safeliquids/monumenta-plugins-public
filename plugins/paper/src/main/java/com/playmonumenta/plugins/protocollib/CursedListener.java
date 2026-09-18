@@ -13,6 +13,7 @@ import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlay
 import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutEntityMetadataHandle;
 import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutScoreboardTeamHandle;
 import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityHandle;
+import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityLivingHandle;
 import com.bergerkiller.generated.net.minecraft.world.entity.DisplayHandle;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -94,7 +95,7 @@ public class CursedListener extends PacketAdapter {
 	// TODO: make npc features
 	public static final boolean NPCS_ENABLED = false;
 
-	private record EntityData(UUID entityUuid, String entityName, SkinData entitySkin,
+	private record EntityData(UUID entityUuid, String fakeName, SkinData entitySkin,
 	                          FakePlayerBoss.Parameters params, Set<UUID> visibleToPlayers,
 	                          @Nullable NametagData nametag) {
 
@@ -177,12 +178,54 @@ public class CursedListener extends PacketAdapter {
 		}
 
 		@SuppressWarnings("unused") // I need kill switches
-		public static EntityData getOrCreateEntityData(Entity entity) {
+		public static @Nullable EntityData getOrCreateEntityData(Entity entity) {
 			return entityDataMap.computeIfAbsent(entity.getEntityId(), key -> generateEntityData(entity));
 		}
 
-		public static void updateEntityData(Entity entity) {
-			entityDataMap.compute(entity.getEntityId(), (id, data) -> generateEntityData(entity));
+		public static void updateEntityData(Entity entity, @Nullable SkinData newSkin) {
+			NametagData newNameTag;
+			if (entity.customName() != null) {
+				if (entity.isCustomNameVisible()) {
+					newNameTag = getNametagData(entity, entity.customName(), 64);
+				} else {
+					newNameTag = getNametagData(entity, entity.customName(), 4);
+				}
+			} else {
+				newNameTag = null;
+			}
+			EntityData data = entityDataMap.compute(entity.getEntityId(), (id, oldData) -> {
+				if (oldData == null) {
+					return generateEntityData(entity);
+				}
+				final FakePlayerBoss.Parameters parameters = BossParameters.getParameters(entity, FakePlayerBoss.identityTag, new FakePlayerBoss.Parameters());
+
+				return new EntityData(
+					oldData.entityUuid,
+					oldData.fakeName,
+					newSkin == null ? oldData.entitySkin : newSkin,
+					parameters,
+					oldData.visibleToPlayers,
+					newNameTag
+				);
+			});
+			if (data == null) {
+				return;
+			}
+			if (newNameTag == null) {
+				return;
+			}
+			for (UUID uuid : data.visibleToPlayers) {
+				@Nullable
+				Player player = Bukkit.getPlayer(uuid);
+				if (player == null) {
+					continue;
+				}
+				if (data.nametag != null) {
+					sendDestroyNametagPacket(player, data);
+					sendSpawnNametagPacket(player, newNameTag);
+					sendPassengerPacket(player, entity, newNameTag);
+				}
+			}
 		}
 
 		private static @Nullable EntityData generateEntityData(Entity entity) {
@@ -275,7 +318,7 @@ public class CursedListener extends PacketAdapter {
 		}
 	}
 
-	private void sendPassengerPacket(Player player, Entity entity, NametagData data) {
+	private static void sendPassengerPacket(Player player, Entity entity, NametagData data) {
 		PacketContainer entityPacket = new PacketContainer(PacketType.Play.Server.MOUNT);
 		entityPacket.getIntegers().writeSafely(0, entity.getEntityId());
 		List<Entity> e = entity.getPassengers();
@@ -288,7 +331,7 @@ public class CursedListener extends PacketAdapter {
 		sendPacketNoFilters(player, entityPacket);
 	}
 
-	private void handleEntityEquipmentPacket(PacketEvent event, PacketContainer packet, Player player) {
+	private static void handleEntityEquipmentPacket(PacketEvent event, PacketContainer packet, Player player) {
 		if (!PlayerData.containsPlayer(player.getUniqueId())) {
 			return;
 		}
@@ -315,12 +358,12 @@ public class CursedListener extends PacketAdapter {
 		packet.getSlotStackPairLists().writeSafely(0, items);
 	}
 
-	private void sendSpawnPlayerPacket(Player recievingPlayer, Entity entity) {
+	private static void sendSpawnPlayerPacket(Player recievingPlayer, Entity entity) {
 		// create actual player
 		// https://minecraft.wiki/w/Java_Edition_protocol/Packets?oldid=2773257#Spawn_Entity
 		PacketContainer playerPacket = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
 		playerPacket.getModifier().writeDefaults();
-		PacketPlayOutSpawnEntityHandle playerHandle = PacketPlayOutSpawnEntityHandle.createHandle(playerPacket.getHandle());
+		PacketPlayOutSpawnEntityLivingHandle playerHandle = PacketPlayOutSpawnEntityLivingHandle.createHandle(playerPacket.getHandle());
 		playerHandle.setEntityId(entity.getEntityId());
 		playerHandle.setEntityUUID(entity.getUniqueId());
 		Location loc = entity.getLocation();
@@ -329,6 +372,7 @@ public class CursedListener extends PacketAdapter {
 		playerHandle.setPosZ(loc.getZ());
 		playerHandle.setPitch(loc.getPitch());
 		playerHandle.setYaw(loc.getYaw());
+		playerHandle.setHeadYaw(NmsUtils.getVersionAdapter().getEntityHeadRotation(entity));
 		playerHandle.setCommonEntityType(CommonEntityType.PLAYER);
 		sendPacketNoFilters(recievingPlayer, playerPacket);
 	}
@@ -349,7 +393,7 @@ public class CursedListener extends PacketAdapter {
 		return NametagData.of(nameTag, loc);
 	}
 
-	private void sendSpawnNametagPacket(Player player, NametagData data) {
+	private static void sendSpawnNametagPacket(Player player, NametagData data) {
 		PacketContainer entityPacket = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
 		entityPacket.getModifier().writeDefaults();
 		PacketPlayOutSpawnEntityHandle entityHandle = PacketPlayOutSpawnEntityHandle.createHandle(entityPacket.getHandle());
@@ -363,13 +407,13 @@ public class CursedListener extends PacketAdapter {
 		sendNametagMetadataPacket(player, data);
 	}
 
-	private void sendNametagMetadataPacket(Player player, NametagData data) {
+	private static void sendNametagMetadataPacket(Player player, NametagData data) {
 		PacketPlayOutEntityMetadataHandle handle = PacketPlayOutEntityMetadataHandle.createNew(data.entityId, data.dataWatcher, true);
 		sendPacketNoFilters(player, handle);
 	}
 
 	@SuppressWarnings("EnumOrdinal")
-	private void rewriteFakePlayerMetadata(PacketEvent event, PacketContainer packet, Player player) {
+	private static void rewriteFakePlayerMetadata(PacketEvent event, PacketContainer packet, Player player) {
 		if (!PlayerData.containsPlayer(player.getUniqueId())) {
 			return;
 		}
@@ -432,7 +476,7 @@ public class CursedListener extends PacketAdapter {
 		event.setPacket(packet);
 	}
 
-	private void sendPlayerInfoPacket(Player recievingPlayer, Entity entity, EntityData entityData) {
+	private static void sendPlayerInfoPacket(Player recievingPlayer, Entity entity, EntityData entityData) {
 		// create player info packet
 		// https://minecraft.wiki/w/Java_Edition_protocol/Packets?oldid=2773257#Player_Info_Update
 		PacketContainer playerInfoPacket = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
@@ -442,7 +486,7 @@ public class CursedListener extends PacketAdapter {
 		// setting the fake player's name to the recievingPlayer's name makes the nametag completely invisible
 		// setting the fake player's name to an empty string will show a nametag but it is very subtle (Wynncraft)
 		// but we can set this string to anything, as long as it is within the 16 character limit
-		GameProfileHandle playerData = GameProfileHandle.createNew(entity.getUniqueId(), entityData.entityName);
+		GameProfileHandle playerData = GameProfileHandle.createNew(entity.getUniqueId(), entityData.fakeName);
 		// use player's current skin
 		// playerData.setAllProperties(GameProfileHandle.getForPlayer(recievingPlayer));
 		SkinData textureData;
@@ -457,7 +501,7 @@ public class CursedListener extends PacketAdapter {
 		sendPacket(recievingPlayer, playerInfoPacket);
 	}
 
-	private void handleEntityDestroyPacket(PacketEvent event, PacketContainer packet, Player player) {
+	private static void handleEntityDestroyPacket(PacketEvent event, PacketContainer packet, Player player) {
 		if (!PlayerData.containsPlayer(player.getUniqueId())) {
 			return;
 		}
@@ -467,7 +511,7 @@ public class CursedListener extends PacketAdapter {
 		// we don't cancel this event, since we want these entities to also be removed on the client
 
 		// Lookup to see if one of the entity ids has a uuid match
-		List<UUID> uuids = new ArrayList<>(1);
+		List<UUID> uuids = new ArrayList<>(8);
 		List<Integer> newIds = new ArrayList<>(Arrays.stream(entityIds).boxed().toList());
 		for (int entityId : entityIds) {
 			@Nullable
@@ -491,11 +535,16 @@ public class CursedListener extends PacketAdapter {
 					continue;
 				}
 				@Nullable
-				Team entityTeam = ScoreboardUtils.getEntityTeam(entity);
-				if (entityTeam != null) {
-					entityTeam.removeEntry(uuid.toString());
+				EntityData data = PlayerData.getOrCreateEntityData(entity);
+				if (data == null) {
+					continue;
 				}
-				sendDestroyNametagPacket(entity.getEntityId());
+				sendTeamLeavePacket(player, entity, data);
+				sendDestroyNametagPacket(player, data);
+				// Cleanup entity data when the fake player mob exits the view of all players and eventually unloads
+				if (data.visibleToPlayers.isEmpty()) {
+					PlayerData.removeEntity(entity.getEntityId());
+				}
 			}
 			sendPlayerInfoRemovePacket(player, uuids);
 		}
@@ -506,7 +555,7 @@ public class CursedListener extends PacketAdapter {
 		event.setPacket(PacketContainer.fromPacket(entityHandle.getRaw()));
 	}
 
-	private void sendPlayerInfoRemovePacket(Player player, List<UUID> uuids) {
+	private static void sendPlayerInfoRemovePacket(Player player, List<UUID> uuids) {
 		PacketContainer playerInfoPacket = new PacketContainer(PacketType.Play.Server.PLAYER_INFO_REMOVE);
 		playerInfoPacket.getModifier().writeDefaults();
 		// I tried to use BKCommonLib here but it failed to write a list of uuids for some reason
@@ -514,25 +563,18 @@ public class CursedListener extends PacketAdapter {
 		sendPacket(player, playerInfoPacket);
 	}
 
-	private static void sendDestroyNametagPacket(int entityId) {
-		EntityData data = PlayerData.getEntityData(entityId);
-		if (data == null || data.nametag == null) {
+	private static void sendDestroyNametagPacket(Player player, EntityData data) {
+		if (data.nametag == null) {
 			return;
 		}
 		PacketPlayOutEntityDestroyHandle handle = PacketPlayOutEntityDestroyHandle.createNewSingle(data.nametag.entityId);
-		for (UUID uuid : data.visibleToPlayers) {
-			Player player = Bukkit.getPlayer(uuid);
-			if (player == null) {
-				continue;
-			}
-			sendPacket(player, handle);
-		}
+		sendPacket(player, handle);
 	}
 
 	/**
 	 * Hacky code to make sure the body rotates with the head
 	 */
-	private void handleEntityRotationPacket(PacketEvent event, PacketContainer packet, Player player) {
+	private static void handleEntityRotationPacket(PacketEvent event, PacketContainer packet, Player player) {
 		Entity entity = packet.getEntityModifier(event).readSafely(0);
 		if (entity == null || !PlayerData.containsEntityForPlayer(player.getUniqueId(), entity.getEntityId())) {
 			return;
@@ -553,7 +595,7 @@ public class CursedListener extends PacketAdapter {
 	 * Has many limitations and is not reliable
 	 * FIXME: Remove if this code doesn't work or breaks on a minecraft version update
 	 */
-	private void handleTeamPacket(PacketEvent event, PacketContainer packet, Player player) {
+	private static void handleTeamPacket(PacketEvent event, PacketContainer packet, Player player) {
 		if (!PlayerData.containsPlayer(player.getUniqueId())) {
 			return;
 		}
@@ -572,6 +614,7 @@ public class CursedListener extends PacketAdapter {
 				// not a uuid
 				continue;
 			}
+			@Nullable
 			EntityData data = PlayerData.getEntityDataByUUID(uuid);
 			if (data == null) {
 				Entity entity = Bukkit.getEntity(uuid);
@@ -589,7 +632,7 @@ public class CursedListener extends PacketAdapter {
 			if (data != null) {
 				changed = true;
 				namesIterator.remove();
-				String newName = data.entityName;
+				String newName = data.fakeName;
 				MMLog.debug("Changing team name from " + name + " to " + newName);
 				if (newName != null && !copy.contains(newName)) {
 					namesIterator.add(newName);
@@ -620,8 +663,23 @@ public class CursedListener extends PacketAdapter {
 			PacketPlayOutScoreboardTeamHandle join = PacketPlayOutScoreboardTeamHandle.createNew();
 			join.setName(teamName);
 			join.setMethod(PacketPlayOutScoreboardTeamHandle.METHOD_JOIN);
-			join.setPlayers(List.of(data.entityName));
+			join.setPlayers(List.of(data.fakeName));
 			sendPacketNoFilters(player, join);
+		}
+	}
+
+	private static void sendTeamLeavePacket(Player player, Entity entity, EntityData data) {
+		if (GlowingManager.isCustomGlowingForPlayer(entity, player)) {
+			return;
+		}
+		Team team = ScoreboardUtils.getEntityTeam(entity);
+		if (team != null) {
+			String teamName = team.getName();
+			PacketPlayOutScoreboardTeamHandle leave = PacketPlayOutScoreboardTeamHandle.createNew();
+			leave.setName(teamName);
+			leave.setMethod(PacketPlayOutScoreboardTeamHandle.METHOD_LEAVE);
+			leave.setPlayers(List.of(data.fakeName));
+			sendPacketNoFilters(player, leave);
 		}
 	}
 
@@ -678,8 +736,7 @@ public class CursedListener extends PacketAdapter {
 	 * Updates the fake player for CustomName or Skin changes
 	 * @param entity  the fake player entity
 	 */
-	public static void updateFakePlayer(LivingEntity entity) {
-		PlayerData.updateEntityData(entity);
+	public static void updateFakePlayer(LivingEntity entity, @Nullable SkinData newSkin) {
+		PlayerData.updateEntityData(entity, newSkin);
 	}
-
 }

@@ -95,7 +95,7 @@ public class FrostNova extends Ability {
 			return false;
 		}
 		putOnCooldown();
-		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
+		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
 		Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(mPlayer), mRadius);
 		for (LivingEntity mob : hitbox.getHitMobs()) {
 			if (EntityUtils.isElite(mob) || EntityUtils.isBoss(mob)) {

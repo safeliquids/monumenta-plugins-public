@@ -36,7 +36,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
-public class MusicGui extends Gui {
+public class MusicGui extends NjolGui {
 	public enum MusicPage {
 		VANILLA("vanilla", 36, "Minecraft Music Discs"),
 		VALLEY("valley", 36, "Monumenta Soundtrack: King's Valley"),
@@ -173,10 +173,10 @@ public class MusicGui extends Gui {
 			}
 
 			case RING -> {
-				addMusicItem(1, 1, Material.MUSIC_DISC_FAR, "Those Who Survived", Location.FOREST, "Galengarde", "Whitebeard_OP", "epic:music.galengarde", 189, checkAdvance("monumenta:quests/r3/galengarde"));
-				addMusicItem(1, 2, Material.MUSIC_DISC_STAL, "Argentum Lament", Location.KEEP, "New Antium", "Whitebeard_OP", "epic:music.newantium", 205, checkAdvance("monumenta:quests/r3/newantium"));
-				addMusicItem(1, 3, Material.MUSIC_DISC_MALL, "Resting Among the Stars", Location.STARPOINT, "Chantry of Repentance", "Xernial", "epic:music.chantry", 159, checkAdvance("monumenta:quests/r3/chantryofrepentance"));
-
+				addMusicItem(1, 1, Material.MUSIC_DISC_WAIT, "Forza Manta", Location.FISHING, "Port Manteau", "Michael228p", "epic:music.portmanteau", 222, checkAdvance("monumenta:quests/r3/portmanteau"));
+				addMusicItem(1, 2, Material.MUSIC_DISC_FAR, "Those Who Survived", Location.FOREST, "Galengarde", "Whitebeard_OP", "epic:music.galengarde", 189, checkAdvance("monumenta:quests/r3/galengarde"));
+				addMusicItem(1, 3, Material.MUSIC_DISC_STAL, "Argentum Lament", Location.KEEP, "New Antium", "Whitebeard_OP", "epic:music.newantium", 205, checkAdvance("monumenta:quests/r3/newantium"));
+				addMusicItem(1, 4, Material.MUSIC_DISC_MALL, "Resting Among the Stars", Location.STARPOINT, "Chantry of Repentance", "Xernial", "epic:music.chantry", 159, checkAdvance("monumenta:quests/r3/chantryofrepentance"));
 				addMusicItem(1, 5, Material.MUSIC_DISC_BLOCKS, "The Architect's Ring", Location.OVERWORLD3, "The Architect's Ring", "Corpe_", "epic:music.ring", 187, checkScore(PlayerUtils.SCOREBOARD_RING_UNLOCK));
 				addMusicItem(1, 6, Material.MUSIC_DISC_MALL, "Into the Star Verse", Location.STARPOINT, "Star Point", "CmdrGod", "epic:music.starpoint", 215, checkScore(PlayerUtils.SCOREBOARD_RING_UNLOCK));
 				addMusicItem(1, 7, Material.MUSIC_DISC_OTHERSIDE, "Jellyfish Skirmish", Location.FISHING, "Fishing Combat", "Xernial", FishingCombatManager.MUSIC_TITLE, FishingCombatManager.MUSIC_DURATION, checkScore(FishingCombatManager.COMBAT_TOTAL));

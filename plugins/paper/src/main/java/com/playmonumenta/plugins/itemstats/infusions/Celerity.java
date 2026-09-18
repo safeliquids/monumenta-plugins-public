@@ -34,8 +34,12 @@ public class Celerity implements Infusion {
 	public void tick(Plugin plugin, Player player, double level, boolean twoHertz, boolean oneHertz) {
 		if (shouldActivate(player, plugin)) {
 			plugin.mEffectManager.addEffect(player, PERCENT_SPEED_EFFECT_NAME,
-				new PercentSpeed(EFFECT_DURATION, level * SPEED_BONUS, PERCENT_SPEED_EFFECT_NAME).displaysTime(false));
+				new PercentSpeed(EFFECT_DURATION, getMovementSpeedBonus(level), PERCENT_SPEED_EFFECT_NAME).displaysTime(false));
 		}
+	}
+
+	public static double getMovementSpeedBonus(double level) {
+		return level * SPEED_BONUS;
 	}
 
 	@Override

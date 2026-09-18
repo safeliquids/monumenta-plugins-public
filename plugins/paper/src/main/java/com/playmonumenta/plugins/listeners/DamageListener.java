@@ -9,6 +9,7 @@ import com.playmonumenta.plugins.bosses.parameters.Tokenizer;
 import com.playmonumenta.plugins.commands.DamageTraceCommand;
 import com.playmonumenta.plugins.commands.ShowMyDpsCommand;
 import com.playmonumenta.plugins.depths.abilities.steelsage.RapidFire;
+import com.playmonumenta.plugins.effects.BodyguardDamageTransfer;
 import com.playmonumenta.plugins.effects.ProjectileIframe;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageShieldedEvent;
@@ -174,9 +175,6 @@ public class DamageListener implements Listener {
 		Entity damager = event.getDamager();
 		LivingEntity source = event.getSource();
 
-		// Why does this exist?
-		event.updateDamageWithMultiplier(EntityUtils.vulnerabilityMult(damagee), DamageEvent.DamageType.getScalableDamageType());
-
 		// If this event was caused by /kill, the entity should immediately die with no further processing
 		if (event.getCause().equals(DamageCause.KILL)) {
 			damagee.setHealth(0);
@@ -184,6 +182,8 @@ public class DamageListener implements Listener {
 
 		// Player getting damaged
 		if (damagee instanceof Player player) {
+			BodyguardDamageTransfer.bodyguardPlayerHurt(player, event);
+
 			mPlugin.mItemStatManager.onHurt(mPlugin, player, event, damager, source);
 			mPlugin.mAbilityManager.onHurt(player, event, damager, source);
 			mPlugin.mDoubleJumpManager.onHurt(player, event);
@@ -272,7 +272,10 @@ public class DamageListener implements Listener {
 		if (event.getDamagee() instanceof Player player && player.getScoreboardTags().contains(DamageTraceCommand.TAG)) {
 			sendDebugMessage(player, event);
 		}
+	}
 
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void monitorDamage(DamageEvent event) {
 		ShowMyDpsCommand.onDamage(event);
 	}
 
@@ -293,6 +296,7 @@ public class DamageListener implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void damageShieldedEvent(DamageShieldedEvent event) {
 		mPlugin.mItemStatManager.onDamageShielded(mPlugin, event.getPlayer(), event);
+		mPlugin.mAbilityManager.damageShieldedEvent(event.getPlayer(), event);
 	}
 
 	public static @Nullable PlayerItemStats getProjectileItemStats(Projectile proj) {

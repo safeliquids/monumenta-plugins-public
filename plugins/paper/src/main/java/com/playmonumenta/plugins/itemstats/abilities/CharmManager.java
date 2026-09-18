@@ -126,6 +126,7 @@ import com.playmonumenta.plugins.abilities.warrior.berserker.MeteorSlam;
 import com.playmonumenta.plugins.abilities.warrior.berserker.Rampage;
 import com.playmonumenta.plugins.abilities.warrior.guardian.Bodyguard;
 import com.playmonumenta.plugins.abilities.warrior.guardian.Challenge;
+import com.playmonumenta.plugins.abilities.warrior.guardian.Endurance;
 import com.playmonumenta.plugins.abilities.warrior.guardian.ShieldWall;
 import com.playmonumenta.plugins.depths.charmfactory.CharmEffects;
 import com.playmonumenta.plugins.depths.charmfactory.CharmFactory;
@@ -360,8 +361,6 @@ public class CharmManager {
 			AstralOmen.CHARM_MODIFIER,
 			AstralOmen.CHARM_STACK,
 			AstralOmen.CHARM_PULL,
-			CosmicMoonblade.CHARM_CAP,
-			CosmicMoonblade.CHARM_DEATH_CAP,
 			CosmicMoonblade.CHARM_DAMAGE,
 			CosmicMoonblade.CHARM_RANGE,
 			CosmicMoonblade.CHARM_COOLDOWN,
@@ -614,6 +613,8 @@ public class CharmManager {
 			DeadlyRonde.CHARM_DECAY_TIME,
 			DeadlyRonde.CHARM_STACKS_REQ,
 			DeadlyRonde.CHARM_ATTACK_SPEED_SCALING_PORTION,
+			DeadlyRonde.CHARM_SLASHES,
+			DeadlyRonde.CHARM_SLASH_INTERVAL,
 			WindWalk.CHARM_CHARGE,
 			WindWalk.CHARM_COOLDOWN,
 			WindWalk.CHARM_COOLDOWN_REDUCTION,
@@ -636,6 +637,7 @@ public class CharmManager {
 			//Warrior
 			Bloodlust.CHARM_STACKS,
 			Bloodlust.CHARM_THRESHOLD,
+			Endurance.CHARM_BLOCKING_SPEED,
 			BruteForce.CHARM_DAMAGE,
 			BruteForce.CHARM_RADIUS,
 			BruteForce.CHARM_KNOCKBACK,
@@ -664,8 +666,9 @@ public class CharmManager {
 			Riposte.CHARM_COOLDOWN,
 			Riposte.CHARM_KNOCKBACK,
 			Riposte.CHARM_BONUS_DAMAGE,
-			Riposte.CHARM_DAMAGE_DURATION,
+			Riposte.CHARM_DURATION,
 			Riposte.CHARM_STUN_DURATION,
+			Riposte.CHARM_STUN_RADIUS,
 			Riposte.CHARM_ROOT_DURATION,
 			Riposte.CHARM_RADIUS,
 			Riposte.CHARM_DAMAGE,
@@ -696,23 +699,22 @@ public class CharmManager {
 			GloriousBattle.CHARM_ARTIFACT_COLLISION_KNOCKBACK,
 			GloriousBattle.CHARM_ARTIFACT_IMPACT_DAMAGE,
 			Rampage.CHARM_DAMAGE,
-			Rampage.CHARM_DAMAGE_BUFF,
-			Rampage.CHARM_MELEE_RESISTANCE,
-			Rampage.CHARM_MAX_BLOODLUST_GAIN,
+			Rampage.CHARM_SPEED_EFFECT,
+			Rampage.CHARM_DAMAGE_EFFECT,
+			Rampage.CHARM_MAX_RECAST,
 			Rampage.CHARM_COOLDOWN,
-			Rampage.CHARM_DURATION_PER_STACK,
+			Rampage.CHARM_DURATION_PER_RECAST,
 			Rampage.CHARM_KNOCKBACK,
 			Rampage.CHARM_RADIUS,
 			Rampage.CHARM_HEALING,
 			Rampage.CHARM_BLOODLUST_COST,
+			Rampage.CHARM_BLOODLUST_RECAST_COST,
 			Rampage.CHARM_INITIAL_DURATION,
 			Rampage.CHARM_MAX_DURATION,
-			MeteorSlam.CHARM_SLAM_DAMAGE,
+			MeteorSlam.CHARM_JUMP_BOOST,
+			MeteorSlam.CHARM_DURATION,
 			MeteorSlam.CHARM_VELOCITY,
-			MeteorSlam.CHARM_UP_DAMAGE,
-			MeteorSlam.CHARM_CONE_ANGLE,
-			MeteorSlam.CHARM_RANGE,
-			MeteorSlam.CHARM_KNOCKBACK,
+			MeteorSlam.CHARM_SLAM_DAMAGE,
 			MeteorSlam.CHARM_COOLDOWN,
 			MeteorSlam.CHARM_THRESHOLD,
 			MeteorSlam.CHARM_HEIGHT,
@@ -726,30 +728,40 @@ public class CharmManager {
 			MeteorSlam.CHARM_GROUND_POUND_KNOCKBACK,
 			MeteorSlam.CHARM_GROUND_POUND_SLOWNESS_MULTIPLIER,
 			MeteorSlam.CHARM_GROUND_POUND_SLOWNESS_DURATION,
+			MeteorSlam.CHARM_GROUND_POUND_VULNERABILITY_MULTIPLIER,
+			MeteorSlam.CHARM_GROUND_POUND_VULNERABILITY_DURATION,
 			Bodyguard.CHARM_COOLDOWN,
 			Bodyguard.CHARM_RADIUS,
 			Bodyguard.CHARM_RANGE,
 			Bodyguard.CHARM_ABSORPTION,
 			Bodyguard.CHARM_ABSORPTION_DURATION,
-			Bodyguard.CHARM_STUN_DURATION,
+			Bodyguard.CHARM_KBR_DURATION,
 			Bodyguard.CHARM_KNOCKBACK,
+			Bodyguard.CHARM_KNOCKBACK_RESISTANCE,
+			Bodyguard.CHARM_DAMAGE_TRANSFER_AMOUNT,
+			Bodyguard.CHARM_DAMAGE_TRANSFER_DURATION,
+			Bodyguard.CHARM_DAMAGE_TRANSFER_RADIUS,
 			Challenge.CHARM_COOLDOWN,
 			Challenge.CHARM_DAMAGE_PER,
 			Challenge.CHARM_DAMAGE_MAX,
 			Challenge.CHARM_ABSORPTION_PER,
 			Challenge.CHARM_ABSORPTION_MAX,
 			Challenge.CHARM_SPEED_PER,
+			Challenge.CHARM_SPEED_MAX,
 			Challenge.CHARM_CDR_PER,
 			Challenge.CHARM_DURATION,
 			Challenge.CHARM_MAX_MOBS,
 			Challenge.CHARM_RANGE,
 			ShieldWall.CHARM_DAMAGE,
+			ShieldWall.CHARM_BASH_VELOCITY,
+			ShieldWall.CHARM_BASH_STUN_DURATION,
 			ShieldWall.CHARM_COOLDOWN,
-			ShieldWall.CHARM_DURATION,
 			ShieldWall.CHARM_ANGLE,
 			ShieldWall.CHARM_KNOCKBACK,
 			ShieldWall.CHARM_HEIGHT,
 			ShieldWall.CHARM_RADIUS,
+			ShieldWall.CHARM_DURABILITY,
+			ShieldWall.CHARM_DURABILITY_RECHARGE,
 
 			//Alchemist
 			AlchemistPotions.CHARM_DAMAGE,
@@ -1375,6 +1387,7 @@ public class CharmManager {
 			MeteorSlam.CHARM_GROUND_POUND_BLOODLUST_COST,
 			GloriousBattle.CHARM_BLOODLUST_COST,
 			Rampage.CHARM_BLOODLUST_COST,
+			Rampage.CHARM_BLOODLUST_RECAST_COST,
 			Rampage.CHARM_COOLDOWN,
 			BrutalAlchemy.CHARM_REFRESHES_NEEDED_TO_EXPLODE,
 			Bezoar.CHARM_REQUIREMENT,
@@ -1859,49 +1872,42 @@ public class CharmManager {
 	public void onSave(PlayerSaveEvent event) {
 		for (CharmType charmType : CharmType.values()) {
 			Player player = event.getPlayer();
+			JsonObject data = new JsonObject();
+			JsonArray charmArray = new JsonArray();
+			data.add(KEY_CHARMS, charmArray);
 			List<ItemStack> charms = charmType.mPlayerCharms.get(player.getUniqueId());
 			if (charms != null) {
-				JsonObject data = new JsonObject();
-				JsonArray charmArray = new JsonArray();
-				data.add(KEY_CHARMS, charmArray);
 				for (ItemStack charm : charms) {
 					JsonObject charmData = new JsonObject();
 					charmData.addProperty(KEY_ITEM, NBT.itemStackToNBT(charm).toString());
 					charmArray.add(charmData);
 				}
-				event.setPluginData(charmType.getPluginDataKey(), data);
 			}
+			event.setPluginData(charmType.getPluginDataKey(), data);
 		}
 	}
 
 	//Load plugin data into local charm data
 	public void onJoin(Player p) {
 		for (CharmType charmType : CharmType.values()) {
+			List<ItemStack> playerCharms = new ArrayList<>();
 			JsonObject charmPluginData = MonumentaRedisSyncAPI.getPlayerPluginData(p.getUniqueId(), charmType.getPluginDataKey());
-			if (charmPluginData != null) {
-				if (charmPluginData.has(KEY_CHARMS)) {
-					JsonArray charmArray = charmPluginData.getAsJsonArray(KEY_CHARMS);
-					List<ItemStack> playerCharms = new ArrayList<>();
-					for (JsonElement charmElement : charmArray) {
-						JsonObject data = charmElement.getAsJsonObject();
-						if (data.has(KEY_ITEM) && data.get(KEY_ITEM).isJsonPrimitive() && data.getAsJsonPrimitive(KEY_ITEM).isString()) {
-							ItemStack item = NBT.itemStackFromNBT(NBT.parseNBT(data.getAsJsonPrimitive(KEY_ITEM).getAsString()));
-							if (item != null) {
-
-								ItemStatUtils.cleanIfNecessary(item);
-
-								playerCharms.add(item);
-							}
+			if (charmPluginData != null && charmPluginData.has(KEY_CHARMS)) {
+				JsonArray charmArray = charmPluginData.getAsJsonArray(KEY_CHARMS);
+				for (JsonElement charmElement : charmArray) {
+					JsonObject data = charmElement.getAsJsonObject();
+					if (data.has(KEY_ITEM) && data.get(KEY_ITEM).isJsonPrimitive() && data.getAsJsonPrimitive(KEY_ITEM).isString()) {
+						ItemStack item = NBT.itemStackFromNBT(NBT.parseNBT(data.getAsJsonPrimitive(KEY_ITEM).getAsString()));
+						if (item != null) {
+							ItemStatUtils.cleanIfNecessary(item);
+							playerCharms.add(item);
 						}
-					}
-					//Check if we actually loaded any charms
-					if (!playerCharms.isEmpty()) {
-						charmType.mPlayerCharms.put(p.getUniqueId(), playerCharms);
-						//Recalculate the charm map based on loaded charms by calling update
-						updateCharms(p, charmType);
 					}
 				}
 			}
+			// Always overwrite — clears stale in-memory data from rapid reconnects (e.g. after rollback)
+			charmType.mPlayerCharms.put(p.getUniqueId(), playerCharms);
+			updateCharms(p, charmType);
 		}
 	}
 

@@ -257,7 +257,9 @@ public class BossManager implements Listener {
 		registerStatelessBoss(DropShardBoss.identityTag, DropShardBoss::new);
 		registerStatelessBoss(DummyDecoyBoss.identityTag, DummyDecoyBoss::new);
 		registerStatelessBoss(EarthshakeBoss.identityTag, EarthshakeBoss::new, new EarthshakeBoss.Parameters());
+		registerStatelessBoss(EffectOnKillBoss.identityTag, EffectOnKillBoss::new, new EffectOnKillBoss.Parameters());
 		registerStatelessBoss(EruptionBoss.identityTag, EruptionBoss::new, new EruptionBoss.Parameters());
+		registerStatelessBoss(ExplosionBoss.identityTag, ExplosionBoss::new, new ExplosionBoss.Parameters());
 		registerStatelessBoss(FacelessOneBoss.identityTag, FacelessOneBoss::new);
 		registerStatelessBoss(FacingBoss.identityTag, FacingBoss::new, new FacingBoss.Parameters());
 		registerStatelessBoss(FakePlayerBoss.identityTag, FakePlayerBoss::new, new FakePlayerBoss.Parameters());
@@ -375,6 +377,7 @@ public class BossManager implements Listener {
 		registerStatelessBoss(ResistanceBoss.identityTag, ResistanceBoss::new, new ResistanceBoss.Parameters());
 		registerStatelessBoss(RestlessSoulsBoss.identityTag, RestlessSoulsBoss::new);
 		registerStatelessBoss(RiftBoss.identityTag, RiftBoss::new, new RiftBoss.Parameters());
+		registerStatelessBoss(RiptideBoss.identityTag, RiptideBoss::new, new RiptideBoss.Parameters());
 		registerStatelessBoss(RunAwayBoss.identityTag, RunAwayBoss::new);
 		registerStatelessBoss(RushDownMobBoss.identityTag, RushDownMobBoss::new);
 		registerStatelessBoss(ScoutVolleyBoss.identityTag, ScoutVolleyBoss::new, new ScoutVolleyBoss.Parameters());
@@ -831,10 +834,19 @@ public class BossManager implements Listener {
 		}
 
 		Entity vehicle = damagee.getVehicle();
-		if (vehicle instanceof LivingEntity mount) {
-			Boss mountBoss = mBosses.get(mount.getUniqueId());
+		if (vehicle instanceof LivingEntity le) {
+			Boss mountBoss = mBosses.get(le.getUniqueId());
 			if (mountBoss != null) {
 				mountBoss.onPassengerHurt(event);
+			}
+		}
+
+		for (Entity passenger : damagee.getPassengers()) {
+			if (passenger instanceof LivingEntity le) {
+				Boss mountBoss = mBosses.get(le.getUniqueId());
+				if (mountBoss != null) {
+					mountBoss.onMountHurt(event);
+				}
 			}
 		}
 

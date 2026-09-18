@@ -30,7 +30,6 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -352,8 +351,9 @@ public final class MasterworkCustomInventory extends CustomInventory {
 
 			//Edge cases. This system was not built with this stuff in mind. Attribute names != what is actually on the item
 			AttributeType attributeType = AttributeType.getAttributeType(attributeString);
-			if (contentString.contains("%")) {
-				operation = Operation.MULTIPLY;
+			boolean percent = contentString.contains("%");
+			if (percent) {
+				operation = attributeType != AttributeType.KNOCKBACK_RESISTANCE ? Operation.MULTIPLY : Operation.ADD;
 				if (attributeType == null) {
 					attributeType = AttributeType.getAttributeType(attributeString.concat("Multiply"));
 				}
@@ -378,13 +378,9 @@ public final class MasterworkCustomInventory extends CustomInventory {
 					//Even if it is a new attribute, it not be 0. Essentially it will only be false if they are the same value.
 					if (afterValue - beforeValue != 0) {
 						double diff = afterValue - beforeValue;
-						diff = Math.round(diff * 100) / (operation.equals(Operation.MULTIPLY) ? 1.0 : 100.0);
-						//KBR is apparently off by 10 on displays...
-						if (attributeType.getAttribute() == Attribute.GENERIC_KNOCKBACK_RESISTANCE) {
-							diff *= 10;
-						}
+						diff = Math.round(diff * 100) / (percent ? 1.0 : 100.0);
 						Component appended = Component.text(" (+");
-						appended = appended.append(Component.text(StringUtils.to2DP(diff) + (operation.equals(Operation.MULTIPLY) ? "%" : "") + ")"));
+						appended = appended.append(Component.text(StringUtils.to2DP(diff) + (percent ? "%" : "") + ")"));
 						appended = appended.color(color);
 						appended = component.append(appended);
 						currentLore.set(currentLore.indexOf(component), appended);

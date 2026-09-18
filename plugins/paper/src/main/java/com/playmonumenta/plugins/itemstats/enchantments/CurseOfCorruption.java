@@ -43,6 +43,10 @@ public class CurseOfCorruption implements Enchantment {
 			plugin.mEffectManager.clearEffects(player, SLOWNESS_SOURCE);
 			plugin.mEffectManager.addEffect(player, SLOWNESS_SOURCE,
 				new PercentSpeed(Integer.MAX_VALUE, SLOWNESS_AMOUNT_PER_LEVEL * (level - 1), SLOWNESS_SOURCE).displaysTime(false));
+
+			// This is fine to remove here because the only other thing which uses
+			// mining fatigue with PotionID.ITEM is Shattered, which updates after this
+			plugin.mPotionManager.removePotion(player, PotionID.ITEM, PotionEffectType.SLOW_DIGGING);
 			plugin.mPotionManager.addPotion(player, PotionID.ITEM, new PotionEffect(PotionEffectType.SLOW_DIGGING, PotionEffect.INFINITE_DURATION, level - 1, true, false));
 		} else if (mCorruptionPlayers.remove(player) || plots) {
 			plugin.mEffectManager.clearEffects(player, SLOWNESS_SOURCE);

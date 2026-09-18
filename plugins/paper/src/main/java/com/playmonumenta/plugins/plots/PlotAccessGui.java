@@ -1,8 +1,8 @@
 package com.playmonumenta.plugins.plots;
 
 import com.playmonumenta.plugins.Constants;
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
 import com.playmonumenta.plugins.listeners.AuditListener;
 import com.playmonumenta.plugins.plots.PlotManager.PlotInfo;
@@ -28,7 +28,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class PlotAccessGui extends Gui {
+public class PlotAccessGui extends NjolGui {
 	private static final ArrayList<Integer> GUI_LOCATIONS = new ArrayList<>(Arrays.asList(19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43));
 	private AccessInfoGuiMode mAccessInfoGuiMode = AccessInfoGuiMode.INACTIVE;
 	private int mTotalPages;
@@ -192,14 +192,14 @@ public class PlotAccessGui extends Gui {
 	private void setLayoutForAccessInfo() {
 		createInfoHead();
 
-		setItem(30, new GuiItem(GUIUtils.createBasicItem(Material.GRASS_BLOCK, "Access to " + (mIsSelf ? "Your " : mOwnerName + "'s ") + "Plot", NamedTextColor.WHITE, false, "Click here to see who has access to " + (mIsSelf ? "your " : mOwnerName + "'s ") + "plot!", NamedTextColor.LIGHT_PURPLE)))
+		setItem(30, new NjolGuiItem(GUIUtils.createBasicItem(Material.GRASS_BLOCK, "Access to " + (mIsSelf ? "Your " : mOwnerName + "'s ") + "Plot", NamedTextColor.WHITE, false, "Click here to see who has access to " + (mIsSelf ? "your " : mOwnerName + "'s ") + "plot!", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				mAccessInfoGuiMode = AccessInfoGuiMode.OTHER_ACCESS_TO_OWNER_PLOT;
 				setTitle(Component.text("Access to " + (mIsSelf ? "Your " : mOwnerName + "'s ") + "Plot"));
 				update();
 			});
 
-		setItem(32, new GuiItem(GUIUtils.createBasicItem(Material.ENDER_PEARL, "Access to Other Plots", NamedTextColor.WHITE, false, "Click here to see which plots " + (mIsSelf ? "you have " : mOwnerName + " has ") + "access to!", NamedTextColor.LIGHT_PURPLE)))
+		setItem(32, new NjolGuiItem(GUIUtils.createBasicItem(Material.ENDER_PEARL, "Access to Other Plots", NamedTextColor.WHITE, false, "Click here to see which plots " + (mIsSelf ? "you have " : mOwnerName + " has ") + "access to!", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				mAccessInfoGuiMode = AccessInfoGuiMode.OWNER_ACCESS_TO_OTHER_PLOTS;
 				setTitle(Component.text("Access to Other Plots"));
@@ -212,19 +212,19 @@ public class PlotAccessGui extends Gui {
 		int pageOffset = (mCurrentPage - 1) * GUI_LOCATIONS.size();
 
 		if (isTeleportMode) {
-			setItem(4, new GuiItem(GUIUtils.createBasicItem(Material.ENDER_PEARL, "Plot Selection", NamedTextColor.WHITE, false, "Click the head of the plot you would like to teleport to.", NamedTextColor.LIGHT_PURPLE)));
+			setItem(4, new NjolGuiItem(GUIUtils.createBasicItem(Material.ENDER_PEARL, "Plot Selection", NamedTextColor.WHITE, false, "Click the head of the plot you would like to teleport to.", NamedTextColor.LIGHT_PURPLE)));
 		} else {
 			createInfoHead();
 		}
 		createControlButtons();
 
 		if (plotList.isEmpty()) {
-			setItem(31, new GuiItem(GUIUtils.createBasicItem(Material.BARRIER, emptyMessage, NamedTextColor.RED)));
+			setItem(31, new NjolGuiItem(GUIUtils.createBasicItem(Material.BARRIER, emptyMessage, NamedTextColor.RED)));
 		} else {
 			for (int i = 0; i < GUI_LOCATIONS.size(); i++) {
 				if (i + pageOffset < plotList.size()) {
 					PlotEntry plotEntry = plotList.get(i + pageOffset);
-					GuiItem guiItem = new GuiItem(createHead(plotEntry));
+					NjolGuiItem guiItem = new NjolGuiItem(createHead(plotEntry));
 
 					if (isRemovalMode) {
 						if (removalConfirmationMode == null) {
@@ -270,16 +270,16 @@ public class PlotAccessGui extends Gui {
 		String recordName = record.mOtherAccessToOwnerPlotEntry.mName;
 		UUID recordUuid = record.mOtherAccessToOwnerPlotEntry.mUUID;
 
-		setItem(4, new GuiItem(createHead(record)));
+		setItem(4, new NjolGuiItem(createHead(record)));
 
-		setItem(30, new GuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Cancel Removal", NamedTextColor.WHITE, false, "Click here to return to the access management screen.", NamedTextColor.LIGHT_PURPLE)))
+		setItem(30, new NjolGuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Cancel Removal", NamedTextColor.WHITE, false, "Click here to return to the access management screen.", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				mAccessInfoGuiMode = AccessInfoGuiMode.OTHER_ACCESS_TO_OWNER_PLOT_REMOVAL;
 				mSelectedPlotEntry = null;
 				update();
 			});
 
-		setItem(32, new GuiItem(GUIUtils.createBasicItem(Material.GREEN_CONCRETE, "Confirm Removal", NamedTextColor.WHITE, false, "Click here to revoke access from " + recordName + ".", NamedTextColor.LIGHT_PURPLE)))
+		setItem(32, new NjolGuiItem(GUIUtils.createBasicItem(Material.GREEN_CONCRETE, "Confirm Removal", NamedTextColor.WHITE, false, "Click here to revoke access from " + recordName + ".", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				if (!mIsSelf) {
 					AuditListener.log("[Plot Manager] " + mViewer.getName() + " removed " + recordName + "'s access to " + mOwnerName + "'s plot.");
@@ -314,16 +314,16 @@ public class PlotAccessGui extends Gui {
 			return;
 		}
 
-		setItem(4, new GuiItem(createHead(record)));
+		setItem(4, new NjolGuiItem(createHead(record)));
 
-		setItem(30, new GuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Cancel Removal", NamedTextColor.WHITE, false, "Click here to return to the access management screen.", NamedTextColor.LIGHT_PURPLE)))
+		setItem(30, new NjolGuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Cancel Removal", NamedTextColor.WHITE, false, "Click here to return to the access management screen.", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				mAccessInfoGuiMode = AccessInfoGuiMode.OWNER_ACCESS_TO_OTHER_PLOTS_REMOVAL;
 				mSelectedPlotEntry = null;
 				update();
 			});
 
-		setItem(32, new GuiItem(GUIUtils.createBasicItem(Material.GREEN_CONCRETE, "Confirm Removal", NamedTextColor.WHITE, false, "Click here to remove " + (mIsSelf ? "your " : mOwnerName + "'s ") + "access to " + recordName + "'s plot.", NamedTextColor.LIGHT_PURPLE)))
+		setItem(32, new NjolGuiItem(GUIUtils.createBasicItem(Material.GREEN_CONCRETE, "Confirm Removal", NamedTextColor.WHITE, false, "Click here to remove " + (mIsSelf ? "your " : mOwnerName + "'s ") + "access to " + recordName + "'s plot.", NamedTextColor.LIGHT_PURPLE)))
 			.onClick(event -> {
 				AuditListener.log("[Plot Manager] " + mViewer.getName() + " removed " + mOwnerName + "'s access to " + recordName + "'s plot.");
 				PlotManager.plotAccessRemove(mViewer, recordUuid, mOwnerUuid);
@@ -348,12 +348,12 @@ public class PlotAccessGui extends Gui {
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		ownerSkull.setItemMeta(meta);
 
-		setItem(4, new GuiItem(ownerSkull));
+		setItem(4, new NjolGuiItem(ownerSkull));
 	}
 
 	private void createControlButtons() {
 		if (mCurrentPage > 1) {
-			setItem(0, new GuiItem(GUIUtils.createBasicItem(Material.ARROW, "Back", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage - 1) + ".", NamedTextColor.LIGHT_PURPLE)))
+			setItem(0, new NjolGuiItem(GUIUtils.createBasicItem(Material.ARROW, "Back", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage - 1) + ".", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mCurrentPage -= 1;
 					update();
@@ -361,7 +361,7 @@ public class PlotAccessGui extends Gui {
 		}
 
 		if (mCurrentPage < mTotalPages) {
-			setItem(8, new GuiItem(GUIUtils.createBasicItem(Material.ARROW, "Next", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage + 1) + ".", NamedTextColor.LIGHT_PURPLE)))
+			setItem(8, new NjolGuiItem(GUIUtils.createBasicItem(Material.ARROW, "Next", NamedTextColor.WHITE, false, "Click to go to page " + (mCurrentPage + 1) + ".", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mCurrentPage += 1;
 					update();
@@ -369,7 +369,7 @@ public class PlotAccessGui extends Gui {
 		}
 
 		if (mAccessInfoGuiMode != AccessInfoGuiMode.INACTIVE) {
-			setItem(45, new GuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Main Menu", NamedTextColor.WHITE, false, "Click to return to the main menu.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(45, new NjolGuiItem(GUIUtils.createBasicItem(Material.RED_CONCRETE, "Main Menu", NamedTextColor.WHITE, false, "Click to return to the main menu.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mCurrentPage = 1;
 					mAccessInfoGuiMode = AccessInfoGuiMode.INACTIVE;
@@ -379,7 +379,7 @@ public class PlotAccessGui extends Gui {
 		}
 
 		if (mAccessInfoGuiMode == AccessInfoGuiMode.OTHER_ACCESS_TO_OWNER_PLOT) {
-			setItem(6, new GuiItem(GUIUtils.createBasicItem(Material.FLINT_AND_STEEL, "Enter Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to enter revoke access mode where you can remove access from players on this screen.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(6, new NjolGuiItem(GUIUtils.createBasicItem(Material.FLINT_AND_STEEL, "Enter Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to enter revoke access mode where you can remove access from players on this screen.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mAccessInfoGuiMode = AccessInfoGuiMode.OTHER_ACCESS_TO_OWNER_PLOT_REMOVAL;
 					update();
@@ -388,7 +388,7 @@ public class PlotAccessGui extends Gui {
 
 		// TODO: redo permission handling
 		if (mAccessInfoGuiMode == AccessInfoGuiMode.OWNER_ACCESS_TO_OTHER_PLOTS && mViewer.hasPermission("monumenta.command.plot.remove.others")) {
-			setItem(6, new GuiItem(GUIUtils.createBasicItem(Material.FLINT_AND_STEEL, "Enter Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to enter revoke access mode where you can remove " + (mIsSelf ? "your " : mOwnerName + "'s ") + "access to other players' plots on this screen.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(6, new NjolGuiItem(GUIUtils.createBasicItem(Material.FLINT_AND_STEEL, "Enter Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to enter revoke access mode where you can remove " + (mIsSelf ? "your " : mOwnerName + "'s ") + "access to other players' plots on this screen.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mAccessInfoGuiMode = AccessInfoGuiMode.OWNER_ACCESS_TO_OTHER_PLOTS_REMOVAL;
 					update();
@@ -396,7 +396,7 @@ public class PlotAccessGui extends Gui {
 		}
 
 		if (mAccessInfoGuiMode == AccessInfoGuiMode.OTHER_ACCESS_TO_OWNER_PLOT_REMOVAL) {
-			setItem(6, new GuiItem(GUIUtils.createBasicItem(Material.CAMPFIRE, "Exit Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to exit revoke access mode.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(6, new NjolGuiItem(GUIUtils.createBasicItem(Material.CAMPFIRE, "Exit Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to exit revoke access mode.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mAccessInfoGuiMode = AccessInfoGuiMode.OTHER_ACCESS_TO_OWNER_PLOT;
 					update();
@@ -404,7 +404,7 @@ public class PlotAccessGui extends Gui {
 		}
 
 		if (mAccessInfoGuiMode == AccessInfoGuiMode.OWNER_ACCESS_TO_OTHER_PLOTS_REMOVAL) {
-			setItem(6, new GuiItem(GUIUtils.createBasicItem(Material.CAMPFIRE, "Exit Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to exit revoke access mode.", NamedTextColor.LIGHT_PURPLE)))
+			setItem(6, new NjolGuiItem(GUIUtils.createBasicItem(Material.CAMPFIRE, "Exit Revoke Access Mode", NamedTextColor.WHITE, false, "Click here to exit revoke access mode.", NamedTextColor.LIGHT_PURPLE)))
 				.onClick(event -> {
 					mAccessInfoGuiMode = AccessInfoGuiMode.OWNER_ACCESS_TO_OTHER_PLOTS;
 					update();

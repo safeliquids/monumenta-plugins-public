@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.events.AbilityCastEvent;
 import com.playmonumenta.plugins.events.CustomEffectApplyEvent;
 import com.playmonumenta.plugins.events.DamageEvent;
+import com.playmonumenta.plugins.events.DamageShieldedEvent;
 import com.playmonumenta.plugins.events.DoubleJumpEvent;
 import com.playmonumenta.plugins.events.EffectTypeApplyFromPotionEvent;
 import com.playmonumenta.plugins.events.EntityGainAbsorptionEvent;
@@ -336,6 +337,10 @@ public abstract class Ability {
 	}
 
 	public void inventoryOpenEvent(InventoryOpenEvent event) {
+
+	}
+
+	public void damageShieldedEvent(DamageShieldedEvent event) {
 
 	}
 

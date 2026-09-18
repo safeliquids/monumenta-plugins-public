@@ -30,7 +30,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("NullAway")
-public class AbilityTriggersGui extends Gui {
+public class AbilityTriggersGui extends NjolGui {
 
 	private static final Component MAIN_PAGE_TITLE = Component.text("Ability Triggers");
 	private static final int GUI_IDENTIFIER_LOC_L = 45;

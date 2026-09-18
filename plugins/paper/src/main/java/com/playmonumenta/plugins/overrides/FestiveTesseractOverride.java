@@ -3,10 +3,12 @@ package com.playmonumenta.plugins.overrides;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.bosses.BossManager;
 import com.playmonumenta.plugins.bosses.bosses.FestiveTesseractSnowmanBoss;
+import com.playmonumenta.plugins.bosses.bosses.PlayerTargetBoss;
+import com.playmonumenta.plugins.bosses.bosses.WinterSnowmanEventBoss;
 import com.playmonumenta.plugins.integrations.LibraryOfSoulsIntegration;
 import com.playmonumenta.plugins.particle.PartialParticle;
+import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.FastUtils;
-import com.playmonumenta.plugins.utils.InventoryUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.MessagingUtils;
@@ -54,7 +56,8 @@ public class FestiveTesseractOverride extends BaseOverride implements Listener {
 
 	@Override
 	public boolean leftClickItemInteraction(Plugin plugin, Player player, Action action, ItemStack item, @Nullable Block block) {
-		if (!InventoryUtils.testForItemWithName(item, TESSERACT_NAME, false)) {
+		int tesseractType = checkTesseractName(item);
+		if (tesseractType == 0) {
 			return true;
 		}
 
@@ -64,7 +67,7 @@ public class FestiveTesseractOverride extends BaseOverride implements Listener {
 		new PartialParticle(Particle.REDSTONE, loc, 4, 0.2, 0.2, 0.2, FESTIVE_RED_COLOR).spawnAsPlayerActive(player);
 		new PartialParticle(Particle.REDSTONE, loc, 4, 0.2, 0.2, 0.2, FESTIVE_GREEN_COLOR).spawnAsPlayerActive(player);
 		new PartialParticle(Particle.SNOWBALL, loc, 4, 0.2, 0.2, 0.2, 0).spawnAsPlayerActive(player);
-		if (checkTesseractName(item) == 2) {
+		if (tesseractType == 2) {
 			new PartialParticle(Particle.REDSTONE, loc, 4, 0.2, 0.2, 0.2, FESTIVE_RED_COLOR).spawnAsPlayerActive(player);
 			new PartialParticle(Particle.REDSTONE, loc, 4, 0.2, 0.2, 0.2, FESTIVE_GREEN_COLOR).spawnAsPlayerActive(player);
 			new PartialParticle(Particle.SNOWBALL, loc, 4, 0.2, 0.2, 0.2, 0).spawnAsPlayerActive(player);
@@ -75,7 +78,8 @@ public class FestiveTesseractOverride extends BaseOverride implements Listener {
 
 	@Override
 	public boolean rightClickItemInteraction(Plugin plugin, Player player, Action action, ItemStack item, @Nullable Block block) {
-		if (checkTesseractName(item) == 0) {
+		int tesseractType = checkTesseractName(item);
+		if (tesseractType == 0) {
 			return true;
 		}
 		if (ZoneUtils.hasZoneProperty(player.getLocation(), ZoneUtils.ZoneProperty.FESTIVE_TESSERACT_DISABLED)) {
@@ -84,7 +88,7 @@ public class FestiveTesseractOverride extends BaseOverride implements Listener {
 		}
 		List<String> currentSummons = STANDARD_SUMMONS;
 
-		if (checkTesseractName(item) == 2) {
+		if (tesseractType == 2) {
 			currentSummons = UPGRADE_SUMMONS;
 		}
 
@@ -130,8 +134,9 @@ public class FestiveTesseractOverride extends BaseOverride implements Listener {
 
 		for (LivingEntity summon : summons) {
 			if (summon != null) {
-				summon.getScoreboardTags().remove("boss_targetplayer");
-				summon.getScoreboardTags().remove("boss_winter_snowman");
+				summon.removeScoreboardTag(PlayerTargetBoss.identityTag);
+				summon.removeScoreboardTag(WinterSnowmanEventBoss.identityTag);
+				summon.removeScoreboardTag(EntityUtils.HOSTILE_TAG);
 				if (summon instanceof Lootable lootable) {
 					lootable.clearLootTable();
 				}
@@ -160,9 +165,10 @@ public class FestiveTesseractOverride extends BaseOverride implements Listener {
 	}
 
 	private int checkTesseractName(ItemStack item) {
-		if (ItemUtils.getPlainName(item).equals(TESSERACT_UPGRADENAME)) {
+		String plain = ItemUtils.getPlainName(item);
+		if (plain.equals(TESSERACT_UPGRADENAME)) {
 			return 2;
-		} else if (ItemUtils.getPlainName(item).equals(TESSERACT_NAME)) {
+		} else if (plain.equals(TESSERACT_NAME)) {
 			return 1;
 		}
 		return 0;

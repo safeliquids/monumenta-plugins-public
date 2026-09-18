@@ -141,6 +141,7 @@ import com.playmonumenta.plugins.abilities.warrior.berserker.MeteorSlam;
 import com.playmonumenta.plugins.abilities.warrior.berserker.Rampage;
 import com.playmonumenta.plugins.abilities.warrior.guardian.Bodyguard;
 import com.playmonumenta.plugins.abilities.warrior.guardian.Challenge;
+import com.playmonumenta.plugins.abilities.warrior.guardian.Endurance;
 import com.playmonumenta.plugins.abilities.warrior.guardian.ShieldWall;
 import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.commands.experiencinator.ExperiencinatorUtils;
@@ -151,6 +152,7 @@ import com.playmonumenta.plugins.effects.Stasis;
 import com.playmonumenta.plugins.events.AbilityCastEvent;
 import com.playmonumenta.plugins.events.CustomEffectApplyEvent;
 import com.playmonumenta.plugins.events.DamageEvent;
+import com.playmonumenta.plugins.events.DamageShieldedEvent;
 import com.playmonumenta.plugins.events.DoubleJumpEvent;
 import com.playmonumenta.plugins.events.EffectTypeApplyFromPotionEvent;
 import com.playmonumenta.plugins.events.EntityGainAbsorptionEvent;
@@ -544,6 +546,7 @@ public class AbilityManager {
 			ShieldWall.INFO,
 			Challenge.INFO,
 			Bodyguard.INFO,
+			Endurance.INFO,
 
 			//********** CLERIC **********//
 			// PALADIN
@@ -851,6 +854,10 @@ public class AbilityManager {
 
 	public void inventoryOpenEvent(Player player, InventoryOpenEvent event) {
 		conditionalCast(player, ability -> ability.inventoryOpenEvent(event));
+	}
+
+	public void damageShieldedEvent(Player player, DamageShieldedEvent event) {
+		conditionalCast(player, ability -> ability.damageShieldedEvent(event));
 	}
 
 	public void playerQuitEvent(Player player, PlayerQuitEvent event) {

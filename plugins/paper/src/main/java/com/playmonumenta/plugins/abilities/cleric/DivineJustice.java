@@ -16,11 +16,14 @@ import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
+import com.playmonumenta.plugins.itemstats.attributes.AttackDamageAdd;
+import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.network.ClientModHandler;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
+import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.MetadataUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.List;
@@ -207,7 +210,12 @@ public class DivineJustice extends Ability implements AbilityWithChargesOrStacks
 	}
 
 	public double calculateDamage(final DamageEvent event) {
-		return mDamage + event.getDamage(DamageType.MAGIC) * Math.max(mPercentDamage, 0.0);
+		double attackDamage = event.getDamage(DamageType.MAGIC) * Math.max(mPercentDamage, 0.0);
+
+		if (!event.getIsCrit() && !ItemStatUtils.hasEnchantment(mPlayer.getInventory().getItemInMainHand(), EnchantmentType.CUMBERSOME)) {
+			attackDamage *= AttackDamageAdd.CRIT_BONUS;
+		}
+		return mDamage + attackDamage;
 	}
 
 	private static Description<DivineJustice> getDescription1() {

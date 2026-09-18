@@ -33,7 +33,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class WalletGui extends Gui {
+public class WalletGui extends NjolGui {
 	private final boolean mOpenedAsModerator;
 	private final BaseWallet mWallet;
 	private final WalletManager.WalletSettings mSettings;
@@ -167,7 +167,7 @@ public class WalletGui extends Gui {
 				if (showAmounts) {
 					displayItem.setAmount((int) Math.max(1, Math.min(64, showAmountsAsStacks ? item.mAmount / item.mItem.getMaxStackSize() : item.mAmount)));
 				}
-				setItem(10 + posInPage + posInPage / 8, new GuiItem(displayItem, false))
+				setItem(10 + posInPage + posInPage / 8, new NjolGuiItem(displayItem, false))
 					.onClick(event -> {
 						if (!mOpenedAsModerator && mWallet.canNotAccess(mPlayer)) {
 							mPlayer.sendMessage(Component.text("You no longer have access to this wallet", NamedTextColor.RED));
@@ -355,7 +355,7 @@ public class WalletGui extends Gui {
 				});
 		}
 		{
-			setItem(3, new GuiItem(GUIUtils.createBasicItem(
+			setItem(3, new NjolGuiItem(GUIUtils.createBasicItem(
 				Material.SPYGLASS,
 				Component.text("Search By Name", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
 				List.of("Click to filter items by name", "Swap to filter items by location", "Shift-click to reset"), NamedTextColor.GRAY

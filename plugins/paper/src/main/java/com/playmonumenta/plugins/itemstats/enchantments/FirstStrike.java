@@ -8,6 +8,7 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import java.util.EnumSet;
@@ -42,6 +43,14 @@ public class FirstStrike implements Enchantment {
 		DamageType.PROJECTILE_SKILL
 	);
 
+	private static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = EnumSet.noneOf(DamageEvent.DamageType.class);
+
+	static {
+		AFFECTED_TYPES.addAll(ACTIVATION_DAMAGE_TYPES);
+		AFFECTED_TYPES.addAll(SAME_TICK_DAMAGE_TYPES);
+		AFFECTED_TYPES.addAll(DamageEvent.DamageType.getAllMagicTypes());
+	}
+
 	private static final EnumSet<ClassAbility> IGNORED_ABILITIES = EnumSet.of(
 		ClassAbility.HUNTING_COMPANION
 	);
@@ -54,8 +63,8 @@ public class FirstStrike implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 999;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGE_MULTIPLY;
 	}
 
 	@Override
@@ -103,7 +112,7 @@ public class FirstStrike implements Enchantment {
 	}
 
 	public void triggerFirstStrike(Plugin plugin, Player player, double bonus, DamageEvent event, LivingEntity enemy) {
-		event.updateGearDamageWithMultiplier(1 + bonus, SAME_TICK_DAMAGE_TYPES);
+		event.updateGearDamageWithMultiplier(1 + bonus, AFFECTED_TYPES);
 
 		double widthDelta = PartialParticle.getWidthDelta(enemy);
 		double doubleWidthDelta = widthDelta * 2;

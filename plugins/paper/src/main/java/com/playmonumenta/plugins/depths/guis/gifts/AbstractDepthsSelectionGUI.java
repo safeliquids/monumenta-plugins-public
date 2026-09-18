@@ -4,14 +4,14 @@ import com.playmonumenta.plugins.depths.DepthsManager;
 import com.playmonumenta.plugins.depths.DepthsPlayer;
 import com.playmonumenta.plugins.depths.guis.DepthsGUICommands;
 import com.playmonumenta.plugins.depths.rooms.DepthsRoomType;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import java.util.List;
 import java.util.function.Function;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractDepthsSelectionGUI<T> extends Gui {
+public abstract class AbstractDepthsSelectionGUI<T> extends NjolGui {
 	private static final List<List<Integer>> SLOTS_MAP = List.of(
 		List.of(13),
 		List.of(11, 15),

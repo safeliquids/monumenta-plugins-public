@@ -78,12 +78,27 @@ public class ServerProperties {
 	private final Set<String> mFormattingFreeBlockNames = new TreeSet<>();
 	private final List<NamespacedKey> mDroppedItemReplacements = new ArrayList<>();
 	private final List<NamespacedKey> mEggifySpawnEggs = new ArrayList<>();
+
+	// AntiLR
 	private int mLootingLimiterMobKills = 0;
 	private int mLootingLimiterSpawners = 0;
+	private double mLootingLimiterLoSScoreMobs = 2;
+	private double mLootingLimiterLoSScoreSpawners = 4;
+	private int mLootingLimiterMobCountThreshold = 2;
+	private int mLootingLimiterSpawnerCountThreshold = 2;
+	private int mLootingLimiterBankedChests = 3;
+
+	private double mLootingLimiterLoSScoreMobsStrike;
+	private double mLootingLimiterLoSScoreSpawnersStrike;
+	private int mLootingLimiterMobCountThresholdStrike;
+	private int mLootingLimiterSpawnerCountThresholdStrike;
+
 	private boolean mLootingLimiterIgnoreBreakingChests = false;
 	private boolean mDepthsEnabled = false;
+	private boolean mZenithCharmDupeCheckEnabled = true;
 	private boolean mTrickyCreepersEnabled = true;
 	private @Nullable String mGameplayDataExportPath = null;
+	private boolean mSkinManagerReadonly = true;
 
 	private JsonObject mDebugParameters = new JsonObject();
 
@@ -274,6 +289,47 @@ public class ServerProperties {
 		return INSTANCE.mLootingLimiterSpawners;
 	}
 
+	public static boolean lootingLimiterEnabled() {
+		return INSTANCE.mLootingLimiterSpawners != 0 && INSTANCE.mLootingLimiterMobKills != 0;
+	}
+
+	public static double getLootingLimiterModifiedLoSScoreMobs() {
+		return INSTANCE.mLootingLimiterLoSScoreMobs;
+	}
+
+	public static double getLootingLimiterModifiedLoSScoreSpawners() {
+		return INSTANCE.mLootingLimiterLoSScoreSpawners;
+	}
+
+	public static int getLootingLimiterMobCountThreshold() {
+		return INSTANCE.mLootingLimiterMobCountThreshold;
+	}
+
+	public static int getLootingLimiterSpawnerCountThreshold() {
+		return INSTANCE.mLootingLimiterSpawnerCountThreshold;
+	}
+
+	public static int getLootingLimiterBankedChests() {
+		return INSTANCE.mLootingLimiterBankedChests;
+	}
+
+	public static double getLootingLimiterModifiedLoSScoreMobsStrike() {
+		return INSTANCE.mLootingLimiterLoSScoreMobsStrike;
+	}
+
+	public static double getLootingLimiterModifiedLoSScoreSpawnersStrike() {
+		return INSTANCE.mLootingLimiterLoSScoreSpawnersStrike;
+	}
+
+	public static int getLootingLimiterMobCountThresholdStrike() {
+		return INSTANCE.mLootingLimiterMobCountThresholdStrike;
+	}
+
+	public static int getLootingLimiterSpawnerCountThresholdStrike() {
+		return INSTANCE.mLootingLimiterSpawnerCountThresholdStrike;
+	}
+
+
 	public static boolean getLootingLimiterIgnoreBreakingChests() {
 		return INSTANCE.mLootingLimiterIgnoreBreakingChests;
 	}
@@ -282,8 +338,16 @@ public class ServerProperties {
 		return INSTANCE.mDepthsEnabled;
 	}
 
+	public static boolean getZenithCharmDupeCheckEnabled() {
+		return INSTANCE.mZenithCharmDupeCheckEnabled;
+	}
+
 	public static boolean getTrickyCreepersEnabled() {
 		return INSTANCE.mTrickyCreepersEnabled;
+	}
+
+	public static boolean getSkinManagerWritable() {
+		return !INSTANCE.mSkinManagerReadonly;
 	}
 
 	public static boolean getMasterworkRefundEnabled() {
@@ -453,10 +517,23 @@ public class ServerProperties {
 
 			mLootingLimiterMobKills = getPropertyValueInt(object, "lootingLimiterMobKills", mLootingLimiterMobKills);
 			mLootingLimiterSpawners = getPropertyValueInt(object, "lootingLimiterSpawners", mLootingLimiterSpawners);
+			mLootingLimiterLoSScoreMobs = getPropertyValueDouble(object, "lootingLimiterLoSScoreMobs", mLootingLimiterLoSScoreMobs);
+			mLootingLimiterLoSScoreSpawners = getPropertyValueDouble(object, "lootingLimiterLoSScoreSpawners", mLootingLimiterLoSScoreSpawners);
+			mLootingLimiterMobCountThreshold = getPropertyValueInt(object, "lootingLimiterMobCountThreshold", mLootingLimiterMobCountThreshold);
+			mLootingLimiterSpawnerCountThreshold = getPropertyValueInt(object, "lootingLimiterSpawnerCountThreshold", mLootingLimiterSpawnerCountThreshold);
+			mLootingLimiterBankedChests = getPropertyValueInt(object, "lootingLimiterBankedChests", mLootingLimiterBankedChests);
+
+			mLootingLimiterLoSScoreMobsStrike = getPropertyValueDouble(object, "lootingLimiterLoSScoreMobsStrike", mLootingLimiterLoSScoreMobs);
+			mLootingLimiterLoSScoreSpawnersStrike = getPropertyValueDouble(object, "lootingLimiterLoSScoreSpawnersStrike", mLootingLimiterLoSScoreSpawners);
+			mLootingLimiterMobCountThresholdStrike = getPropertyValueInt(object, "lootingLimiterMobCountThresholdStrike", mLootingLimiterMobCountThreshold);
+			mLootingLimiterSpawnerCountThresholdStrike = getPropertyValueInt(object, "lootingLimiterSpawnerCountThresholdStrike", mLootingLimiterSpawnerCountThreshold);
+
 			mLootingLimiterIgnoreBreakingChests = getPropertyValueBool(object, "lootingLimiterIgnoreBreakingChests", mLootingLimiterIgnoreBreakingChests);
 
 			mDepthsEnabled = getPropertyValueBool(object, "depthsEnabled", mDepthsEnabled);
+			mZenithCharmDupeCheckEnabled = getPropertyValueBool(object, "zenithCharmDupeCheckEnabled", mZenithCharmDupeCheckEnabled);
 			mTrickyCreepersEnabled = getPropertyValueBool(object, "trickyCreepersEnabled", mTrickyCreepersEnabled);
+			mSkinManagerReadonly = getPropertyValueBool(object, "skinManagerReadonly", mSkinManagerReadonly);
 
 			if (!(object.get("debugParameters") instanceof JsonObject debugParameters)) {
 				mDebugParameters = new JsonObject();
@@ -529,9 +606,21 @@ public class ServerProperties {
 
 		out.add("lootingLimiterMobKills = " + mLootingLimiterMobKills);
 		out.add("lootingLimiterSpawners = " + mLootingLimiterSpawners);
+		out.add("lootingLimiterBankedChests = " + mLootingLimiterBankedChests);
 		out.add("lootingLimiterIgnoreBreakingChests = " + mLootingLimiterIgnoreBreakingChests);
+		out.add("LootingLimiterLoSScoreMobs = " + mLootingLimiterLoSScoreMobs);
+		out.add("LootingLimiterLoSScoreSpawners = " + mLootingLimiterLoSScoreSpawners);
+		out.add("lootingLimiterMobCountThreshold = " + mLootingLimiterMobCountThreshold);
+		out.add("lootingLimiterSpawnerCountThreshold = " + mLootingLimiterSpawnerCountThreshold);
+
+		out.add("LootingLimiterLoSScoreMobsStrike = " + mLootingLimiterLoSScoreMobsStrike);
+		out.add("LootingLimiterLoSScoreSpawnersStrike = " + mLootingLimiterLoSScoreSpawnersStrike);
+		out.add("lootingLimiterMobCountThresholdStrike = " + mLootingLimiterMobCountThresholdStrike);
+		out.add("lootingLimiterSpawnerCountThresholdStrike = " + mLootingLimiterSpawnerCountThresholdStrike);
+
 
 		out.add("depthsEnabled = " + mDepthsEnabled + " (NB: changing this requires a restart)");
+		out.add("zenithCharmDupeCheckEnabled = " + mZenithCharmDupeCheckEnabled);
 
 		out.add("trickyCreepersEnabled = " + mTrickyCreepersEnabled);
 
@@ -559,6 +648,17 @@ public class ServerProperties {
 		JsonElement element = object.get(propertyName);
 		if (element != null) {
 			value = element.getAsInt();
+		}
+
+		return value;
+	}
+
+	private double getPropertyValueDouble(JsonObject object, String propertyName, double defaultVal) {
+		double value = defaultVal;
+
+		JsonElement element = object.get(propertyName);
+		if (element != null) {
+			value = element.getAsDouble();
 		}
 
 		return value;

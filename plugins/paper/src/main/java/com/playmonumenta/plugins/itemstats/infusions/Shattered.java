@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.effects.RespawnStasis;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.itemstats.enums.Tier;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.potion.PotionManager;
@@ -16,6 +17,7 @@ import com.playmonumenta.plugins.utils.MessagingUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -61,8 +63,8 @@ public class Shattered implements Infusion {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 4998; // just before region scaling
+	public StatPriority getPriorityAmount() {
+		return StatPriority.SHATTERED; // just before region scaling
 	}
 
 	public static double getMultiplier(int level) {
@@ -108,7 +110,7 @@ public class Shattered implements Infusion {
 				if (DateUtils.getSecond() % 12 < 6) {
 					MessagingUtils.sendActionBarMessage(player, "Some of your gear is Shattered, giving you " + (hasMaxShatteredItemEquipped(player) ? "Mining Fatigue and " : "") + (int) (getMultiplier(shatterLevel) * 100) + "% Weakness and Vulnerability!", NamedTextColor.RED);
 				} else {
-					MessagingUtils.sendActionBarMessage(player, "Retrieve a Grave, or use Repair Anvils to remove Shattered.", NamedTextColor.RED);
+					MessagingUtils.sendActionBarMessage(player, "Retrieve a Grave or use Repair Anvils to remove Shattered.", NamedTextColor.RED);
 				}
 			}
 			updateEffects(plugin, player, shatterLevel);
@@ -169,7 +171,7 @@ public class Shattered implements Infusion {
 		}
 		int newLevel = Math.min(oldLevel + numLevels, MAX_LEVEL);
 		ItemStatUtils.addInfusion(item, InfusionType.SHATTERED, newLevel, NULL_UUID);
-		ItemUpdateHelper.generateItemStats(item);
+		ItemUpdateHelper.generateItemStats(item, List.of("Shatter added to item"));
 		return newLevel;
 	}
 
@@ -193,7 +195,7 @@ public class Shattered implements Infusion {
 		} else {
 			ItemStatUtils.addInfusion(item, InfusionType.SHATTERED, oldLevel - 1, NULL_UUID);
 		}
-		ItemUpdateHelper.generateItemStats(item);
+		ItemUpdateHelper.generateItemStats(item, List.of("Shatter removed from item"));
 		return true;
 	}
 }

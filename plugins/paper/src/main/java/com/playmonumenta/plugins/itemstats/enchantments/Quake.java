@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
@@ -46,10 +47,9 @@ public class Quake implements Enchantment {
 		return EnumSet.of(Slot.MAINHAND, Slot.PROJECTILE);
 	}
 
-	// After all damage multipliers for the onDamage() storage portion. onKill() should not have any ordering issues
 	@Override
-	public double getPriorityAmount() {
-		return 5001;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGING_ENCHANTMENT;
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class Quake implements Enchantment {
 	}
 
 	@Override
-	public void onDamage(Plugin plugin, Player player, double level, DamageEvent event, LivingEntity enemy) {
+	public void onDamageDelayed(Plugin plugin, Player player, double level, DamageEvent event, LivingEntity enemy) {
 		if (event.getType() == DamageType.MELEE || event.getType() == DamageType.PROJECTILE) {
 			//Store the highest damage dealt with a quake weapon this tick
 			double damage = event.getDamage();

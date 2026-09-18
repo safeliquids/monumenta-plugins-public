@@ -163,7 +163,7 @@ public class ItemUpdateManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void entityPickupItemEvent(EntityPickupItemEvent event) {
 		List<String> path = new ArrayList<>();
-		path.add("EntityPickupItemEvent");
+		path.add("EntityPickupItemEvent at " + event.getEntity().getLocation().getWorld().getName() + " " + event.getEntity().getLocation().toVector());
 
 		Item entity = event.getItem();
 		ItemStack item = entity.getItemStack();
@@ -177,7 +177,7 @@ public class ItemUpdateManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void itemSpawnEvent(ItemSpawnEvent event) {
 		List<String> path = new ArrayList<>();
-		path.add("ItemSpawnEvent");
+		path.add("ItemSpawnEvent at " + event.getEntity().getLocation().getWorld().getName() + " " + event.getEntity().getLocation().toVector());
 
 		Item itemEntity = event.getEntity();
 		ItemStack item = itemEntity.getItemStack();
@@ -191,7 +191,16 @@ public class ItemUpdateManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void inventoryOpenEvent(InventoryOpenEvent event) {
 		List<String> path = new ArrayList<>();
-		path.add("InventoryOpenEvent");
+		Player player = (Player) event.getPlayer();
+		Location location = event.getInventory().getLocation();
+		String locationString;
+		if (location == null) {
+			locationString = " for virtual inventory (" + event.getInventory().getType() + ")";
+		} else {
+			locationString = " for inventory (" + event.getInventory().getType() + ") at " + location.getWorld().getName() + " " + location.toVector();
+		}
+		path.add("InventoryOpenEvent for Player" + " " + player.getName()
+			+ locationString);
 
 		try {
 			updateNested(path, event.getInventory());
@@ -272,7 +281,7 @@ public class ItemUpdateManager implements Listener {
 				});
 			}
 
-			ItemUpdateHelper.generateItemStats(item);
+			ItemUpdateHelper.generateItemStats(item, path);
 		} catch (Exception e) {
 			path = new ArrayList<>(path);
 			path.add("in ItemStack " + ItemUtils.getGiveCommand(item));
@@ -488,7 +497,7 @@ public class ItemUpdateManager implements Listener {
 			@Nullable ItemStack item = items[i];
 			if (item != null) {
 				List<String> subPath = new ArrayList<>(path);
-				subPath.add("in slot " + i);
+				subPath.add("slot " + i);
 				try {
 					updateNested(subPath, item);
 				} catch (Exception e) {

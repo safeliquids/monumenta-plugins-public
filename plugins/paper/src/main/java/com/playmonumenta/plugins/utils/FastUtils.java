@@ -71,7 +71,7 @@ public class FastUtils {
 	 * Generates a random boolean.
 	 */
 	public static boolean randomBoolean() {
-		return RANDOM.nextInt(2) == 0;
+		return RANDOM.nextBoolean();
 	}
 
 	/**

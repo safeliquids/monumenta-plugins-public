@@ -36,10 +36,12 @@ import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 public class ShieldBash extends Ability {
 
-	private static final double[] SHIELD_BASH_DAMAGE = {8, 12, 16};
+	private static final double[] SHIELD_BASH_DAMAGE_L1 = {6, 9, 12};
+	private static final double[] SHIELD_BASH_DAMAGE_L2 = {8, 12, 16};
 	private static final int SHIELD_BASH_STUN = 20;
-	private static final int SHIELD_BASH_COOLDOWN = 20 * 8;
-	private static final int SHIELD_BASH_2_RADIUS = 3;
+	private static final int SHIELD_BASH_COOLDOWN_L1 = 20 * 10;
+	private static final int SHIELD_BASH_COOLDOWN_L2 = 20 * 8;
+	private static final int SHIELD_BASH_RADIUS = 3;
 	private static final int SHIELD_BASH_RANGE = 4;
 	private static final int ENHANCEMENT_BLOCKING_DURATION = 20;
 	private static final double ENHANCEMENT_CDR = 0.5;
@@ -59,8 +61,8 @@ public class ShieldBash extends Ability {
 			.scoreboardId("ShieldBash")
 			.shorthandName("SB")
 			.descriptions(getDescription1(), getDescription2(), getDescriptionEnhancement())
-			.simpleDescription("Bash mobs with your shield, stunning and taunting them.")
-			.cooldown(SHIELD_BASH_COOLDOWN, CHARM_COOLDOWN)
+			.simpleDescription("Bash mobs with your shield, taunting them.")
+			.cooldown(SHIELD_BASH_COOLDOWN_L1, SHIELD_BASH_COOLDOWN_L2, CHARM_COOLDOWN)
 			.displayItem(Material.IRON_DOOR);
 
 	private final double mRange;
@@ -79,17 +81,16 @@ public class ShieldBash extends Ability {
 	public ShieldBash(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
 		mRange = CharmManager.getRadius(mPlayer, CHARM_RANGE, SHIELD_BASH_RANGE);
-		mRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, SHIELD_BASH_2_RADIUS);
+		mRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, SHIELD_BASH_RADIUS);
 		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE,
-			AbilityUtils.getRegionScaled(player, SHIELD_BASH_DAMAGE));
+			AbilityUtils.getRegionScaled(player, isLevelOne() ? SHIELD_BASH_DAMAGE_L1 : SHIELD_BASH_DAMAGE_L2));
 		mStunDuration = CharmManager.getDuration(mPlayer, CHARM_DURATION, SHIELD_BASH_STUN);
 		mParryDuration = CharmManager.getDuration(mPlayer, CHARM_PARRY_DURATION, ENHANCEMENT_BLOCKING_DURATION);
 		mCDR = ENHANCEMENT_CDR + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_CDR);
 		mKnockback = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, 0.35f);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new ShieldBashCS());
-		Bukkit.getScheduler().runTask(plugin, () -> {
-			mCounterStrike = plugin.mAbilityManager.getPlayerAbilityIgnoringSilence(player, CounterStrike.class);
-		});
+
+		Bukkit.getScheduler().runTask(plugin, () -> mCounterStrike = plugin.mAbilityManager.getPlayerAbilityIgnoringSilence(player, CounterStrike.class));
 	}
 
 	@Override
@@ -108,13 +109,12 @@ public class ShieldBash extends Ability {
 		World world = eyeLoc.getWorld();
 		mCosmetic.onCast(mPlayer, world, eyeLoc, mobLoc);
 
-		bash(mob, ClassAbility.SHIELD_BASH);
-		if (isLevelTwo()) {
-			Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(mob), mRadius);
-			for (LivingEntity le : hitbox.getHitMobs(mob)) {
-				mCosmetic.onHitSurroundingMobs(mPlayer, world, eyeLoc, le.getEyeLocation());
-				bash(le, ClassAbility.SHIELD_BASH_AOE);
-			}
+		bash(mob, true);
+
+		Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(mob), mRadius);
+		for (LivingEntity le : hitbox.getHitMobs(mob)) {
+			mCosmetic.onHitSurroundingMobs(mPlayer, world, eyeLoc, le.getEyeLocation());
+			bash(le, false);
 		}
 
 		if (isEnhanced()) {
@@ -138,16 +138,20 @@ public class ShieldBash extends Ability {
 		}
 	}
 
-	private void bash(LivingEntity le, ClassAbility ca) {
-		DamageUtils.damage(mPlayer, le, DamageType.MELEE_SKILL, mDamage, ca, true, false);
+	private void bash(LivingEntity le, boolean isTarget) {
+		DamageUtils.damage(mPlayer, le, DamageType.MELEE_SKILL, mDamage, ClassAbility.SHIELD_BASH, true, false);
 		if (mKnockback != 0) {
 			MovementUtils.knockAway(mPlayer, le, (float) mKnockback);
 		}
-		if (EntityUtils.isBoss(le) || EntityUtils.isElite(le)) {
-			EntityUtils.applySlow(mPlugin, mStunDuration, .99, le);
-		} else {
-			EntityUtils.applyStun(mPlugin, mStunDuration, le);
+
+		if (isLevelTwo() || isTarget) {
+			if (EntityUtils.isBoss(le) || EntityUtils.isElite(le)) {
+				EntityUtils.applySlow(mPlugin, mStunDuration, .99, le);
+			} else {
+				EntityUtils.applyStun(mPlugin, mStunDuration, le);
+			}
 		}
+
 		if (le instanceof Mob mob) {
 			if (mCounterStrike != null) {
 				mCounterStrike.onTaunt(mob);
@@ -158,7 +162,7 @@ public class ShieldBash extends Ability {
 
 				@Override
 				public void run() {
-					if (mob.isDead() || !mob.isValid() || mT > mStunDuration * 2) {
+					if (mob.isDead() || !mob.isValid() || ((isLevelTwo() || isTarget) && mT > mStunDuration * 2)) {
 						this.cancel();
 					} else if (!EntityUtils.isStunned(mob)) {
 						EntityUtils.applyTaunt(mob, mPlayer, false);
@@ -175,29 +179,35 @@ public class ShieldBash extends Ability {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 1)
 			.addCustomTrigger("Shield Block")
 			.addDashedLine()
-			.addLine("Damage, taunt, and stun a target")
-			.addLine("mob in front of you.")
+			.addLine("Stun a target mob in front of you. The target")
+			.addLine("mob and nearby mobs are also damaged and taunted.")
 			.addLine("(Elites/Bosses are rooted instead)")
 			.addLine()
-			.addStat("Damage: %d0R (m)")
-				.statValues(perRegion(a -> a.mDamage, SHIELD_BASH_DAMAGE[0], SHIELD_BASH_DAMAGE[1], SHIELD_BASH_DAMAGE[2]))
-			.addStat("Effect: Stun for %t")
-				.statValues(stat(a -> a.mStunDuration, SHIELD_BASH_STUN))
+			.addStat("Effect: Stun for %t (on target mob)")
+			.statValues(stat(a -> a.mStunDuration, SHIELD_BASH_STUN))
+			.addStat("Damage: %d1R (m)")
+			.statValues(perRegion(a -> a.mDamage, SHIELD_BASH_DAMAGE_L1[0], SHIELD_BASH_DAMAGE_L1[1], SHIELD_BASH_DAMAGE_L1[2]))
+			.addStat("Radius: %r")
+			.statValues(stat(a -> a.mRadius, SHIELD_BASH_RADIUS))
 			.addStat("Range: %r")
-				.statValues(stat(a -> a.mRange, SHIELD_BASH_RANGE))
-			.addStat("Cooldown: %t")
-				.statValues(cooldown(SHIELD_BASH_COOLDOWN))
+			.statValues(stat(a -> a.mRange, SHIELD_BASH_RANGE))
+			.addStat("Cooldown: %t1")
+			.statValues(cooldown(SHIELD_BASH_COOLDOWN_L1))
 			.addDashedLine();
 	}
 
 	private static Description<ShieldBash> getDescription2() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
-			.addLine("*Shield Bash* now hits all").styles(UNDERLINED)
-			.addLine("mobs near the target mob.")
+			.addLine("Increase *Shield Bash*'s damage and").styles(UNDERLINED)
+			.addLine("reduce its cooldown. *Shield Bash*").styles(UNDERLINED)
+			.addLine("stun all mobs in front of you.")
 			.addLine()
-			.addStat("Radius: %r")
-				.statValues(stat(a -> a.mRadius, SHIELD_BASH_2_RADIUS))
+			.addStatComparison("Damage: %d1R -> %d2R (m)")
+			.statValues(perRegion(a -> a.mDamage, SHIELD_BASH_DAMAGE_L1[0], SHIELD_BASH_DAMAGE_L1[1], SHIELD_BASH_DAMAGE_L1[2]),
+				perRegion(a -> a.mDamage, SHIELD_BASH_DAMAGE_L2[0], SHIELD_BASH_DAMAGE_L2[1], SHIELD_BASH_DAMAGE_L2[2]))
+			.addStatComparison("Cooldown: %t1 -> %t2")
+			.statValues(cooldown(SHIELD_BASH_COOLDOWN_L1), cooldown(SHIELD_BASH_COOLDOWN_L2))
 			.addDashedLine();
 	}
 
@@ -205,12 +215,12 @@ public class ShieldBash extends Ability {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 3)
 			.addDashedLine()
 			.addLine("Blocking an attack within %t of")
-				.statValues(stat(a -> a.mParryDuration, ENHANCEMENT_BLOCKING_DURATION))
+			.statValues(stat(a -> a.mParryDuration, ENHANCEMENT_BLOCKING_DURATION))
 			.addLine("raising your shield reduces")
 			.addLine("*Shield Bash*'s cooldown.").styles(UNDERLINED)
 			.addLine()
 			.addStat("Cooldown Reduction: %p")
-				.statValues(stat(a -> a.mCDR, ENHANCEMENT_CDR))
+			.statValues(stat(a -> a.mCDR, ENHANCEMENT_CDR))
 			.addDashedLine();
 	}
 }

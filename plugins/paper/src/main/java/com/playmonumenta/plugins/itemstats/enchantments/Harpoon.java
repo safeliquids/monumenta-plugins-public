@@ -37,11 +37,6 @@ public class Harpoon implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 32;
-	}
-
-	@Override
 	public void onDamage(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
 		if (event.getDamager() instanceof Projectile projectile) {
 			applyHarpoon(plugin, value, event.getDamagee(), projectile.getVelocity());

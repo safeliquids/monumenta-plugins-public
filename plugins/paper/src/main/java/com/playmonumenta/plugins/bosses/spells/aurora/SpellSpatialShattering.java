@@ -57,12 +57,12 @@ public class SpellSpatialShattering extends Spell implements CooldownReducible {
 
 	private final SpellCooldownManager mSpellCooldownManager;
 
-	public SpellSpatialShattering(Plugin plugin, LivingEntity boss, Location center) {
+	public SpellSpatialShattering(Plugin plugin, LivingEntity boss, Location center, int cooldown) {
 		mPlugin = plugin;
 		mBoss = boss;
 		mCenter = center;
 		mYawOffset = mCenter.getYaw() + 22.5f;
-		mSpellCooldownManager = new SpellCooldownManager(60 * 20, boss::isValid, boss::hasAI);
+		mSpellCooldownManager = new SpellCooldownManager(cooldown, boss::isValid, boss::hasAI);
 	}
 
 	@Override
@@ -115,7 +115,9 @@ public class SpellSpatialShattering extends Spell implements CooldownReducible {
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
 				super.cancel();
-				mBoss.setPose(Pose.STANDING);
+				if (mBoss.isValid()) {
+					mBoss.setPose(Pose.STANDING);
+				}
 			}
 		};
 		mActiveRunnables.add(runnable);

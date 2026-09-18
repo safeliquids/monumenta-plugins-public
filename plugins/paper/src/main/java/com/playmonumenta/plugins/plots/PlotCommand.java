@@ -13,6 +13,7 @@ import com.playmonumenta.redissync.RBoardAPI;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.BooleanArgument;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
@@ -48,6 +49,7 @@ public class PlotCommand {
 	private static final String SUBCOMMAND_BORDERGUI = "bordergui";
 	private static final String SUBCOMMAND_NEW = "new";
 	private static final String SUBCOMMAND_RESET = "reset";
+	private static final String SUBCOMMAND_LOCK = "lock";
 	private static final String PERMISSION_ADD_OTHER = "monumenta.plots.addother";
 	private static final String PERMISSION_REMOVE_OTHER = "monumenta.plots.removeother";
 	private static final String PERMISSION_INFO_OTHER = "monumenta.plots.infoother";
@@ -56,6 +58,7 @@ public class PlotCommand {
 	private static final String PERMISSION_BORDERGUI = "monumenta.plots.bordergui";
 	private static final String PERMISSION_NEW = "monumenta.plots.new";
 	private static final String PERMISSION_RESET = "monumenta.plots.reset";
+	private static final String PERMISSION_LOCK_OR_UNLOCK = "monumenta.plots.lock";
 	private static final IntegerArgument REGION_ARGUMENT = new IntegerArgument("region", 0, 3);
 	private static final MultiLiteralArgument MULTI_REGION_ARGUMENT = new MultiLiteralArgument("region", "all", "valley", "isles", "ring");
 
@@ -438,6 +441,23 @@ public class PlotCommand {
 								}
 							});
 						}
+					}
+				})
+			)
+
+			/* /plot lock <player> <boolean> */
+			.withSubcommand(new CommandAPICommand(SUBCOMMAND_LOCK)
+				.withPermission(PERMISSION_LOCK_OR_UNLOCK)
+				// Suggest names of every player to have joined the server
+				.withArguments(new StringArgument("player").replaceSuggestions(ALL_CACHED_PLAYER_NAMES_SUGGESTIONS))
+				.withArguments(new BooleanArgument("applyLock"))
+				.executesPlayer((moderator, args) -> {
+					String playerName = (String) args.get("player");
+					UUID playerUuid = StringUtils.getUuidFromInput(playerName);
+					if ((boolean) args.getOrDefault("applyLock", true)) {
+						PlotManager.lockPlot(playerUuid, moderator);
+					} else {
+						PlotManager.unlockPlot(playerUuid, moderator);
 					}
 				})
 			)

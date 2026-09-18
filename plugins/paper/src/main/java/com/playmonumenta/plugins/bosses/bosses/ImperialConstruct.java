@@ -22,10 +22,9 @@ import com.playmonumenta.plugins.bosses.spells.imperialconstruct.SpellSteelboreS
 import com.playmonumenta.plugins.bosses.spells.imperialconstruct.SpellStonemason;
 import com.playmonumenta.plugins.effects.TemporalFlux;
 import com.playmonumenta.plugins.events.DamageEvent;
-import com.playmonumenta.plugins.itemstats.enums.InfusionType;
-import com.playmonumenta.plugins.itemstats.infusions.Sturdy;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.EntityUtils;
+import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import com.playmonumenta.plugins.utils.NmsUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
@@ -624,7 +623,7 @@ public class ImperialConstruct extends SerializedLocationBossAbilityGroup {
 		if (event.getEvent().getEntity() instanceof Player player && event.getCause().equals(DamageCause.ENTITY_ATTACK)) {
 			if (player.isBlocking()) {
 				// set shield cooldown if boss hits player
-				int finalStunTicks = Sturdy.updateStunCooldown(20 * 6, Plugin.getInstance().mItemStatManager.getInfusionLevel(player, InfusionType.STURDY));
+				int finalStunTicks = ItemUtils.getShieldStunDuration(player, 20 * 6);
 				NmsUtils.getVersionAdapter().stunShield(player, finalStunTicks);
 			}
 		}

@@ -84,7 +84,6 @@ public class SpellAuroraVolley extends Spell {
 					AbstractArrow proj = (AbstractArrow) projectile;
 
 					proj.setPickupStatus(PickupStatus.CREATIVE_ONLY);
-					proj.setPierceLevel(10);
 					proj.setDamage(DAMAGE);
 
 					mActiveTasks.add(new BukkitRunnable() {

@@ -184,7 +184,7 @@ public enum EffectType {
 
 	//Damage type of effects
 	DAMAGE("damage", "Strength", true, false, false, pluginApplicator(
-		(duration, strength, source) -> new PercentDamageDealt(duration, strength).damageTypes(DamageEvent.DamageType.getScalableDamageType())
+		(duration, strength, source) -> new PercentDamageDealt(duration, strength).damageTypes(DamageEvent.DamageType.getScalableDamageTypes())
 	)),
 	MELEE_DAMAGE("MeleeDamage", "Melee Damage", true, false, false, pluginApplicator(
 		(duration, strength, source) -> new PercentDamageDealt(duration, strength).damageTypes(DamageEvent.DamageType.getAllMeleeTypes())

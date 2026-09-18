@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class DungeonsGui extends Gui {
+public class DungeonsGui extends NjolGui {
 
 	private static final ItemStack NO_INSTANCE_ITEM = GUIUtils.createBasicItem(
 		Material.RED_STAINED_GLASS_PANE,
@@ -150,7 +150,7 @@ public class DungeonsGui extends Gui {
 			));
 		} else {
 			setItem(2, 0, GUIUtils.createBasicItem(Material.GREEN_TERRACOTTA, "King's Valley", NamedTextColor.GREEN, true,
-				"View Region 1 daily completions."))
+				"View Region 1 weekly dungeon information."))
 				.onLeftClick(() -> {
 					mPage = 1;
 					mPlayer.playSound(mPlayer, Sound.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.PLAYERS, 1.0f, 0.5f);
@@ -168,7 +168,7 @@ public class DungeonsGui extends Gui {
 		} else {
 			if (PlayerUtils.hasUnlockedIsles(mPlayer)) {
 				setItem(3, 0, GUIUtils.createBasicItem(Material.SAND, "Celsian Isles", NamedTextColor.AQUA, true,
-					"View Region 2 daily completions."))
+					"View Region 2 weekly dungeon information."))
 					.onLeftClick(() -> {
 						mPage = 2;
 						mPlayer.playSound(mPlayer, Sound.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.PLAYERS, 1.0f, 0.5f);
@@ -191,7 +191,7 @@ public class DungeonsGui extends Gui {
 		} else {
 			if (PlayerUtils.hasUnlockedRing(mPlayer)) {
 				setItem(4, 0, GUIUtils.createBasicItem(Material.RED_MUSHROOM_BLOCK, "Architect's Ring", NamedTextColor.RED, true,
-					"View Region 3 daily completions."))
+					"View Region 3 weekly dungeon information."))
 					.onLeftClick(() -> {
 						mPage = 3;
 						mPlayer.playSound(mPlayer, Sound.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.PLAYERS, 1.0f, 0.5f);

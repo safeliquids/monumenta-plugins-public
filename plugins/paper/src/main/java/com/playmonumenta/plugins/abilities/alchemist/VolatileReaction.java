@@ -434,6 +434,8 @@ public class VolatileReaction extends Ability implements PotionAbility {
 			.addLine()
 			.addStat("Concoction Radius: %p (of potion radius)")
 			.statValues(stat(a -> a.mRadiusMultiplier, POTION_RADIUS_MULTIPLIER))
+			.addStat("Cooldown: %t")
+			.statValues(FormattedDescriptionBuilder.StatValue.cooldown(COOLDOWN))
 			.addLine()
 			.addLine("Afflicting a *Volatile* mob with *Gruesome* or").styles(VOLATILE_COLOR, GRUESOME_COLOR)
 			.addLine("*Brutal* causes an explosion that damages that").styles(BRUTAL_COLOR)

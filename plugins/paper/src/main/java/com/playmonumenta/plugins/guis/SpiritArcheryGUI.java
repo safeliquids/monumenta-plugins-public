@@ -19,7 +19,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class SpiritArcheryGUI extends Gui {
+public class SpiritArcheryGUI extends NjolGui {
 	public static final Component playerInMinigame = Component.text("The spirits must be faced alone...").color(NamedTextColor.GRAY);
 	public static final Component playerTooPoor = Component.text("Your experience is insufficient to face down the spirits...").color(NamedTextColor.GRAY);
 	private static final NamespacedKey CXP_KEY = NamespacedKeyUtils.fromString("epic:r1/items/currency/concentrated_experience");

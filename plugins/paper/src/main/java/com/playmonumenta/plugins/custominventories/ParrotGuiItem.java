@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.custominventories;
 
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import net.kyori.adventure.text.Component;
@@ -15,7 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class ParrotGuiItem extends GuiItem {
+public class ParrotGuiItem extends NjolGuiItem {
 	private final ParrotCustomInventory mGUI;
 	private final int mPage;
 	private final int mSlot;

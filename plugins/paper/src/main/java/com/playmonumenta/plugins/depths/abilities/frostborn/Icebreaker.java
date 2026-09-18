@@ -25,7 +25,7 @@ public class Icebreaker extends DepthsAbility {
 	public static final String ABILITY_NAME = "Icebreaker";
 	public static final double[] ICE_DAMAGE = {0.20, 0.27, 0.33, 0.40, 0.46, 0.60};
 	public static final double[] EFFECT_DAMAGE = {0.10, 0.135, 0.165, 0.20, 0.23, 0.30};
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
 
 	public static final DepthsAbilityInfo<Icebreaker> INFO =
 		new DepthsAbilityInfo<>(Icebreaker.class, ABILITY_NAME, Icebreaker::new, DepthsTree.FROSTBORN, DepthsTrigger.PASSIVE)

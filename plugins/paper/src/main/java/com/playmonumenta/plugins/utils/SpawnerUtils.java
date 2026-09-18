@@ -15,7 +15,6 @@ import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.spawners.SpawnerActionManager;
 import com.playmonumenta.plugins.spawners.SpawnerBreakAction;
 import com.playmonumenta.plugins.spawners.actions.CustomFunctionAction;
-import com.playmonumenta.plugins.spawners.types.ProtectorSpawner;
 import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import de.tr7zw.nbtapi.iface.ReadableItemNBT;
@@ -65,6 +64,7 @@ import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.Nullable;
 
 import static com.playmonumenta.plugins.listeners.SpawnerListener.spawnerCatMap;
+import static com.playmonumenta.plugins.spawners.types.ProtectorSpawner.getProtector;
 import static com.playmonumenta.plugins.spawners.types.RallySpawner.getRally;
 import static com.playmonumenta.plugins.spawners.types.RallySpawner.triggerRallyEffect;
 
@@ -178,7 +178,7 @@ public class SpawnerUtils {
 				// set health to specified
 				Objects.requireNonNull(cat.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(catHealth);
 				cat.setHealth(catHealth);
-				cat.addScoreboardTag("Hostile");
+				cat.addScoreboardTag(EntityUtils.HOSTILE_TAG);
 				spawnerCatMap.put(block.getLocation(), cat.getUniqueId());
 				spawnersWithCat.add(block.getLocation());
 
@@ -334,7 +334,7 @@ public class SpawnerUtils {
 					new PartialParticle(Particle.REDSTONE, centerLoc.clone().add(FastUtils.randomDoubleInRange(-1, 1), FastUtils.randomDoubleInRange(-1, 1), FastUtils.randomDoubleInRange(-1, 1)), 1).data(mBROWN).spawnFull();
 				}
 
-				if (ProtectorSpawner.getProtector(spawnerBlock)) {
+				if (getProtector(spawnerBlock)) {
 					Particle.DustOptions mYELLOW = new Particle.DustOptions(Color.fromRGB(237, 198, 26), 1.0f);
 					new PPCircle(Particle.REDSTONE, spawnerBlock.getLocation().clone().add(0.5, 1.2, 0.5), 0.5).data(mYELLOW).countPerMeter(8).spawnAsEnemy();
 				}
@@ -1036,4 +1036,16 @@ public class SpawnerUtils {
 		return canBreak;
 	}
 
+	public static boolean isSpecialSpawner(Block block) {
+		if (!isSpawner(block)) {
+			return false;
+		}
+		return getShields(block) > 0
+			|| getSpawnerType(block, GUARDED_ATTRIBUTE) > 0
+			|| getSpawnerType(block, CAT_ATTRIBUTE) > 0
+			|| getSpawnerType(block, SEQUENCE_ATTRIBUTE) > 0
+			|| getProtector(block)
+			|| getSpawnerType(block, ENSNARED_ATTRIBUTE) > 0
+			|| !getBreakActionIdentifiers(block).isEmpty();
+	}
 }

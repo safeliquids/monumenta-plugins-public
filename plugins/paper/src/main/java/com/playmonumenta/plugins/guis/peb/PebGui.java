@@ -1,24 +1,24 @@
 package com.playmonumenta.plugins.guis.peb;
 
-import com.playmonumenta.plugins.guis.lib.PagedGui;
+import com.playmonumenta.plugins.guis.lib.PagedFloweyGui;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import org.bukkit.entity.Player;
 
-public class PebGui extends PagedGui {
-	public static final PagedGui.PageType MAIN_PAGE = new PagedGui.PageType("Main Page", 6 * 9);
-	public static final PagedGui.PageType PLAYER_INFO_PAGE = new PagedGui.PageType("Player Information", 6 * 9);
-	public static final PagedGui.PageType GAMEPLAY_OPTIONS_PAGE = new PagedGui.PageType("Gameplay Options", 6 * 9);
-	public static final PagedGui.PageType TECHNICAL_OPTIONS_PAGE = new PagedGui.PageType("Technical Options", 6 * 9);
-	public static final PagedGui.PageType TRADE_GUI_PAGE = new PagedGui.PageType("Trade Gui Settings", 6 * 9);
-	public static final PagedGui.PageType INTERACTABLE_OPTIONS_PAGE = new PagedGui.PageType("Interactable Options", 6 * 9);
-	public static final PagedGui.PageType SERVER_INFO_PAGE = new PagedGui.PageType("Server Information", 6 * 9);
-	public static final PagedGui.PageType BOOK_SKINS_PAGE = new PagedGui.PageType("Book Skins", 6 * 9);
-	public static final PagedGui.PageType PICKUP_AND_DISABLE_DROP_PAGE = new PagedGui.PageType("Pickup/Disable Drops", 6 * 9);
-	public static final PagedGui.PageType GLOWING_PAGE = new PagedGui.PageType("Glowing Settings", 6 * 9);
-	public static final PagedGui.PageType PARTIAL_PARTICLES_PAGE = new PagedGui.PageType("Particle Settings", 6 * 9);
-	public static final PagedGui.PageType SOUND_CONTROLS_PAGE = new PagedGui.PageType("Sound Options", 6 * 9);
-	public static final PagedGui.PageType SOUND_CATEGORIES_PAGE = new PagedGui.PageType("Sound Categories", 6 * 9);
-	public static final PagedGui.PageType SOUND_OVERWORLD_PLOTS_PAGE = new PagedGui.PageType("Sound: Overworld/Plots", 6 * 9);
+public class PebGui extends PagedFloweyGui {
+	public static final PagedFloweyGui.PageType MAIN_PAGE = new PagedFloweyGui.PageType("Main Page", 6 * 9);
+	public static final PagedFloweyGui.PageType PLAYER_INFO_PAGE = new PagedFloweyGui.PageType("Player Information", 6 * 9);
+	public static final PagedFloweyGui.PageType GAMEPLAY_OPTIONS_PAGE = new PagedFloweyGui.PageType("Gameplay Options", 6 * 9);
+	public static final PagedFloweyGui.PageType TECHNICAL_OPTIONS_PAGE = new PagedFloweyGui.PageType("Technical Options", 6 * 9);
+	public static final PagedFloweyGui.PageType TRADE_GUI_PAGE = new PagedFloweyGui.PageType("Trade Gui Settings", 6 * 9);
+	public static final PagedFloweyGui.PageType INTERACTABLE_OPTIONS_PAGE = new PagedFloweyGui.PageType("Interactable Options", 6 * 9);
+	public static final PagedFloweyGui.PageType SERVER_INFO_PAGE = new PagedFloweyGui.PageType("Server Information", 6 * 9);
+	public static final PagedFloweyGui.PageType BOOK_SKINS_PAGE = new PagedFloweyGui.PageType("Book Skins", 6 * 9);
+	public static final PagedFloweyGui.PageType PICKUP_AND_DISABLE_DROP_PAGE = new PagedFloweyGui.PageType("Pickup/Disable Drops", 6 * 9);
+	public static final PagedFloweyGui.PageType GLOWING_PAGE = new PagedFloweyGui.PageType("Glowing Settings", 6 * 9);
+	public static final PagedFloweyGui.PageType PARTIAL_PARTICLES_PAGE = new PagedFloweyGui.PageType("Particle Settings", 6 * 9);
+	public static final PagedFloweyGui.PageType SOUND_CONTROLS_PAGE = new PagedFloweyGui.PageType("Sound Options", 6 * 9);
+	public static final PagedFloweyGui.PageType SOUND_CATEGORIES_PAGE = new PagedFloweyGui.PageType("Sound Categories", 6 * 9);
+	public static final PagedFloweyGui.PageType SOUND_OVERWORLD_PLOTS_PAGE = new PagedFloweyGui.PageType("Sound: Overworld/Plots", 6 * 9);
 
 	public PebGui(Player player, PageType page) {
 		super(player, GUIUtils.FILLER, page);

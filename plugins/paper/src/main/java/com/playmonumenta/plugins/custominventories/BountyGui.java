@@ -8,7 +8,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.delves.DelveCustomInventory;
 import com.playmonumenta.plugins.delves.DelvePreset;
 import com.playmonumenta.plugins.delves.DelvesManager;
-import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.NjolGui;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
@@ -28,7 +28,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 
-public class BountyGui extends Gui {
+public class BountyGui extends NjolGui {
 	private static final int RANGE = 10;
 
 	private static final List<Integer> BOUNTY_L1_LOCATIONS = new ArrayList<>(Arrays.asList(19, 22, 25));

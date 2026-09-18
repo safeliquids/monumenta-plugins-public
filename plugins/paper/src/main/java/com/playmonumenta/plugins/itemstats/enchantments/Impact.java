@@ -9,18 +9,14 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.MetadataUtils;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -29,10 +25,8 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
 
 public class Impact implements Enchantment {
 
@@ -51,9 +45,6 @@ public class Impact implements Enchantment {
 	private static final String KB_EFFECT_ID = "ImpactKBVulnerability";
 	private static final String PROJECTILE_METAKEY = "ImpactProjectileHitThisTick";
 
-	private final Map<Player, ImpactInstance> mDamageInTick = new HashMap<>();
-	private @Nullable BukkitTask mRunDamageTask = null;
-
 	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.IMPACT;
@@ -70,12 +61,12 @@ public class Impact implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 5600;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.DAMAGING_ENCHANTMENT;
 	}
 
 	@Override
-	public void onDamage(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
+	public void onDamageDelayed(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
 		if (enemy instanceof Player
 			|| event.isCancelled()
 			|| event.getAbility() == ClassAbility.IMPACT
@@ -85,47 +76,20 @@ public class Impact implements Enchantment {
 			return;
 		}
 		if (AbilityUtils.isChargedAspectTriggeringEvent(event, player)) {
-			mDamageInTick.computeIfAbsent(player, key -> new ImpactInstance(value, plugin)).addEvent(enemy, event);
+			applyImpact(plugin, player, value, event.getDamage(), enemy);
 		} else {
 			return;
 		}
 
 		// The KB resistance needs to be applied before abilities are cast
-		if (!EntityUtils.isBoss(enemy) && !EntityUtils.isCCImmuneMob(enemy) && !EntityUtils.isTrainingDummy(enemy) && enemy.hasGravity() && enemy.hasAI()) {
+		if (!EntityUtils.isCCImmuneMob(enemy) && !EntityUtils.isTrainingDummy(enemy) && enemy.hasGravity() && enemy.hasAI()) {
 			plugin.mEffectManager.addEffect(enemy, KB_EFFECT_ID, new HitKnockbackVulnerability(80, -0.1 * value));
 		}
 
-		if (mRunDamageTask == null || !Bukkit.getScheduler().isQueued(mRunDamageTask.getTaskId())) {
-			mRunDamageTask = Bukkit.getScheduler().runTaskLater(plugin, this::task, 1);
-		}
-
-	}
-
-	private void task() {
-
-		mDamageInTick.forEach((p, instance) -> {
-			if (instance.mMap.values().stream().anyMatch(events -> events.stream().anyMatch(event ->
-				TRIGGERING_DAMAGE_TYPES.contains(event.getType()) || (event.getAbility() != null && TRIGGERING_ABILITIES.contains(event.getAbility()))
-			))) {
-				instance.mMap.forEach((entity, events) -> applyImpact(instance.mPlugin, p, instance.mValue, events, entity));
-				// Impact will only activate if the player dealt damage from the correct damage types or class abilities in the same tick
-			}
-		});
-		mDamageInTick.clear();
-		mRunDamageTask = null;
 	}
 
 
-	private void applyImpact(Plugin plugin, Player player, double value, List<DamageEvent> events, LivingEntity enemy) {
-
-		double damage = 0;
-		for (DamageEvent event : events) {
-			if (!event.isCancelled()) {
-				damage += event.getFinalDamage(true);
-			}
-		}
-		final double finalDamage = damage;
-
+	private void applyImpact(Plugin plugin, Player player, double value, double damaage, LivingEntity enemy) {
 		Vector kbDirection = player.getEyeLocation().getDirection();
 
 		//Apply the effect 1 tick later to avoid making the attack that applies the effect cancel it
@@ -150,7 +114,7 @@ public class Impact implements Enchantment {
 					return;
 				}
 				if (checkForImpact(mFallDistanceLastTick, kbDirection, enemy)) {
-					onImpact(player, enemy, finalDamage, (int) value);
+					onImpact(player, enemy, damaage, (int) value);
 					plugin.mEffectManager.clearEffects(enemy, EFFECT_ID);
 					this.cancel();
 				}
@@ -176,7 +140,7 @@ public class Impact implements Enchantment {
 		}.runTaskTimer(plugin, 1, 2);
 	}
 
-	private boolean checkForImpact(double fallDistanceLastTick, Vector direction, LivingEntity target) {
+	public static boolean checkForImpact(double fallDistanceLastTick, Vector direction, LivingEntity target) {
 
 		if (fallDistanceLastTick > 2.0 && target.isOnGround()) {
 
@@ -208,7 +172,7 @@ public class Impact implements Enchantment {
 		return false;
 	}
 
-	private void onImpact(Player player, LivingEntity target, double originalDamage, int level) {
+	public static void onImpact(Player player, LivingEntity target, double originalDamage, int level) {
 
 		double finalDamage = originalDamage * DAMAGE_PER_LEVEL * level;
 
@@ -221,22 +185,4 @@ public class Impact implements Enchantment {
 		world.playSound(target.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 1.7f, 0.5f);
 
 	}
-
-	private static class ImpactInstance {
-
-		private final double mValue;
-		private final Plugin mPlugin;
-		private final Map<LivingEntity, List<DamageEvent>> mMap = new HashMap<>();
-
-		private ImpactInstance(double value, Plugin plugin) {
-			mValue = value;
-			mPlugin = plugin;
-		}
-
-		private void addEvent(LivingEntity entity, DamageEvent event) {
-			mMap.computeIfAbsent(entity, damageEvent -> new ArrayList<>()).add(event);
-		}
-
-	}
-
 }

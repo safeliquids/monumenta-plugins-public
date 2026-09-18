@@ -25,8 +25,8 @@ import com.playmonumenta.plugins.abilities.snowperks.SphereOfVargos;
 import com.playmonumenta.plugins.abilities.snowperks.StringLightHook;
 import com.playmonumenta.plugins.abilities.snowperks.ToughCookie;
 import com.playmonumenta.plugins.abilities.snowperks.WindUpCar;
-import com.playmonumenta.plugins.guis.lib.Gui;
-import com.playmonumenta.plugins.guis.lib.GuiItem;
+import com.playmonumenta.plugins.guis.lib.FloweyGui;
+import com.playmonumenta.plugins.guis.lib.FloweyGuiItem;
 import com.playmonumenta.plugins.itemstats.enums.Location;
 import com.playmonumenta.plugins.utils.DescriptionUtils;
 import com.playmonumenta.plugins.utils.GUIUtils;
@@ -56,7 +56,7 @@ import org.jetbrains.annotations.Nullable;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.scoreboard;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.stat;
 
-public class SnowPerkGui extends Gui {
+public class SnowPerkGui extends FloweyGui {
 	public static final Style SNOW_POINT_COLOR = Style.style(TextColor.color(0x74D2D2));
 	public static final Style SNOW_ARROW_COLOR = Style.style(TextColor.color(0x236D85));
 	public static final Style COAL_COLOR = Style.style(TextColor.color(0x736B63));
@@ -217,7 +217,7 @@ public class SnowPerkGui extends Gui {
 
 		int remainingPoints = ScoreboardUtils.getScoreboardValue(mPlayer, REMAINING_POINTS).orElse(0);
 		Component mainMenuName = DescriptionUtils.centeredComponent(mainMenuDescription, "Snow Points", SNOW_POINT_COLOR, true);
-		GuiItem.builder().maxLoreLength(99)
+		FloweyGuiItem.builder().maxLoreLength(99)
 			.name(mainMenuName)
 			.lore(mainMenuDescription)
 			.count(remainingPoints > 0 ? remainingPoints : 1)
@@ -234,7 +234,7 @@ public class SnowPerkGui extends Gui {
 			.get();
 		resetDescription = makeLinesJolly(resetDescription, true, mLightParity);
 		Component resetName = DescriptionUtils.centeredComponent(resetDescription, "Reset Snow Perks", SNOW_POINT_COLOR, true);
-		GuiItem.builder(Material.POWDER_SNOW_BUCKET).maxLoreLength(99)
+		FloweyGuiItem.builder(Material.POWDER_SNOW_BUCKET).maxLoreLength(99)
 			.name(resetName)
 			.lore(resetDescription)
 			.onMouseClick(this::resetSnowPerks)
@@ -263,7 +263,7 @@ public class SnowPerkGui extends Gui {
 					desc -> desc.addAction("Page not unlocked yet!", DescriptionUtils.ACTION_DENIED))
 				.get(mPlayer);
 			forwardDescription = makeLinesJolly(forwardDescription, true, mLightParity);
-			GuiItem.builder(Material.ARROW).maxLoreLength(99)
+			FloweyGuiItem.builder(Material.ARROW).maxLoreLength(99)
 				.name(DescriptionUtils.centeredComponent(forwardDescription, "Next Page", SNOW_POINT_COLOR, true))
 				.lore(forwardDescription)
 				.onMouseClick(() -> {
@@ -285,7 +285,7 @@ public class SnowPerkGui extends Gui {
 				.addAction("Click to go to page 1!", DescriptionUtils.ACTION_SELECT)
 				.get();
 			forwardDescription = makeLinesJolly(forwardDescription, true, mLightParity);
-			GuiItem.builder(Material.ARROW).maxLoreLength(99)
+			FloweyGuiItem.builder(Material.ARROW).maxLoreLength(99)
 				.name(DescriptionUtils.centeredComponent(forwardDescription, "Previous Page", SNOW_POINT_COLOR, true))
 				.lore(forwardDescription)
 				.onMouseClick(() -> {
@@ -390,7 +390,7 @@ public class SnowPerkGui extends Gui {
 			};
 
 			int position = PERK_POSITIONS[page - 1][i];
-			GuiItem.Builder perkItem = GuiItem.builder().maxLoreLength(99)
+			FloweyGuiItem.Builder perkItem = FloweyGuiItem.builder().maxLoreLength(99)
 				.name(name)
 				.lore(description)
 				.onMouseClick(togglePerk);

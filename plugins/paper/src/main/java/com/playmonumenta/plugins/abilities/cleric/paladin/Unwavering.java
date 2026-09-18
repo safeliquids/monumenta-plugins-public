@@ -10,6 +10,7 @@ import com.playmonumenta.plugins.classes.Cleric;
 import com.playmonumenta.plugins.effects.PercentKnockbackResist;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
+import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.util.List;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -42,7 +43,11 @@ public class Unwavering extends Ability {
 	@Override
 	public void periodicTrigger(boolean twoHertz, boolean oneSecond, int ticks) {
 		if (twoHertz) {
-			List<LivingEntity> heretics = EntityUtils.getNearbyMobs(mPlayer.getLocation(), mRadius).stream().filter(Crusade::enemyTriggersAbilities).toList();
+			List<LivingEntity> heretics = EntityUtils.getNearbyMobs(mPlayer.getLocation(), mRadius)
+				.stream()
+				.filter(Crusade::enemyTriggersAbilities)
+				.filter(e -> !ScoreboardUtils.checkTag(e, AbilityUtils.IGNORE_TAG))
+				.toList();
 			if (!heretics.isEmpty()) {
 				mPlugin.mEffectManager.addEffect(mPlayer, SOURCE, new PercentKnockbackResist(19, Math.min(mMaxKBR, mKBRIncrement * heretics.size()), SOURCE).displaysTime(false));
 			}

@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.market.gui;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.inventories.WalletManager;
 import com.playmonumenta.plugins.market.MarketListing;
 import com.playmonumenta.plugins.market.MarketManager;
@@ -69,7 +69,7 @@ public class TabPlayerListings implements MarketGuiTab {
 					claimAllableListings.add(listing);
 				}
 			}
-			GuiItem claimAllButton = mGui.setItem(4, buildClaimAllIcon(amountExpired, amountClaimable));
+			NjolGuiItem claimAllButton = mGui.setItem(4, buildClaimAllIcon(amountExpired, amountClaimable));
 			if (amountExpired > 0 || amountClaimable > 0) {
 				claimAllButton.onClick((clickAction) -> claimAllAction(claimAllableListings));
 			}
@@ -96,7 +96,7 @@ public class TabPlayerListings implements MarketGuiTab {
 		mGui.update();
 	}
 
-	private GuiItem buildClaimAllIcon(int amountExpired, int amountClaimable) {
+	private NjolGuiItem buildClaimAllIcon(int amountExpired, int amountClaimable) {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Claim all", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
@@ -131,7 +131,7 @@ public class TabPlayerListings implements MarketGuiTab {
 
 		}
 
-		return new GuiItem(GUIUtils.createBasicItem(mat, 1, name, lore, false), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(mat, 1, name, lore, false), false);
 	}
 
 	private void loadItems() {
@@ -188,7 +188,7 @@ public class TabPlayerListings implements MarketGuiTab {
 			for (int i = 9; i < 54; i++) {
 				if (listingsIter.hasNext()) {
 					MarketListing listing = listingsIter.next();
-					mGui.setItem(i, new GuiItem(listing.getListingDisplayItemStack(mPlayer, mGui.TAB_PLAYER_LISTINGS), false))
+					mGui.setItem(i, new NjolGuiItem(listing.getListingDisplayItemStack(mPlayer, mGui.TAB_PLAYER_LISTINGS), false))
 						.onClick((clickEvent) -> clickOnListingAction(clickEvent, listing));
 				} else {
 					if ((mCurrentPage * 45) + (i - 9) < MarketManager.getConfig().mAmountOfPlayerListingsSlots) {
@@ -238,11 +238,11 @@ public class TabPlayerListings implements MarketGuiTab {
 		}
 	}
 
-	private GuiItem buildOpenSlotIcon() {
+	private NjolGuiItem buildOpenSlotIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("This slot is available,", NamedTextColor.GRAY));
 		lore.add(Component.text("Left Click to list an item.", NamedTextColor.GRAY));
-		return new GuiItem(GUIUtils.createBasicItem(Material.LIME_STAINED_GLASS_PANE, 1, Component.text("Open Slot", NamedTextColor.GOLD), lore, true, "gui_openSlot"), false);
+		return new NjolGuiItem(GUIUtils.createBasicItem(Material.LIME_STAINED_GLASS_PANE, 1, Component.text("Open Slot", NamedTextColor.GOLD), lore, true, "gui_openSlot"), false);
 	}
 
 	private void changePageAction(InventoryClickEvent clickEvent) {

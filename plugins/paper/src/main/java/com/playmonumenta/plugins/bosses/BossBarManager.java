@@ -130,8 +130,8 @@ public class BossBarManager {
 		}
 	}
 
-	public void setTitle(String newTitle) {
-		mBar.name(Component.text(newTitle));
+	public void setTitle(Component newTitle) {
+		mBar.name(newTitle);
 	}
 
 	public void setColor(BossBar.Color barColor) {

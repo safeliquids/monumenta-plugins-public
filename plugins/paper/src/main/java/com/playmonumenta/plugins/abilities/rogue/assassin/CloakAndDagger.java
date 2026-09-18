@@ -207,7 +207,7 @@ public class CloakAndDagger extends Ability implements KillTriggeredAbility, Abi
 				.statValues(stat(a -> a.mDamageMultiplier, CLOAK_1_DAMAGE_MULTIPLIER))
 			.addStat("Effect: Stealth for %t")
 				.statValues(stat(a -> a.mStealthDuration, STEALTH_DURATION))
-			.addStat("Max Daggers: %d1")
+			.addStat("Max Stacks: %d1")
 				.statValues(stat(a -> a.mMaxStacks, CLOAK_1_MAX_STACKS))
 			.addDashedLine();
 	}

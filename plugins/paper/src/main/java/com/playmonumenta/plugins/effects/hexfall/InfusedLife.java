@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.effects.hexfall;
 
 import com.playmonumenta.plugins.effects.Effect;
-import com.playmonumenta.plugins.utils.ScoreboardUtils;
+import com.playmonumenta.plugins.managers.GlowingManager;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -15,7 +15,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
@@ -50,8 +49,8 @@ public class InfusedLife extends Effect {
 			}
 			if (mCurrentEnergy == MAX_ENERGY) {
 				if (!mIsFull) {
-					entity.setGlowing(true);
-					ScoreboardUtils.addEntityToTeam(player, "green");
+					GlowingManager.startGlowing(entity, NamedTextColor.GREEN, 9999,
+						GlowingManager.BOSS_SPELL_PRIORITY, p -> true, effectId);
 				}
 				mIsFull = true;
 			}
@@ -133,11 +132,7 @@ public class InfusedLife extends Effect {
 			mDisplay.remove();
 		}
 		if (event.getEntity() instanceof Player player) {
-			Team team = ScoreboardUtils.getEntityTeam(player);
-			if (team != null) {
-				team.removePlayer(player);
-			}
-			player.setGlowing(false);
+			GlowingManager.clear(player, effectId);
 		}
 	}
 
@@ -148,11 +143,7 @@ public class InfusedLife extends Effect {
 			mDisplay.remove();
 		}
 		if (entity instanceof Player player) {
-			Team team = ScoreboardUtils.getEntityTeam(player);
-			if (team != null) {
-				team.removePlayer(player);
-			}
-			player.setGlowing(false);
+			GlowingManager.clear(player, effectId);
 		}
 	}
 

@@ -21,6 +21,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -271,12 +272,14 @@ public class SpellCascadingHex extends Spell {
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
 				super.cancel();
-				if (mCascadeDisplay.isValid()) {
-					mCascadeDisplay.remove();
-				}
-				if (mTextDisplay.isValid()) {
-					mTextDisplay.remove();
-				}
+				Bukkit.getScheduler().runTask(mPlugin, () -> {
+					if (mCascadeDisplay.isValid()) {
+						mCascadeDisplay.remove();
+					}
+					if (mTextDisplay.isValid()) {
+						mTextDisplay.remove();
+					}
+				});
 			}
 		};
 		runnable.runTaskTimer(mPlugin, 0, 1);

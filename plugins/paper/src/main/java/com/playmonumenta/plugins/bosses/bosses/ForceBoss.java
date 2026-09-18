@@ -102,7 +102,7 @@ public class ForceBoss extends BossAbilityGroup {
 			//by default Force boss hit all the player in range even the players in stealth
 		}
 		final double currentRadius = p.TARGETS.getRange();
-		Spell spell = new SpellForce(plugin, boss, (int) currentRadius, p.DURATION, p.COOLDOWN, p.NEED_PLAYERS) {
+		Spell spell = new SpellForce(plugin, boss, currentRadius, p.DURATION, p.COOLDOWN, p.NEED_PLAYERS) {
 
 			@Override
 			protected void chargeAuraAction(Location loc) {

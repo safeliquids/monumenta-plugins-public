@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.listeners.DamageListener;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.AbilityUtils;
@@ -39,8 +40,8 @@ public class FireAspect implements Enchantment {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 10;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.ASPECTS;
 	}
 
 	@Override

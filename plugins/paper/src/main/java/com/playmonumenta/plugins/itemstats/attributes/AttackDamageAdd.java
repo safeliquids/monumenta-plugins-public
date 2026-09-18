@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.itemstats.Attribute;
 import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.itemstats.enums.AttributeType;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -26,8 +27,8 @@ public class AttackDamageAdd implements Attribute {
 	}
 
 	@Override
-	public double getPriorityAmount() {
-		return 2;
+	public StatPriority getPriorityAmount() {
+		return StatPriority.WEAPON_BASE_DAMAGE;
 	}
 
 	@Override

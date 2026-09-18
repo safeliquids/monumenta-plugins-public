@@ -739,6 +739,15 @@ public class LocationUtils {
 		return center.clone().add(r * FastUtils.cos(theta), 0, r * FastUtils.sin(theta));
 	}
 
+	public static Location randomLocationInPrism(Location center, double xLengthHalf, double yLengthHalf, double zLengthHalf) {
+		return new Location(
+			center.getWorld(),
+			FastUtils.randomDoubleInRange(center.x() - xLengthHalf, center.x() + xLengthHalf),
+			FastUtils.randomDoubleInRange(center.y() - yLengthHalf, center.y() + yLengthHalf),
+			FastUtils.randomDoubleInRange(center.z() - zLengthHalf, center.z() + zLengthHalf)
+		);
+	}
+
 	public static Location randomSafeLocationInCircle(Location center, double radius, Predicate<Location> safePredicate) {
 		Location loc = randomLocationInCircle(center, radius);
 		if (safePredicate.test(loc)) {
@@ -843,10 +852,12 @@ public class LocationUtils {
 		for (int i = 0; i < 1000; i++) {
 			Block block = clone.getBlock();
 			if (!block.isSolid()) {
+				clone.setY(block.getY());
 				return clone;
 			}
 			double newY = block.getBoundingBox().getMaxY();
 			if (newY < clone.getY()) {
+				clone.setY(newY);
 				return clone;
 			}
 			if (newY >= maxHeight) {
@@ -869,6 +880,15 @@ public class LocationUtils {
 		return startLocation;
 	}
 
+	public static double distanceToGround(Location loc, double minHeight, double maxDistance, boolean ignoreLiquids) {
+		Vector toGround = getVectorTo(loc, fallToGround(loc, minHeight, ignoreLiquids));
+		if (toGround.getY() > maxDistance || toGround.getY() < 0) {
+			return 0;
+		} else {
+			return toGround.getY();
+		}
+	}
+
 	public static double distanceToGround(Location loc, double minHeight, double maxDistance) {
 		Vector toGround = getVectorTo(loc, fallToGround(loc, minHeight));
 		if (toGround.getY() > maxDistance || toGround.getY() < 0) {
@@ -885,6 +905,19 @@ public class LocationUtils {
 		} else {
 			return toGround.getY();
 		}
+	}
+
+	public static boolean isInPoI(Location location) {
+		StructuresPlugin structuresPlugin = StructuresPlugin.getInstance();
+		if (structuresPlugin.mRespawnManager != null) {
+			List<RespawningStructure> structures = structuresPlugin.mRespawnManager.getStructures(location.toVector(), false);
+			for (RespawningStructure structure : structures) {
+				if (structure.isWithin(location)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public static @Nullable String getPoiNameFromLocation(Location location) {
@@ -991,7 +1024,7 @@ public class LocationUtils {
 		Vector p = point.clone().subtract(center);
 		var pd = p.dot(direction);
 
-		double ans = -pd + Math.sqrt(pd - p.lengthSquared() + radius * radius);
+		double ans = -pd + Math.sqrt(pd * pd - p.lengthSquared() + radius * radius);
 		return Double.isFinite(ans) ? ans : 0.05;
 	}
 }

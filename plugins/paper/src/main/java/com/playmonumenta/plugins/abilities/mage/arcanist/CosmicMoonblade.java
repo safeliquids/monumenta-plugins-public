@@ -42,20 +42,15 @@ public class CosmicMoonblade extends Ability {
 	private static final int COOLDOWN = 20 * 8;
 	private static final double ANGLE = 55;
 	private static final int SLASH_INTERVAL_TICKS = 7;
-	public static final double REDUCTION_MULTIPLIER_1 = 0.05;
-	public static final double REDUCTION_MULTIPLIER_2 = 0.1;
-	public static final double REDUCTION_MULTIPLIER_KILL = 0.075;
-	public static final int CAP_TICKS_1 = (int) (0.5 * Constants.TICKS_PER_SECOND);
-	public static final int CAP_TICKS_2 = Constants.TICKS_PER_SECOND;
-	public static final int CAP_TICKS_KILL = (int) (0.75 * Constants.TICKS_PER_SECOND);
+	public static final int CDR_TICKS_1 = (int) (0.5 * Constants.TICKS_PER_SECOND);
+	public static final int CDR_TICKS_2 = Constants.TICKS_PER_SECOND;
+	public static final int CDR_TICKS_KILL = (int) (0.75 * Constants.TICKS_PER_SECOND);
 
 	public static final String CHARM_DAMAGE = "Cosmic Moonblade Damage";
 	public static final String CHARM_SPELL_COOLDOWN = "Cosmic Moonblade Cooldown Reduction";
 	public static final String CHARM_DEATH_COOLDOWN = "Cosmic Moonblade On Kill Cooldown Reduction";
 	public static final String CHARM_COOLDOWN = "Cosmic Moonblade Cooldown";
 	public static final String CHARM_SLASH_INTERVAL = "Cosmic Moonblade Slash Interval";
-	public static final String CHARM_CAP = "Cosmic Moonblade Cooldown Cap";
-	public static final String CHARM_DEATH_CAP = "Cosmic Moonblade On Kill Cooldown Cap";
 	public static final String CHARM_RANGE = "Cosmic Moonblade Range";
 	public static final String CHARM_SLASH = "Cosmic Moonblade Slashes";
 
@@ -72,13 +67,11 @@ public class CosmicMoonblade extends Ability {
 			.displayItem(Material.DIAMOND_SWORD);
 
 	private final double mDamage;
-	private final double mLevelReduction;
-	private final int mLevelCap;
+	private final int mLevelReduction;
 	private final double mRange;
 	private final int mSlashInterval;
 	private final int mTotalSwings;
-	private final double mKillCDR;
-	private final int mKillCDRCap;
+	private final int mKillCDR;
 	private final CosmicMoonbladeCS mCosmetic;
 
 	private boolean mTriggered = false;
@@ -86,13 +79,11 @@ public class CosmicMoonblade extends Ability {
 	public CosmicMoonblade(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
 		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, isLevelOne() ? DAMAGE_1 : DAMAGE_2);
-		mLevelReduction = (isLevelOne() ? REDUCTION_MULTIPLIER_1 : REDUCTION_MULTIPLIER_2) + CharmManager.getLevelPercentDecimal(player, CHARM_SPELL_COOLDOWN);
-		mLevelCap = CharmManager.getDuration(player, CHARM_CAP, (isLevelOne() ? CAP_TICKS_1 : CAP_TICKS_2));
+		mLevelReduction = (int) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_SPELL_COOLDOWN, isLevelOne() ? CDR_TICKS_1 : CDR_TICKS_2);
 		mRange = CharmManager.getRadius(mPlayer, CHARM_RANGE, RADIUS);
 		mSlashInterval = (int) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_SLASH_INTERVAL, SLASH_INTERVAL_TICKS);
 		mTotalSwings = (int) CharmManager.getLevel(mPlayer, CHARM_SLASH) + SWINGS;
-		mKillCDR = REDUCTION_MULTIPLIER_KILL + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_DEATH_COOLDOWN);
-		mKillCDRCap = CharmManager.getDuration(mPlayer, CHARM_DEATH_CAP, CAP_TICKS_KILL);
+		mKillCDR = (int) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DEATH_COOLDOWN, CDR_TICKS_KILL);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new CosmicMoonbladeCS());
 	}
 
@@ -102,7 +93,7 @@ public class CosmicMoonblade extends Ability {
 			return false;
 		}
 		putOnCooldown();
-		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mDamage);
+		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mDamage);
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
 		cancelOnDeath(new BukkitRunnable() {
@@ -114,7 +105,7 @@ public class CosmicMoonblade extends Ability {
 				Hitbox hitbox = Hitbox.approximateCone(mPlayer.getEyeLocation(), mRange, Math.toRadians(ANGLE));
 				List<LivingEntity> hitMobs = hitbox.getHitMobs();
 				if (!hitMobs.isEmpty()) {
-					mPlugin.mTimers.updateCooldownsPercentCapped(mPlayer, mLevelReduction, mLevelCap, s -> s != mInfo.getLinkedSpell());
+					mPlugin.mTimers.updateCooldownsExcept(mPlayer, ClassAbility.COSMIC_MOONBLADE, mLevelReduction);
 					for (LivingEntity mob : hitMobs) {
 						DamageUtils.damage(mPlayer, mob, new DamageEvent.Metadata(DamageEvent.DamageType.MAGIC, mInfo.getLinkedSpell(), playerItemStats), damage, true, false, false);
 					}
@@ -141,7 +132,9 @@ public class CosmicMoonblade extends Ability {
 			event.getDamager() == mPlayer && !mTriggered) {
 			mTriggered = true;
 			// update all abil cd, 1 tick delay to make sure moon blade is also reduced
-			Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPlugin.mTimers.updateCooldownsPercentCapped(mPlayer, mKillCDR, mKillCDRCap, s -> true), 1);
+			Bukkit.getScheduler().runTaskLater(mPlugin, () ->
+					mPlugin.mTimers.updateCooldowns(mKillCDR),
+				1);
 		}
 
 		return false;
@@ -162,8 +155,8 @@ public class CosmicMoonblade extends Ability {
 				.statValues(stat(a -> a.mDamage, DAMAGE_1))
 			.addStat("Radius: %r (Cone-Shaped)")
 				.statValues(stat(a -> a.mRange, RADIUS))
-			.addStat("Cooldown Reduction: %p1 (max %t1) per slash ")
-				.statValues(stat(a -> a.mLevelReduction, REDUCTION_MULTIPLIER_1), stat(a -> a.mLevelCap, CAP_TICKS_1))
+			.addStat("Cooldown Reduction: %t1 per slash ")
+				.statValues(stat(a -> a.mLevelReduction, CDR_TICKS_1))
 			.addStat("Cooldown: %t")
 				.statValues(cooldown(COOLDOWN))
 			.addDashedLine();
@@ -181,10 +174,10 @@ public class CosmicMoonblade extends Ability {
 			.addLine()
 			.addStatComparison("Damage: %d1 -> %d2 (s)")
 				.statValues(stat(DAMAGE_1), stat(a -> a.mDamage, DAMAGE_2))
-			.addStatComparison("Cooldown Reduction: %p1 -> %p2 (max %t2)")
-				.statValues(stat(REDUCTION_MULTIPLIER_1), stat(a -> a.mLevelReduction, REDUCTION_MULTIPLIER_2), stat(a -> a.mLevelCap, CAP_TICKS_2))
-			.addStat("Kill Cooldown Reduction: %p (max %t)")
-				.statValues(stat(a -> a.mKillCDR, REDUCTION_MULTIPLIER_KILL), stat(a -> a.mKillCDRCap, CAP_TICKS_KILL))
+			.addStatComparison("Cooldown Reduction: %t1 -> %t2")
+				.statValues(stat(CDR_TICKS_2), stat(a -> a.mLevelReduction, CDR_TICKS_2))
+			.addStat("Kill Cooldown Reduction: %t")
+				.statValues(stat(a -> a.mKillCDR, CDR_TICKS_KILL))
 			.addDashedLine();
 	}
 }

@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.market.gui;
 
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.inventories.WalletManager;
 import com.playmonumenta.plugins.market.MarketListingIndex;
 import com.playmonumenta.plugins.market.MarketManager;
@@ -126,10 +126,10 @@ public class TabEditFilters implements MarketGuiTab {
 
 	}
 
-	private GuiItem buildBackToChooseComponentButton() {
+	private NjolGuiItem buildBackToChooseComponentButton() {
 		ArrayList<Component> lore = new ArrayList<>();
 		ItemStack icon = GUIUtils.createBasicItem(Material.BARRIER, 1, Component.text("Back to Component selection menu", NamedTextColor.RED).decoration(TextDecoration.BOLD, true), lore, false);
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	private void changePageAction(InventoryClickEvent clickEvent) {
@@ -170,7 +170,7 @@ public class TabEditFilters implements MarketGuiTab {
 		return 0;
 	}
 
-	private GuiItem buildCustomComponentValueIcon(String value) {
+	private NjolGuiItem buildCustomComponentValueIcon(String value) {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Click this to remove"));
 		lore.add(Component.text("this value from the"));
@@ -178,10 +178,10 @@ public class TabEditFilters implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(Material.SPRUCE_SIGN, 1, Component.text("Custom value: " + value, NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
-	private GuiItem buildToggleComponentKnownValue(String value, boolean isUsed) {
+	private NjolGuiItem buildToggleComponentKnownValue(String value, boolean isUsed) {
 
 		ComponentConfig.ComponentConfigObject config = null;
 		if (mSelectedComponent != null && mSelectedComponent.mField.getComponentConfig() != null) {
@@ -216,7 +216,7 @@ public class TabEditFilters implements MarketGuiTab {
 
 		ItemUtils.setLore(icon, lore);
 
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	private void newCustomComponentValueAction() {
@@ -235,7 +235,7 @@ public class TabEditFilters implements MarketGuiTab {
 			.open(mPlayer);
 	}
 
-	private GuiItem buildNewCustomComponentValueIcon() {
+	private NjolGuiItem buildNewCustomComponentValueIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("click this to add", NamedTextColor.GRAY));
 		lore.add(Component.text("a custom value", NamedTextColor.GRAY));
@@ -248,7 +248,7 @@ public class TabEditFilters implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(Material.CHERRY_HANGING_SIGN, 1, Component.text("Add a Custom Value", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	private void computeKeysList() {
@@ -326,7 +326,7 @@ public class TabEditFilters implements MarketGuiTab {
 		}
 	}
 
-	private GuiItem buildNewComponentSelectionIcon(boolean isWhitelist, MarketListingIndex idx) {
+	private NjolGuiItem buildNewComponentSelectionIcon(boolean isWhitelist, MarketListingIndex idx) {
 
 		ArrayList<Component> lore = new ArrayList<>();
 
@@ -339,7 +339,7 @@ public class TabEditFilters implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(idx.getDisplayIconMaterial(), 1, Component.text(idx.toString(), isWhitelist ? NamedTextColor.WHITE : NamedTextColor.DARK_GRAY).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 
 	}
 
@@ -395,7 +395,7 @@ public class TabEditFilters implements MarketGuiTab {
 			.open(mPlayer);
 	}
 
-	private GuiItem buildEditNameIcon() {
+	private NjolGuiItem buildEditNameIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Current filter name:", NamedTextColor.GRAY));
 		if (mSelectedFilter != null && mSelectedFilter.getDisplayName() != null) {
@@ -403,13 +403,13 @@ public class TabEditFilters implements MarketGuiTab {
 		}
 		lore.add(Component.text("click to change the filter name.", NamedTextColor.GRAY));
 		ItemStack icon = GUIUtils.createBasicItem(Material.ACACIA_HANGING_SIGN, 1, Component.text("Edit filter name", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
-	private GuiItem buildBackToChooseFilterButton() {
+	private NjolGuiItem buildBackToChooseFilterButton() {
 		ArrayList<Component> lore = new ArrayList<>();
 		ItemStack icon = GUIUtils.createBasicItem(Material.BARRIER, 1, Component.text("Back to Filter selection menu", NamedTextColor.RED).decoration(TextDecoration.BOLD, true), lore, false);
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	private void setupChooseFilterToEdit() {
@@ -431,11 +431,11 @@ public class TabEditFilters implements MarketGuiTab {
 
 	}
 
-	private GuiItem buildNewComponentIcon() {
+	private NjolGuiItem buildNewComponentIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("click to add a new component.", NamedTextColor.GRAY));
 		ItemStack icon = GUIUtils.createBasicItem(Material.EMERALD, 1, Component.text("Add a new Component", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true), lore, false);
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	private void clickOnComponentSelectionAction(InventoryClickEvent clickEvent, FilterComponent component) {
@@ -452,7 +452,7 @@ public class TabEditFilters implements MarketGuiTab {
 		mGui.update();
 	}
 
-	private GuiItem buildComponentSelectionIcon(FilterComponent component) {
+	private NjolGuiItem buildComponentSelectionIcon(FilterComponent component) {
 
 		ArrayList<Component> lore = new ArrayList<>();
 
@@ -477,7 +477,7 @@ public class TabEditFilters implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(component.getTargetIndex().getDisplayIconMaterial(), 1, Component.text(component.getTargetIndex().toString(), component.mComparator == Comparator.WHITELIST ? NamedTextColor.WHITE : NamedTextColor.DARK_GRAY).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 
 	}
 
@@ -506,7 +506,7 @@ public class TabEditFilters implements MarketGuiTab {
 		return out;
 	}
 
-	private GuiItem buildFilterSelectionIcon(MarketFilter filter) {
+	private NjolGuiItem buildFilterSelectionIcon(MarketFilter filter) {
 
 		ArrayList<Component> lore = new ArrayList<>();
 
@@ -526,7 +526,7 @@ public class TabEditFilters implements MarketGuiTab {
 		} else {
 			icon = GUIUtils.createBasicItem(mat, 1, Component.text("Unnamed", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
 		}
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	private void clickOnFilterSelectionAction(InventoryClickEvent clickEvent, MarketFilter filter) {
@@ -544,19 +544,19 @@ public class TabEditFilters implements MarketGuiTab {
 		mGui.switchToTab(mGui.TAB_BAZAAR_BROWSER);
 	}
 
-	private GuiItem buildBackToListingBrowserIcon() {
+	private NjolGuiItem buildBackToListingBrowserIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Your changes will not be saved!", NamedTextColor.RED).decoration(TextDecoration.BOLD, true));
 		ItemStack icon = GUIUtils.createBasicItem(Material.BARRIER, 1, Component.text("Return to Main Menu", NamedTextColor.RED).decoration(TextDecoration.BOLD, true), lore, false);
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
-	private GuiItem buildSaveIcon() {
+	private NjolGuiItem buildSaveIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Your changes will be saved!", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
 		ItemStack icon = GUIUtils.createBasicItem(Material.GREEN_STAINED_GLASS_PANE, 1, GUIUtils.formatName("Save your changes", NamedTextColor.GREEN, true),
 			lore, true, "gui_checkmark");
-		return new GuiItem(icon, false);
+		return new NjolGuiItem(icon, false);
 	}
 
 	@Override

@@ -105,6 +105,7 @@ public class SpellSurge extends Spell {
 							.directionalMode(true)
 							.delta(1, 0, 0)
 							.extra(particle.mVelocity * mP.EXPLOSION_RADIUS)
+							.data(particle.mExtra2)
 							.spawnAsEntityActive(mBoss);
 					}
 					mP.SOUND_EXPLOSION.play(fallLoc);
@@ -133,6 +134,7 @@ public class SpellSurge extends Spell {
 						.count(particle.mCount)
 						.delta(particle.mDx, particle.mDy, particle.mDz)
 						.extra(particle.mVelocity)
+						.data(particle.mExtra2)
 						.spawnAsEntityActive(mBoss);
 				}
 
@@ -143,6 +145,7 @@ public class SpellSurge extends Spell {
 						.countPerMeter(particle.mCount)
 						.delta(particle.mDx, particle.mDy, particle.mDz)
 						.extra(particle.mVelocity)
+						.data(particle.mExtra2)
 						.spawnAsBoss();
 				}
 				mVelocity.setY(mVelocity.getY() - GRAVITY);

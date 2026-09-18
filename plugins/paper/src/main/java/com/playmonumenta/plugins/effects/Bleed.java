@@ -2,9 +2,6 @@ package com.playmonumenta.plugins.effects;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.bosses.bosses.ImmortalMountBoss;
-import com.playmonumenta.plugins.bosses.bosses.ImmortalPassengerBoss;
-import com.playmonumenta.plugins.bosses.bosses.WormSegmentBoss;
 import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.enums.Region;
@@ -14,7 +11,6 @@ import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
-import java.util.Set;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
@@ -45,14 +41,6 @@ public class Bleed extends Effect {
 	// stack duration is the duration of the weaken as well as the interval stacks decrement at
 	private static final int STACK_DURATION = 5 * Constants.TICKS_PER_SECOND;
 	private static final int HEMORRHAGE_DURATION = 5 * Constants.TICKS_PER_SECOND;
-
-	private static final Set<String> NEVER_HEMORRHAGE_BOSSTAGS = Set.of(
-		ImmortalPassengerBoss.identityTag,
-		ImmortalMountBoss.identityTag,
-		WormSegmentBoss.identityTag
-		// This is FAILSAFE CODE. Damage transferring immortal mobs / worms should never even receive the bleeding (unless being forced to Quiet Hemorrhage).
-		// Non-damage transferring immortal mobs shouldn't take damage in the first place.
-	);
 
 	private static final ItemStack REDSTONE_ITEM_STACK = new ItemStack(Material.REDSTONE_BLOCK);
 	private static final Particle.DustOptions COLOR = new Particle.DustOptions(Color.fromRGB(210, 44, 44), 1.0f);
@@ -98,8 +86,9 @@ public class Bleed extends Effect {
 		if (mStacks >= hemorrhageStacks) {
 			PlayerUtils.callHemorrhageEvent(player, mob);
 			mHasHemorrhaged = true;
-			Set<String> bosstags = mob.getScoreboardTags();
-			if (NEVER_HEMORRHAGE_BOSSTAGS.stream().noneMatch(bosstags::contains)) {
+			// This is FAILSAFE CODE. Damage transferring immortal mobs / worms should never even receive the bleeding (unless being forced to Quiet Hemorrhage).
+			// Non-damage transferring immortal mobs shouldn't take damage in the first place.
+			if (!EntityUtils.isVirtualMob(mob)) {
 				double damage = EntityUtils.isBoss(mob)
 					? (Region.getRegionNumber(ServerProperties.getRegion(player)) * HEMORRHAGE_DAMAGE_BOSS_PER_REGION)
 					: Math.min(EntityUtils.getMaxHealth(mob) * HEMORRHAGE_DAMAGE_PERCENT,

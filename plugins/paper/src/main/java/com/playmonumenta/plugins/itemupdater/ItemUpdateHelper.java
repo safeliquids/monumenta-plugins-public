@@ -17,17 +17,22 @@ import com.playmonumenta.plugins.itemstats.enums.Region;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
 import com.playmonumenta.plugins.itemstats.enums.Tier;
 import com.playmonumenta.plugins.itemstats.infusions.Shattered;
+import com.playmonumenta.plugins.listeners.AuditListener;
 import com.playmonumenta.plugins.listeners.QuiverListener;
 import com.playmonumenta.plugins.overrides.FirmamentOverride;
 import com.playmonumenta.plugins.overrides.WorldshaperOverride;
+import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.DelveInfusionUtils;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
+import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import com.playmonumenta.plugins.utils.PotionUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import com.playmonumenta.plugins.utils.StringUtils;
+import com.playmonumenta.redissync.BukkitConfigAPI;
+import com.playmonumenta.redissync.RedisAPI;
 import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.NBTType;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -176,6 +181,10 @@ public class ItemUpdateHelper {
 	}
 
 	public static void generateItemStats(final ItemStack item) {
+		generateItemStats(item, List.of());
+	}
+
+	public static void generateItemStats(final ItemStack item, List<String> contextPath) {
 		if (ItemUtils.isNullOrAir(item)) {
 			return;
 		}
@@ -204,6 +213,39 @@ public class ItemUpdateHelper {
 			ItemStack newCharm = CharmFactory.updateCharm(item);
 			if (newCharm != null) {
 				item.setItemMeta(newCharm.getItemMeta());
+			}
+
+			// Dupe Check: if we update a charm with a UUID that we already encountered this week, it could be a dupe
+			boolean dupeCheckEnabled = ServerProperties.getZenithCharmDupeCheckEnabled();
+			String uuid = Long.toHexString(CharmFactory.getUUID(item));
+			String context = String.join(" ", contextPath);
+			try (RedisAPI.BorrowedCommands<String, String> conn = RedisAPI.borrow()) {
+				// check if UUID already exists in Hash
+				conn.hget(BukkitConfigAPI.getServerDomain() + ":zenithcharmdupecheck", uuid).toCompletableFuture().whenComplete((oldContext, ex) -> {
+					if (ex != null) {
+						MMLog.severe("Failed to read Zenith Charm UUID from Redis!", ex);
+						return;
+					}
+					if (dupeCheckEnabled && oldContext != null) {
+						// if oldContext found, then charm was already recorded and might be a dupe
+						String message = "Potentially duped Zenith Charm with UUID " + uuid + " at: " + context;
+						message += "\n\nPreviously seen at: " + oldContext;
+						AuditListener.logSevere(message);
+					} else if (dupeCheckEnabled && item.getAmount() > 1) {
+						// stacked charms are also very sussy too
+						String message = "Potentially duped Zenith Charm with UUID " + uuid + " at: " + context;
+						message += "\n\nCharm found with a stack size of: " + item.getAmount();
+						AuditListener.logSevere(message);
+					}
+				});
+
+				// update hash with newest context
+				try (RedisAPI.BorrowedCommands<String, String> conn2 = RedisAPI.borrow()) {
+					conn2.hset(BukkitConfigAPI.getServerDomain() + ":zenithcharmdupecheck", uuid, context).exceptionally(ex -> {
+						MMLog.severe("Failed to write Zenith Charm UUID to Redis!", ex);
+						return null;
+					});
+				}
 			}
 			return;
 		}
@@ -350,7 +392,7 @@ public class ItemUpdateHelper {
 					if (region == Region.RING) {
 						if (masterwork != null && masterwork != Masterwork.ERROR && masterwork != Masterwork.NONE) {
 							final Tier previousTier = tier;
-							switch (Objects.requireNonNull(masterwork)) {
+							switch (masterwork) {
 								case ZERO, I, II, III -> tier = Tier.RARE;
 								case IV, V -> tier = Tier.ARTIFACT;
 								case VI -> tier = Tier.EPIC;

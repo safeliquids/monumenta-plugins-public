@@ -76,7 +76,7 @@ public class BloodbathCS extends IlluminateCS {
 	public void trailEffects(Player player, Location location, double radius, Vector increment, int ticks, int maxTicks, @Nullable Location enhanceZone, double enhanceRadius) {
 		Location loc = location.clone();
 
-		if (enhanceZone != null && location.distance(enhanceZone) < enhanceRadius + 0.5) {
+		if (enhanceZone != null && location.getWorld() != null && location.getWorld().equals(enhanceZone.getWorld()) && location.distance(enhanceZone) < enhanceRadius + 0.5) {
 			return;
 		}
 

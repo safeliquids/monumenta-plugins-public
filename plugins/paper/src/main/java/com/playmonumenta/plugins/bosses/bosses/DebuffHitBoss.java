@@ -40,7 +40,7 @@ public final class DebuffHitBoss extends BossAbilityGroup {
 			case 0 -> Plugin.getInstance().mEffectManager.addEffect(damagee, SLOWNESS_TAG,
 				new PercentSpeed(mDebuffDuration, mSlownessPotency, SLOWNESS_TAG));
 			case 1 -> Plugin.getInstance().mEffectManager.addEffect(damagee, WEAKNESS_TAG,
-				new PercentDamageDealt(mDebuffDuration, mWeaknessPotency).damageTypes(DamageType.getScalableDamageType()));
+				new PercentDamageDealt(mDebuffDuration, mWeaknessPotency).damageTypes(DamageType.getScalableDamageTypes()));
 			case 2 ->
 				damagee.addPotionEffect(new PotionEffect(PotionEffectType.POISON, mDebuffDuration, 0, false, true));
 			default ->

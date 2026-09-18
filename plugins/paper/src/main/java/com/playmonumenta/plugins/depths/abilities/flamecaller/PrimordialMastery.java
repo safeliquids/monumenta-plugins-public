@@ -36,7 +36,7 @@ public class PrimordialMastery extends DepthsAbility {
 	@Override
 	public boolean onDamage(DamageEvent event, LivingEntity enemy) {
 		if (event.getAbility() != null && !event.getAbility().isFake()) {
-			event.updateDamageWithMultiplier(1 + mDamageModifier, DamageEvent.DamageType.getScalableDamageType());
+			event.updateDamageWithMultiplier(1 + mDamageModifier, DamageEvent.DamageType.getScalableDamageTypes());
 		}
 		return false; // only changes event damage
 	}

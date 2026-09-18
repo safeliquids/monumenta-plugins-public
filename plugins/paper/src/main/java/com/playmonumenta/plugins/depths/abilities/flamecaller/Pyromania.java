@@ -31,7 +31,7 @@ public class Pyromania extends DepthsAbility {
 			.displayItem(Material.CAMPFIRE)
 			.descriptions(Pyromania::getDescription)
 			.singleCharm(false);
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
 
 	private final double mRadius;
 	private final double mDamagePerMob;

@@ -6,8 +6,8 @@ import com.playmonumenta.plugins.depths.DepthsParty;
 import com.playmonumenta.plugins.depths.DepthsRarity;
 import com.playmonumenta.plugins.depths.DepthsUtils;
 import com.playmonumenta.plugins.depths.rooms.DepthsRoomType;
-import com.playmonumenta.plugins.guis.Gui;
-import com.playmonumenta.plugins.guis.GuiItem;
+import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.NjolGuiItem;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -17,13 +17,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class DepthsRoomChoiceGUI extends Gui {
+public class DepthsRoomChoiceGUI extends NjolGui {
 	private static final ItemStack NO_CHOICE = GUIUtils.createFiller(Material.BLACK_STAINED_GLASS_PANE);
 	private static final List<RoomChoice> ROOM_LOCATIONS = new ArrayList<>();
 
 	private record RoomChoice(int mLocation, DepthsRoomType mType, ItemStack mStack) {
-		public GuiItem onLeftClick(Runnable runnable) {
-			return new GuiItem(mStack).onLeftClick(runnable);
+		public NjolGuiItem onLeftClick(Runnable runnable) {
+			return new NjolGuiItem(mStack).onLeftClick(runnable);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class DepthsRoomChoiceGUI extends Gui {
 					}
 				}));
 			} else {
-				setItem(item.mLocation, new GuiItem(NO_CHOICE));
+				setItem(item.mLocation, new NjolGuiItem(NO_CHOICE));
 			}
 		}
 	}

@@ -38,6 +38,8 @@ public class TextDisplayBoss extends BossAbilityGroup {
 
 		@BossParam(help = "The opacity of the background. Between 0 (none) and 1 (full)")
 		public double BACKGROUND_OPACITY = 1;
+		@BossParam(help = "The opacity of the text. Between 0 (none) and 1 (full)")
+		public double TEXT_OPACITY = 1;
 
 		@BossParam(help = "Translation is affected by rotation")
 		public float TRANSLATION_X = 0;
@@ -93,6 +95,7 @@ public class TextDisplayBoss extends BossAbilityGroup {
 			int backgroundArgb = (Math.clamp(Math.round(p.BACKGROUND_OPACITY * 255), 0, 255) << 24) | backgroundRgb;
 
 			d.setBackgroundColor(Color.fromARGB(backgroundArgb));
+			d.setTextOpacity((byte) Math.round(p.TEXT_OPACITY * 255));
 
 			EntityUtils.setRemoveEntityOnUnload(d);
 		});

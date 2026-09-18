@@ -9,7 +9,6 @@ import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ public class SpellAuroraVoid extends Spell {
 	private static final String ANTI_CHEESE_NAME = "suffocation";
 
 	private final double mVoidThreshold;
+	private final double mVoidGroundThreshold;
 	private final double mSpaceThreshold;
 	private final double mSpaceGroundThreshold;
 	private final Location mCenter;
@@ -46,6 +46,7 @@ public class SpellAuroraVoid extends Spell {
 
 	public SpellAuroraVoid(Location center, Consumer<Player> onVoid) {
 		mVoidThreshold = center.getY() - 12;
+		mVoidGroundThreshold = center.getY() - 3;
 		mSpaceThreshold = center.getY() + 18;
 		mSpaceGroundThreshold = center.getY() + 6;
 		mCenter = center;
@@ -63,7 +64,9 @@ public class SpellAuroraVoid extends Spell {
 			.forEach(Entity::remove);
 		List<Player> players = Aurora.playersInRange(mCenter);
 		for (Player player : players) {
-			if (mRecentlySeenPlayers.getOrDefault(player, 0L) <= mTicks && player.getLocation().getY() <= mVoidThreshold) {
+			if (mRecentlySeenPlayers.getOrDefault(player, 0L) <= mTicks &&
+				player.getLocation().getY() <= (PlayerUtils.isFreeFalling(player) ? mVoidThreshold : mVoidGroundThreshold)
+			) {
 				DamageUtils.damagePercentHealth(null, player, EXIT_ARENA_DAMAGE, false, false, VOID_NAME);
 				player.teleport(mCenter.clone().add(0, 10, 0));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 2 * 20, 1));
@@ -93,25 +96,27 @@ public class SpellAuroraVoid extends Spell {
 				}
 			}
 		}
-
 		for (Player player : players) {
 			if (mRecentlySeenPlayers.getOrDefault(player, 0L) <= mTicks && LocationUtils.xzDistance(player.getLocation(), mCenter) > Aurora.ARENA_RADIUS + 1) {
-				DamageUtils.damagePercentHealth(null, player, EXIT_ARENA_DAMAGE, false, false, VOID_NAME);
-				launchCenter(player);
+				DamageUtils.damagePercentHealth(null, player, ANTI_CHEESE_DAMAGE, false, false, VOID_NAME);
+				if (!mSupernova) {
+					launchCenter(player);
+				}
 
 				mRecentlySeenPlayers.put(player, mTicks + VOID_IFRAMES);
 			}
+
 		}
 		mTicks++;
 	}
 
 	private void launchCenter(Player player) {
 		Location tpLoc = player.getLocation();
-		tpLoc.setY(mCenter.getY() + 5.5);
+		tpLoc.setY(mCenter.getY() + 11);
 		player.teleport(tpLoc);
 		player.setVelocity(mCenter.clone().subtract(tpLoc).toVector().multiply(0.1).setY(0));
 
-		EffectManager.getInstance().addEffect(player, "AstralVoidImmunity", new DamageImmunity(IMMUNITY_DURATION, EnumSet.complementOf(EnumSet.of(DamageEvent.DamageType.TRUE))));
+		EffectManager.getInstance().addEffect(player, "AstralVoidImmunity", new DamageImmunity(IMMUNITY_DURATION, DamageEvent.DamageType.getNonTrueTypes()));
 	}
 
 	@Override

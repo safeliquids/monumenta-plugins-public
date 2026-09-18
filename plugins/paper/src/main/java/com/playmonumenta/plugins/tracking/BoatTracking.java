@@ -32,7 +32,7 @@ public class BoatTracking implements EntityTracking {
 		Iterator<Boat> boatIter = mEntities.iterator();
 		while (boatIter.hasNext()) {
 			Boat boat = boatIter.next();
-			if (boat != null && boat.isValid() && boat.getLocation().isChunkLoaded()) {
+			if (boat != null && boat.isValid() && boat.getLocation().isWorldLoaded() && boat.getLocation().isChunkLoaded()) {
 				if (!LocationUtils.isValidBoatLocation(boat.getLocation())) {
 					Material woodType = boat.getBoatMaterial();
 					World world = boat.getWorld();
@@ -104,6 +104,10 @@ public class BoatTracking implements EntityTracking {
 				boatIter.remove();
 			}
 		}
+	}
+
+	public void clearWorld(World world) {
+		mEntities.removeIf(boat -> boat == null || world.equals(boat.getWorld()));
 	}
 
 	@Override

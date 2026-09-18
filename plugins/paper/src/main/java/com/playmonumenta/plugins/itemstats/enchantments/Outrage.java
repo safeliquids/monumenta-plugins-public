@@ -4,6 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
+import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
@@ -19,11 +20,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class Outrage implements Enchantment {
 	private static final double DAMAGE_INCREASE = 0.002;
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
 
 	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.OUTRAGE;
+	}
+
+	@Override
+	public StatPriority getPriorityAmount() {
+		return StatPriority.LAST;
 	}
 
 	@Override
