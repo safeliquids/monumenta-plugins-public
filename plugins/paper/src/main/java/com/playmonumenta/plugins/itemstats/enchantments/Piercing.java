@@ -30,6 +30,11 @@ public class Piercing implements Enchantment {
 	}
 
 	@Override
+	public double getPriorityAmount() {
+		return 827; // After Multishot
+	}
+
+	@Override
 	public void onProjectileLaunch(Plugin plugin, Player player, double level, ProjectileLaunchEvent event, Projectile proj) {
 		if (proj instanceof AbstractArrow arrow && !(proj instanceof Trident)) {
 
@@ -39,7 +44,7 @@ public class Piercing implements Enchantment {
 			}
 
 			// Some skills can add piercing
-			arrow.setPierceLevel(Math.clamp(arrow.getPierceLevel() + (int) level, 0, 127));
+			arrow.setPierceLevel(Math.max(0, Math.min(arrow.getPierceLevel() + (int) level, 127)));
 		}
 	}
 }

@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.integrations.luckperms.guildgui;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
 import com.playmonumenta.plugins.integrations.luckperms.GuildAccessLevel;
 import com.playmonumenta.plugins.integrations.luckperms.GuildFlag;
@@ -155,10 +155,6 @@ public class GuildGui extends MailGui {
 		CommandSender callee = CommandUtils.getCallee(sender);
 		if (!(callee instanceof Player player)) {
 			throw CommandAPI.failWithString("The guild GUI can only be shown to players");
-		}
-
-		if (!player.hasPermission("monumenta.command.guild.gui")) {
-			throw CommandAPI.failWithString("This command is currently disabled");
 		}
 
 		boolean openedAsModerator = targetName != null || guildName != null;
@@ -460,7 +456,7 @@ public class GuildGui extends MailGui {
 				});
 		}
 
-		NjolGuiItem guiItem = setItem(HEADER_Y, 5,
+		GuiItem guiItem = setItem(HEADER_Y, 5,
 			GUIUtils.createBasicItem(Material.REDSTONE_TORCH, "Guild Settings", NamedTextColor.GRAY));
 		if (mGuildGroup != null) {
 			guiItem.onClick((InventoryClickEvent event) -> setView(new SettingsView(this)));
@@ -650,7 +646,7 @@ public class GuildGui extends MailGui {
 		meta.lore(lore);
 
 		item.setItemMeta(meta);
-		NjolGuiItem guiItem = setItem(row, column, new NjolGuiItem(item, false));
+		GuiItem guiItem = setItem(row, column, new GuiItem(item, false));
 
 		guiItem.onClick((InventoryClickEvent event) -> {
 			if (
@@ -779,7 +775,7 @@ public class GuildGui extends MailGui {
 	protected void setAccessHeaderIcon(int row, int column, GuildAccessLevel accessLevel) {
 		ItemStack item = getAccessHeaderIcon(accessLevel);
 
-		NjolGuiItem guiItem = setItem(row, column, item);
+		GuiItem guiItem = setItem(row, column, item);
 		if (!(GuildAccessLevel.FOUNDER.equals(accessLevel) || GuildAccessLevel.BLOCKED.equals(accessLevel))) {
 			guiItem.onClick(onAccessHeaderClick(accessLevel));
 		}

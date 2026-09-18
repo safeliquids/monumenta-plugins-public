@@ -29,7 +29,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class CharmBagGui extends NjolGui {
+public class CharmBagGui extends Gui {
 	private final CharmBag mCharmBag;
 	private final CharmBagManager.CharmBagSettings mSettings;
 	private final String mPlainName;
@@ -116,7 +116,7 @@ public class CharmBagGui extends NjolGui {
 				if (showAmounts) {
 					displayItem.setAmount((int) Math.min(64, item.mAmount));
 				}
-				setItem(10 + posInPage + posInPage / 8, new NjolGuiItem(displayItem, false))
+				setItem(10 + posInPage + posInPage / 8, new GuiItem(displayItem, false))
 					.onClick(event -> {
 						ItemStack movedItem = ItemUtils.clone(item.mItem);
 						switch (event.getClick()) {

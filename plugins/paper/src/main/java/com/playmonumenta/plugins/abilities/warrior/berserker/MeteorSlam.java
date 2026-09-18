@@ -12,10 +12,8 @@ import com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder;
 import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.cosmetics.skills.CosmeticSkills;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.berserker.MeteorSlamCS;
-import com.playmonumenta.plugins.effects.ZeroArgumentEffect;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
-import com.playmonumenta.plugins.potion.PotionManager;
 import com.playmonumenta.plugins.utils.BlockUtils;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
@@ -33,11 +31,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -45,52 +42,58 @@ import org.jetbrains.annotations.Nullable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.cooldown;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.stat;
-import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 public class MeteorSlam extends Ability {
-	public static final String METEOR_SLAM_JUMP_BOOST_EFFECT = "MeteorSlamJumpBoostEffect";
-
 	private static final String SLAM_ONCE_THIS_TICK_METAKEY = "MeteorSlamTickSlammed";
 	private static final int SNEAK_TIME_REQ = 3;
 	private static final int CAST_DELAY = 5;
 
 	// Swing
-	private static final int JUMP_AMPLIFIER_L1 = 3;
-	private static final int JUMP_AMPLIFIER_L2 = 4;
-	private static final int DURATION_TICKS = Constants.TICKS_PER_SECOND * 2;
-	private static final double VAULT_VELOCITY = 1.0;
+	private static final double VAULT_VELOCITY = 1.1;
 	private static final double VAULT_VELOCITY_PENALTY = 0.5;
+	private static final double UP_DAMAGE = 10;
+	private static final double CONE_RADIUS = 4;
+	private static final int CONE_ANGLE = 70;
+	private static final double VERTICAL_KB = -0.7;
+
+	public static final String CHARM_VELOCITY = "Meteor Slam Vault Velocity";
+	public static final String CHARM_UP_DAMAGE = "Meteor Slam Vault Damage";
+	public static final String CHARM_CONE_ANGLE = "Meteor Slam Vault Cone Angle";
+	public static final String CHARM_RANGE = "Meteor Slam Vault Range";
+	public static final String CHARM_KNOCKBACK = "Meteor Slam Vault Knockback";
+
+	private final double mVaultVelocity;
+	private final double mVaultDamage;
+	private final double mVaultRadius;
+	private final int mConeAngle;
+	private final double mVerticalKb;
 
 	// Slam
-	private static final double AUTOMATIC_THRESHOLD = 3;
-	private static final double MAX_HEIGHT = 7;
-	private static final double SLAM_DAMAGE_PER_BLOCK_L1 = 3;
-	private static final double SLAM_DAMAGE_PER_BLOCK_L2 = 4;
-	private static final double SLAM_RADIUS = 3;
+	public static final double AUTOMATIC_THRESHOLD = 3;
+	public static final double MAX_HEIGHT = 7;
+	public static final double SLAM_DAMAGE_PER_BLOCK = 3.5;
+	public static final double SLAM_RADIUS = 3;
 
-	// Ground Pound
-	private static final double GROUND_POUND_DAMAGE_BONUS = 0.5;
-	private static final double GROUND_POUND_RADIUS_BONUS = 0.5;
-	private static final double GROUND_POUND_VELOCITY = 1.8;
-	private static final int GROUND_POUND_FIRE_DURATION = 5 * Constants.TICKS_PER_SECOND;
-	private static final int GROUND_POUND_BLOODLUST_COST = 1;
-	private static final double GROUND_POUND_KNOCKBACK = 0.5;
-	private static final double GROUND_POUND_SLOWNESS_MULTIPLIER = 0.15;
-	private static final double GROUND_POUND_VULNERABILITY_MULTIPLIER = 0.15;
-	private static final int GROUND_POUND_SLOWNESS_DURATION = Constants.TICKS_PER_SECOND * 3;
-	private static final int GROUND_POUND_VULNERABILITY_DURATION = Constants.TICKS_PER_SECOND * 3;
-	private static final int COOLDOWN_L1 = 8 * Constants.TICKS_PER_SECOND;
-	private static final int COOLDOWN_L2 = 6 * Constants.TICKS_PER_SECOND;
-
-	// Others
-
-	public static final String CHARM_JUMP_BOOST = "Meteor Slam Jump Boost";
-	public static final String CHARM_DURATION = "Meteor Slam Duration";
-	public static final String CHARM_VELOCITY = "Meteor Slam Vault Velocity";
 	public static final String CHARM_THRESHOLD = "Meteor Slam Fall Requirement";
 	public static final String CHARM_HEIGHT = "Meteor Slam Max Height";
 	public static final String CHARM_SLAM_DAMAGE = "Meteor Slam Damage";
 	public static final String CHARM_METEOR_SLAM_RADIUS = "Meteor Slam Radius";
+
+	private final double mThreshold;
+	private final double mMaxHeight;
+	private final double mSlamDamage;
+	private final double mSlamRadius;
+
+	// Ground Pound
+	public static final double GROUND_POUND_DAMAGE_PER_BLOCK = 1.5;
+	public static final double GROUND_POUND_VELOCITY = 1.8;
+	public static final double GROUND_POUND_RADIUS = 1.5;
+	public static final int GROUND_POUND_FIRE_DURATION = 5 * Constants.TICKS_PER_SECOND;
+	public static final int GROUND_POUND_BLOODLUST_COST = 1;
+	public static final double GROUND_POUND_KNOCKBACK = 0.5;
+	public static final double GROUND_POUND_SLOWNESS_MULTIPLIER = 0.15;
+	public static final int GROUND_POUND_SLOWNESS_DURATION = 40;
+
 	public static final String CHARM_GROUND_POUND_VELOCITY = "Meteor Slam Ground Pound Velocity";
 	public static final String CHARM_GROUND_POUND_DAMAGE = "Meteor Slam Ground Pound Damage Per Block Fallen";
 	public static final String CHARM_GROUND_POUND_RADIUS = "Meteor Slam Ground Pound Additional Radius";
@@ -99,20 +102,7 @@ public class MeteorSlam extends Ability {
 	public static final String CHARM_GROUND_POUND_KNOCKBACK = "Meteor Slam Ground Pound Knockback";
 	public static final String CHARM_GROUND_POUND_SLOWNESS_MULTIPLIER = "Meteor Slam Ground Pound Slowness Multiplier";
 	public static final String CHARM_GROUND_POUND_SLOWNESS_DURATION = "Meteor Slam Ground Pound Slowness Duration";
-	public static final String CHARM_GROUND_POUND_VULNERABILITY_MULTIPLIER = "Meteor Slam Ground Pound Slowness Multiplier";
-	public static final String CHARM_GROUND_POUND_VULNERABILITY_DURATION = "Meteor Slam Ground Pound Slowness Duration";
-	public static final String CHARM_BLOODLUST_COST = "Meteor Slam Bloodlust Cost";
-	public static final String CHARM_COOLDOWN = "Meteor Slam Cooldown";
 
-	// Charm vars
-
-	private final int mJumpBoost;
-	private final int mDuration;
-	private final double mVaultVelocity;
-	private final double mThreshold;
-	private final double mMaxHeight;
-	private final double mSlamDamage;
-	private final double mSlamRadius;
 	private final double mGroundPoundDamage;
 	private final double mGroundPoundVelocity;
 	private final double mGroundPoundRadius;
@@ -121,8 +111,15 @@ public class MeteorSlam extends Ability {
 	private final double mGroundPoundKnockback;
 	private final double mGroundPoundSlownessMultiplier;
 	private final int mGroundPoundSlownessDuration;
-	private final double mGroundPoundVulnMultiplier;
-	private final int mGroundPoundVulnDuration;
+
+	// Others
+	public static final int BLOODLUST_COST = 1;
+	private static final int COOLDOWN = 100;
+
+	public static final String CHARM_BLOODLUST_COST = "Meteor Slam Bloodlust Cost";
+	public static final String CHARM_COOLDOWN = "Meteor Slam Cooldown";
+
+	private final int mBloodlustCost;
 
 	// Non-charm vars
 	private final MeteorSlamCS mCosmetic;
@@ -130,7 +127,6 @@ public class MeteorSlam extends Ability {
 	private @Nullable Bloodlust mBloodlust;
 	private boolean mHasTouchedGround = false;
 	private boolean mGroundPound = false;
-	private boolean mCastedGroundpound = false;
 	private double mFallFromY = -7050;
 	private int mVaultCastTime = 0;
 	private int mPoundCastTime = 0;
@@ -143,7 +139,7 @@ public class MeteorSlam extends Ability {
 			.shorthandName("MS")
 			.descriptions(getDescription1(), getDescription2())
 			.simpleDescription("Swing your weapon to damage mobs and vault yourself upward. Passively generate a slam attack when fallen from great heights.")
-			.cooldown(COOLDOWN_L1, COOLDOWN_L2, CHARM_COOLDOWN)
+			.cooldown(COOLDOWN, CHARM_COOLDOWN)
 			.addTrigger(new AbilityTriggerInfo<>("cast", "cast", MeteorSlam::cast, new AbilityTrigger(AbilityTrigger.Key.SWAP).sneaking(true)))
 			.addTrigger(new AbilityTriggerInfo<>("castgroundpound", "cast ground pound", mSlam -> mSlam.doGroundPound(true), new AbilityTrigger(AbilityTrigger.Key.SWAP).enabled(false)))
 			.displayItem(Material.FIRE_CHARGE);
@@ -151,27 +147,27 @@ public class MeteorSlam extends Ability {
 	public MeteorSlam(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
 
-		mJumpBoost = (isLevelOne() ? JUMP_AMPLIFIER_L1 : JUMP_AMPLIFIER_L2) + (int) CharmManager.getLevel(mPlayer, CHARM_JUMP_BOOST);
-		mDuration = CharmManager.getDuration(mPlayer, CHARM_DURATION, DURATION_TICKS);
-
 		mVaultVelocity = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_VELOCITY, VAULT_VELOCITY);
+		mVaultDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_UP_DAMAGE, UP_DAMAGE);
+		mVaultRadius = CharmManager.getRadius(mPlayer, CHARM_RANGE, CONE_RADIUS);
+		mConeAngle = (int) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_CONE_ANGLE, CONE_ANGLE);
+		mVerticalKb = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, VERTICAL_KB);
 
 		mThreshold = AUTOMATIC_THRESHOLD + CharmManager.getLevel(mPlayer, CHARM_THRESHOLD);
 		mMaxHeight = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_HEIGHT, MAX_HEIGHT);
-		mSlamDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_SLAM_DAMAGE, isLevelOne() ? SLAM_DAMAGE_PER_BLOCK_L1 : SLAM_DAMAGE_PER_BLOCK_L2);
+		mSlamDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_SLAM_DAMAGE, SLAM_DAMAGE_PER_BLOCK);
 		mSlamRadius = CharmManager.getRadius(mPlayer, CHARM_METEOR_SLAM_RADIUS, SLAM_RADIUS);
 
-		mGroundPoundDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_GROUND_POUND_DAMAGE, GROUND_POUND_DAMAGE_BONUS);
+		mGroundPoundDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_GROUND_POUND_DAMAGE, GROUND_POUND_DAMAGE_PER_BLOCK);
 		mGroundPoundVelocity = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_GROUND_POUND_VELOCITY, GROUND_POUND_VELOCITY);
-		mGroundPoundRadius = CharmManager.getRadius(mPlayer, CHARM_GROUND_POUND_RADIUS, GROUND_POUND_RADIUS_BONUS);
+		mGroundPoundRadius = CharmManager.getRadius(mPlayer, CHARM_GROUND_POUND_RADIUS, GROUND_POUND_RADIUS);
 		mGroundPoundKnockback = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_GROUND_POUND_KNOCKBACK, GROUND_POUND_KNOCKBACK);
 		mGroundPoundBloodlustCost = GROUND_POUND_BLOODLUST_COST + (int) CharmManager.getLevel(mPlayer, CHARM_GROUND_POUND_BLOODLUST_COST);
 		mGroundPoundFireDuration = CharmManager.getDuration(mPlayer, CHARM_GROUND_POUND_FIRE_DURATION, GROUND_POUND_FIRE_DURATION);
 		mGroundPoundSlownessMultiplier = GROUND_POUND_SLOWNESS_MULTIPLIER + CharmManager.getLevelPercentDecimal(player, CHARM_GROUND_POUND_SLOWNESS_MULTIPLIER);
-		mGroundPoundVulnMultiplier = GROUND_POUND_VULNERABILITY_MULTIPLIER + CharmManager.getLevelPercentDecimal(player, CHARM_GROUND_POUND_VULNERABILITY_MULTIPLIER);
 		mGroundPoundSlownessDuration = CharmManager.getDuration(mPlayer, CHARM_GROUND_POUND_SLOWNESS_DURATION, GROUND_POUND_SLOWNESS_DURATION);
-		mGroundPoundVulnDuration = CharmManager.getDuration(mPlayer, CHARM_GROUND_POUND_VULNERABILITY_DURATION, GROUND_POUND_VULNERABILITY_DURATION);
 
+		mBloodlustCost = BLOODLUST_COST + (int) CharmManager.getLevel(mPlayer, CHARM_BLOODLUST_COST);
 
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new MeteorSlamCS());
 
@@ -222,7 +218,9 @@ public class MeteorSlam extends Ability {
 
 	public boolean cast() {
 		if (isOnCooldown()
-			|| ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.NO_MOBILITY_ABILITIES)) {
+			|| ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.NO_MOBILITY_ABILITIES)
+			|| mBloodlust == null
+			|| !mBloodlust.useStacks(mBloodlustCost)) {
 			return false;
 		}
 
@@ -234,18 +232,6 @@ public class MeteorSlam extends Ability {
 			}
 		}, null, 5);
 		mVaultCastTime = Bukkit.getServer().getCurrentTick();
-		mCastedGroundpound = false;
-
-		mPlugin.mPotionManager.addPotion(mPlayer, PotionManager.PotionID.ABILITY_SELF,
-			new PotionEffect(PotionEffectType.JUMP, mDuration, mJumpBoost, true, false));
-
-		mPlugin.mEffectManager.addEffect(mPlayer, METEOR_SLAM_JUMP_BOOST_EFFECT,
-			new ZeroArgumentEffect(mDuration, METEOR_SLAM_JUMP_BOOST_EFFECT) {
-				@Override
-				public String toString() {
-					return String.format("%s duration:%d", METEOR_SLAM_JUMP_BOOST_EFFECT, getDuration());
-				}
-			});
 
 		return true;
 	}
@@ -253,12 +239,26 @@ public class MeteorSlam extends Ability {
 	private void doSlash() {
 		World world = mPlayer.getWorld();
 
-		mCosmetic.onUpwardSlash(world, mPlayer.getLocation(), mPlayer, 3, 60);
+		mCosmetic.onUpwardSlash(world, mPlayer.getLocation(), mPlayer, mVaultRadius, mConeAngle);
 
 		Location castLocation = mPlayer.getLocation().clone();
 		castLocation.setDirection(mPlayer.getLocation().getDirection().setY(0));
 		castLocation.setY(castLocation.y() - 3);
 
+		// Mob kb is partially affected by the players initial velocity to make it feel more natural when jumping or using other movement tools
+		double playerInitialVelocity = Math.min(0.7, Math.max(0, mPlayer.getVelocity().getY() * 0.65));
+		Vector kbVector = new Vector(0, mVerticalKb + playerInitialVelocity, 0);
+
+		Hitbox hitbox = Hitbox.approximateCylinderSegment(castLocation, 6, mVaultRadius, Math.toRadians(mConeAngle) / 2);
+		for (LivingEntity target : hitbox.getHitMobs()) {
+
+			double kbMultiplier = 1 - EntityUtils.getAttributeOrDefault(target, Attribute.GENERIC_KNOCKBACK_RESISTANCE, 0);
+			if (kbMultiplier > 0) {
+				target.setVelocity(kbVector.multiply(kbMultiplier));
+			}
+
+			DamageUtils.damage(mPlayer, target, DamageEvent.DamageType.MELEE_SKILL, mVaultDamage, ClassAbility.METEOR_SLAM, true);
+		}
 		Vector dir = mPlayer.getLocation().getDirection().setY(0).normalize().setY(6).normalize();
 		Vector velocity = dir.multiply(mVaultVelocity * (mHasTouchedGround ? 1 : VAULT_VELOCITY_PENALTY));
 		mPlayer.setVelocity(velocity);
@@ -286,38 +286,29 @@ public class MeteorSlam extends Ability {
 	}
 
 	public boolean doGroundPound(boolean customCast) {
-		if (mBloodlust == null
-			|| mCastedGroundpound
-			|| ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.NO_MOBILITY_ABILITIES)
-			|| Bukkit.getCurrentTick() - mVaultCastTime >= mDuration
-			|| !canGroundPound()) {
-			return false;
-		}
-
-		boolean customTriggerEnabled = hasCustomTrigger(mPlayer);
-		if (!customTriggerEnabled
-			&& Bukkit.getServer().getCurrentTick() - CAST_DELAY > mVaultCastTime
-			&& mPlayer.isSneaking()
-			&& mSneakTime < SNEAK_TIME_REQ
-		) {
-			mSneakTime++;
-		}
-
-		if (!mGroundPound
-			&& ((customTriggerEnabled && customCast)
-			|| mSneakTime >= SNEAK_TIME_REQ)
-		) {
-			// Seperate if statement to prevent failed cast & consuming stack
-			if (mBloodlust.useStacks(mGroundPoundBloodlustCost)) {
-				mPlayer.setVelocity(new Vector(0, -mGroundPoundVelocity, 0));
-				mCosmetic.onGroundPoundCast(mPlugin, mPlayer.getWorld(), mPlayer.getLocation(), mPlayer);
-				mPoundCastTime = Bukkit.getServer().getCurrentTick();
-				mGroundPound = true;
-				mCastedGroundpound = true;
-				return true;
+		if (isLevelTwo()
+			&& mBloodlust != null
+			&& canGroundPound()
+			&& !ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.NO_MOBILITY_ABILITIES)) {
+			boolean customTriggerEnabled = hasCustomTrigger(mPlayer);
+			if (!customTriggerEnabled
+				&& Bukkit.getServer().getCurrentTick() - CAST_DELAY > mVaultCastTime
+				&& mPlayer.isSneaking()
+				&& mSneakTime < SNEAK_TIME_REQ) {
+				mSneakTime++;
+			}
+			if (!mGroundPound
+				&& ((customTriggerEnabled && customCast) || mSneakTime >= SNEAK_TIME_REQ)) {
+				// Seperate if statement to prevent failed cast & consuming stack
+				if (mBloodlust.useStacks(mGroundPoundBloodlustCost)) {
+					mPlayer.setVelocity(new Vector(0, -mGroundPoundVelocity, 0));
+					mCosmetic.onGroundPoundCast(mPlugin, mPlayer.getWorld(), mPlayer.getLocation(), mPlayer);
+					mPoundCastTime = Bukkit.getServer().getCurrentTick();
+					mGroundPound = true;
+					return true;
+				}
 			}
 		}
-
 		return false;
 	}
 
@@ -354,6 +345,7 @@ public class MeteorSlam extends Ability {
 		return false;
 	}
 
+
 	// Jumping at the same time cancels slam attack
 	private void doSlamAttack(Location location) {
 		World world = mPlayer.getWorld();
@@ -362,22 +354,19 @@ public class MeteorSlam extends Ability {
 		double extraFall = 10 * (1 - Math.pow(0.975, Math.max(0, fallDistance - linearFall)));
 		double actualFall = linearFall + extraFall;
 
-		double slamDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_SLAM_DAMAGE, actualFall * (isLevelOne() ? SLAM_DAMAGE_PER_BLOCK_L1 : SLAM_DAMAGE_PER_BLOCK_L2));
+		double slamDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_SLAM_DAMAGE, actualFall * SLAM_DAMAGE_PER_BLOCK);
 		double slamRadius = mSlamRadius;
 
 		if (mGroundPound) {
-			slamRadius *= 1 + mGroundPoundRadius;
-			slamDamage *= 1 + mGroundPoundDamage;
+			slamRadius += mGroundPoundRadius;
+			slamDamage += mGroundPoundDamage * actualFall;
 			mCosmetic.onGroundPoundSlam(mPlugin, world, location, mPlayer, slamRadius);
 		}
 
 		for (LivingEntity enemy : new Hitbox.SphereHitbox(location, slamRadius).getHitMobs()) {
 			DamageUtils.damage(mPlayer, enemy, DamageEvent.DamageType.MELEE_SKILL, slamDamage, mInfo.getLinkedSpell(), true);
 			if (mGroundPound) {
-				if (isLevelTwo()) {
-					EntityUtils.applySlow(mPlugin, mGroundPoundSlownessDuration, mGroundPoundSlownessMultiplier, enemy);
-					EntityUtils.applyVulnerability(mPlugin, mGroundPoundVulnDuration, mGroundPoundVulnMultiplier, enemy);
-				}
+				EntityUtils.applySlow(mPlugin, mGroundPoundSlownessDuration, mGroundPoundSlownessMultiplier, enemy);
 				MovementUtils.knockAway(mPlayer, enemy, (float) mGroundPoundKnockback, true);
 				EntityUtils.applyFire(mPlugin, mGroundPoundFireDuration, enemy, mPlayer);
 			}
@@ -439,57 +428,48 @@ public class MeteorSlam extends Ability {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 1)
 			.addTrigger()
 			.addDashedLine()
-			.addLine("Vault upwards and gain Jump Boost.")
-			.addLine("Passively, falling more than %d blocks creates")
-			.statValues(stat(a -> a.mThreshold, AUTOMATIC_THRESHOLD))
-			.addLine("a slam upon landing, dealing more damage for")
-			.addLine("each block fallen. Fall damage is cancelled")
-			.addLine("if any mob was hit by the slam.")
+			.addLine("Spend %d stack of *Bloodlust* to vault upwards").styles(Bloodlust.BLOODLUST_COLOR)
+				.statValues(stat(a -> a.mBloodlustCost, BLOODLUST_COST))
+			.addLine("and damage mobs in front of you, knocking them")
+			.addLine("downwards.")
 			.addLine()
-			.addStat("Effect: Jump Boost %d1 for %t")
-				.statValues(stat(a -> a.mJumpBoost + 1, JUMP_AMPLIFIER_L1 + 1), stat(a -> a.mDuration, DURATION_TICKS))
-			.addStat("Slam Damage: %d1 (m) per block (%d block softcap)")
-				.statValues(stat(a -> a.mSlamDamage, SLAM_DAMAGE_PER_BLOCK_L1),
-					stat(a -> a.mMaxHeight, MAX_HEIGHT))
+			.addStat("Vault Damage: %d (m)")
+				.statValues(stat(a -> a.mVaultDamage, UP_DAMAGE))
+			.addStat("Vault Radius: %r (Cone-Shaped)")
+				.statValues(stat(a -> a.mVaultRadius, CONE_RADIUS))
+			.addStat("Cooldown: %t")
+				.statValues(cooldown(COOLDOWN))
+			.addLine()
+			.addLine("Passively, falling more than %d blocks creates")
+				.statValues(stat(a -> a.mThreshold, AUTOMATIC_THRESHOLD))
+			.addLine("a slam upon landing, dealing more damage for")
+			.addLine("each block fallen. (%d block softcap)")
+				.statValues(stat(a -> a.mMaxHeight, MAX_HEIGHT))
+			.addLine("Fall damage is cancelled if any mob was hit")
+			.addLine("by the slam.")
+			.addLine()
+			.addStat("Slam Damage: %d (m) per block")
+				.statValues(stat(a -> a.mSlamDamage, SLAM_DAMAGE_PER_BLOCK))
 			.addStat("Slam Radius: %r")
 				.statValues(stat(a -> a.mSlamRadius, SLAM_RADIUS))
-			.addStat("Cooldown: %t1")
-				.statValues(cooldown(COOLDOWN_L1))
-			.addLine()
-			.addLine("Sneaking while midair spends %d stack of *Bloodlust*").styles(Bloodlust.BLOODLUST_COLOR)
-				.statValues(stat(a -> a.mGroundPoundBloodlustCost, GROUND_POUND_BLOODLUST_COST))
-			.addLine("to lunge downwards and enhance your next slam,")
-			.addLine("increasing its damage and radius, and causing it")
-			.addLine("to ignite mobs, and knock them back.")
-			.addLine("(Can cast once per vault)")
-			.addLine()
-			.addStat("Damage Boost: +%p")
-				.statValues(stat(a -> a.mGroundPoundDamage, GROUND_POUND_DAMAGE_BONUS))
-			.addStat("Radius Boost: +%p ")
-				.statValues(stat(a -> a.mGroundPoundRadius, GROUND_POUND_RADIUS_BONUS))
-			.addStat("Effect: Fire for %t")
-				.statValues(stat(a -> a.mGroundPoundFireDuration, GROUND_POUND_FIRE_DURATION))
 			.addDashedLine();
 	}
 
 	private static Description<MeteorSlam> getDescription2() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
-			.addLine("Increase *Meteor Slam*'s damage, jump").styles(UNDERLINED)
-			.addLine("boost level and reduce its cooldown.")
+			.addLine("Sneaking while midair spends %d stack of *Bloodlust*").styles(Bloodlust.BLOODLUST_COLOR)
+				.statValues(stat(a -> a.mGroundPoundBloodlustCost, GROUND_POUND_BLOODLUST_COST))
+			.addLine("to lunge downwards and enhance your next slam,")
+			.addLine("increasing its damage and radius, and causing it")
+			.addLine("to ignite mobs, slow them, and knock them back.")
 			.addLine()
-			.addStatComparison("Effect: %d1 -> %d2 Jump Boost")
-				.statValues(stat(JUMP_AMPLIFIER_L1 + 1),
-					stat(a -> a.mJumpBoost + 1, JUMP_AMPLIFIER_L2 + 1))
-			.addStatComparison("Slam Damage: %d1 -> %d2 (m) per block")
-				.statValues(stat(SLAM_DAMAGE_PER_BLOCK_L1), stat(a -> a.mSlamDamage, SLAM_DAMAGE_PER_BLOCK_L2))
-			.addStatComparison("Cooldown: %t1 -> %t2")
-				.statValues(cooldown(COOLDOWN_L1), cooldown(COOLDOWN_L2))
-			.addLine()
-			.addLine("Ground Pound now inflicts vulnerability and slowness.")
-			.addLine()
-			.addStat("Effect: %p Vulnerability for %t")
-				.statValues(stat(a -> a.mGroundPoundSlownessMultiplier, GROUND_POUND_SLOWNESS_MULTIPLIER), stat(a -> a.mGroundPoundSlownessDuration, GROUND_POUND_SLOWNESS_DURATION))
+			.addStatComparison("Ground Pound Damage: %d -> %d (m) per block")
+				.statValues(stat(SLAM_DAMAGE_PER_BLOCK), stat(a -> a.mSlamDamage + a.mGroundPoundDamage, SLAM_DAMAGE_PER_BLOCK + GROUND_POUND_DAMAGE_PER_BLOCK))
+			.addStatComparison("Ground Pound Radius: %r -> %r")
+				.statValues(stat(SLAM_RADIUS), stat(a -> a.mSlamRadius + a.mGroundPoundRadius, SLAM_RADIUS + GROUND_POUND_RADIUS))
+			.addStat("Effect: Fire for %t")
+				.statValues(stat(a -> a.mGroundPoundFireDuration, GROUND_POUND_FIRE_DURATION))
 			.addStat("Effect: %p Slowness for %t")
 				.statValues(stat(a -> a.mGroundPoundSlownessMultiplier, GROUND_POUND_SLOWNESS_MULTIPLIER), stat(a -> a.mGroundPoundSlownessDuration, GROUND_POUND_SLOWNESS_DURATION))
 			.addDashedLine();

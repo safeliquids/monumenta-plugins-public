@@ -73,6 +73,23 @@ public class PotionUtils {
 
 	public static final ImmutableSet<PotionType> BASE_POTION_ITEM_TYPES = ImmutableSet.of(PotionType.AWKWARD, PotionType.THICK, PotionType.MUNDANE, PotionType.WATER);
 
+	// This map only notes any "useful" effect pairs, i.e. effects that would be non-annoying and balanced to invert
+	private static final Map<PotionEffectType, PotionEffectType> OPPOSITE_EFFECTS = new HashMap<>();
+
+	static {
+		OPPOSITE_EFFECTS.put(PotionEffectType.SPEED, PotionEffectType.SLOW);
+		OPPOSITE_EFFECTS.put(PotionEffectType.SLOW, PotionEffectType.SPEED);
+		OPPOSITE_EFFECTS.put(PotionEffectType.FAST_DIGGING, PotionEffectType.SLOW_DIGGING);
+		OPPOSITE_EFFECTS.put(PotionEffectType.SLOW_DIGGING, PotionEffectType.FAST_DIGGING);
+		OPPOSITE_EFFECTS.put(PotionEffectType.REGENERATION, PotionEffectType.WITHER);
+		OPPOSITE_EFFECTS.put(PotionEffectType.WITHER, PotionEffectType.REGENERATION);
+		OPPOSITE_EFFECTS.put(PotionEffectType.POISON, PotionEffectType.REGENERATION);
+		OPPOSITE_EFFECTS.put(PotionEffectType.DAMAGE_RESISTANCE, PotionEffectType.UNLUCK);
+		OPPOSITE_EFFECTS.put(PotionEffectType.UNLUCK, PotionEffectType.DAMAGE_RESISTANCE);
+		OPPOSITE_EFFECTS.put(PotionEffectType.INCREASE_DAMAGE, PotionEffectType.WEAKNESS);
+		OPPOSITE_EFFECTS.put(PotionEffectType.WEAKNESS, PotionEffectType.INCREASE_DAMAGE);
+	}
+
 	public static class PotionInfo {
 		public @Nullable PotionEffectType mType;
 		public int mDuration;
@@ -379,6 +396,10 @@ public class PotionUtils {
 		for (PotionEffectType type : POSITIVE_EFFECTS) {
 			potionMeta.removeCustomEffect(type);
 		}
+	}
+
+	public static @Nullable PotionEffectType getOppositeEffect(PotionEffectType type) {
+		return OPPOSITE_EFFECTS.get(type);
 	}
 
 	// Duration is equal to -1 or greater than about 10 hours.

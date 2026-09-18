@@ -1,5 +1,6 @@
 package com.playmonumenta.plugins.abilities.warrior.berserker;
 
+import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.abilities.Ability;
 import com.playmonumenta.plugins.abilities.AbilityInfo;
@@ -14,11 +15,15 @@ import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
 import com.playmonumenta.plugins.network.ClientModHandler;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.AbilityUtils;
+import com.playmonumenta.plugins.utils.EntityUtils;
+import com.playmonumenta.plugins.utils.ZoneUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +39,9 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 	private static final int R3_DAMAGE_REQ = 130;
 	private static final double AOE_PENALTY = 0.33;
 	private static final int MAX_STACKS = 10;
+	private static final int MAX_PASSIVE_GAIN = 2;
+	private static final int OUT_OF_COMBAT_TIME = Constants.TICKS_PER_SECOND * 12;
+	private static final int TIME_PER_RAMPAGE = Constants.TICKS_PER_SECOND * 5;
 
 	public static final String CHARM_STACKS = "Bloodlust Max Stacks";
 	public static final String CHARM_THRESHOLD = "Bloodlust Stack Threshold";
@@ -44,9 +52,11 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 	private final double mDamageReq;
 
 	private int mStacks;
+	private int mCombatTime;
 	private double mDamageCounter = 0;
 	private final BukkitRunnable mBloodlustRunnable;
 	private int mMaxBloodlust = 3;
+	private @Nullable Rampage mRampage;
 
 	public static final AbilityInfo<Bloodlust> INFO =
 		new AbilityInfo<>(Bloodlust.class, "Bloodlust", Bloodlust::new)
@@ -61,7 +71,13 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 		mDamageReq = CharmManager.calculateFlatAndPercentValue(player, CHARM_THRESHOLD, ServerProperties.getAbilityEnhancementsEnabled(mPlayer) ? R3_DAMAGE_REQ : R2_DAMAGE_REQ);
 		mStackLimit = MAX_STACKS + (int) CharmManager.getLevel(mPlayer, CHARM_STACKS);
 
+		Bukkit.getScheduler().runTask(mPlugin, () -> {
+			mRampage = mPlugin.mAbilityManager.getPlayerAbilityIgnoringSilence(mPlayer, Rampage.class);
+		});
+
 		mBloodlustRunnable = new BukkitRunnable() {
+			int mTicks = 0;
+
 			@Override
 			public void run() {
 				if (player == null) {
@@ -78,7 +94,19 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 					return;
 				}
 
+				boolean hasAggro = EntityUtils.getNearbyMobs(mPlayer.getLocation(), 8).stream().anyMatch(e -> e instanceof Mob mob && mPlayer.equals(mob.getTarget()));
+
 				mMaxBloodlust = MAX_BLOODLUST_PER_TICK;
+				if (mTicks % 20 == 0 && hasAggro && !ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.RESIST_5)) {
+					mCombatTime = Bukkit.getServer().getCurrentTick();
+				}
+				if (mTicks % TIME_PER_RAMPAGE == 0) {
+					if (Bukkit.getServer().getCurrentTick() - OUT_OF_COMBAT_TIME > mCombatTime && mStacks < MAX_PASSIVE_GAIN) {
+						addStacks(1);
+					}
+					mTicks = 0;
+				}
+				mTicks++;
 			}
 		};
 		cancelOnDeath(mBloodlustRunnable.runTaskTimer(plugin, 0, 1));
@@ -95,17 +123,22 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 
 	@Override
 	public boolean onDamageDelayed(final DamageEvent event, final LivingEntity enemy) {
+		if (!ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.RESIST_5)) {
+			mCombatTime = Bukkit.getServer().getCurrentTick();
+		}
+
 		final DamageEvent.DamageType type = event.getType();
 		final boolean isMelee = type == DamageEvent.DamageType.MELEE;
 		final boolean isMeleeAbil = type == DamageEvent.DamageType.MELEE_SKILL || type == DamageEvent.DamageType.MELEE_ENCH;
 		final boolean isRampage = event.getAbility() == ClassAbility.RAMPAGE;
 
-		// Single target ability
+		// Single target abilities
+		final boolean isShieldBash = event.getAbility() == ClassAbility.SHIELD_BASH;
 		final boolean isBruteForce = event.getAbility() == ClassAbility.BRUTE_FORCE;
 
 		if ((isMelee || isMeleeAbil) && !isRampage) {
 			double damage = event.getFinalDamage(false);
-			if (!(isMelee || isBruteForce)) {
+			if (!(isMelee || isShieldBash || isBruteForce)) {
 				damage *= AOE_PENALTY;
 			}
 			damageDealt(damage);
@@ -143,6 +176,10 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 			return;
 		}
 
+		if (mRampage != null) {
+			mRampage.triggerOnBloodlust(stacks);
+		}
+
 		mStacks = Math.min(mStackLimit, mStacks + stacks);
 
 		ClientModHandler.updateAbility(mPlayer, this);
@@ -170,7 +207,10 @@ public class Bloodlust extends Ability implements AbilityWithChargesOrStacks {
 			.addLine("melee damage you deal, up to %d stacks.")
 				.statValues(stat(a -> a.mStackLimit, MAX_STACKS))
 			.addLine("(AoE damage only contributes %p as much)")
-				.statValues(stat(AOE_PENALTY));
+				.statValues(stat(AOE_PENALTY))
+			.addLine()
+			.addLine("Gain up to %d stacks while outside combat.").styles(BLOODLUST_COLOR)
+				.statValues(stat(MAX_PASSIVE_GAIN));
 	}
 
 	@Override

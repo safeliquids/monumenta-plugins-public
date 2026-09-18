@@ -469,7 +469,7 @@ public class ItemStatManager implements Listener {
 				ITEM_STATS.add(type.getItemStat());
 			}
 		}
-		ITEM_STATS.sort(Comparator.comparing(ItemStat::getPriorityAmount));
+		ITEM_STATS.sort(Comparator.comparingDouble(ItemStat::getPriorityAmount));
 	}
 
 	private final Plugin mPlugin;

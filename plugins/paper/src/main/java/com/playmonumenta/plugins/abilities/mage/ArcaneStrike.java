@@ -115,7 +115,7 @@ public class ArcaneStrike extends Ability {
 				}
 
 				preSpellPowerDamage += event.getBaseDamage() * mWandScaling;
-				double dmg = SpellPower.getSpellDamage(mPlugin, mPlayer, preSpellPowerDamage);
+				float dmg = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) preSpellPowerDamage);
 
 				ClassAbility ability = ClassAbility.ARCANE_STRIKE;
 				if (isEnhanced()) {

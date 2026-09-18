@@ -14,7 +14,6 @@ import com.playmonumenta.plugins.effects.CustomDamageOverTime;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
-import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.LocationUtils;
@@ -24,7 +23,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.cooldown;
-import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.perRegion;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.stat;
 import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
@@ -34,7 +32,7 @@ public class WitheringGaze extends Ability {
 	private static final int WITHERING_GAZE_DOT_DURATION_1 = 6 * 20;
 	private static final int WITHERING_GAZE_DOT_DURATION_2 = 8 * 20;
 	private static final int WITHERING_GAZE_DOT_PERIOD = 10;
-	private static final double[] WITHERING_GAZE_DOT_DAMAGE = {2, 3};
+	private static final int WITHERING_GAZE_DOT_DAMAGE = 1;
 	private static final int WITHERING_GAZE_1_COOLDOWN = 20 * 30;
 	private static final int WITHERING_GAZE_2_COOLDOWN = 20 * 20;
 	private static final int WITHERING_GAZE_RANGE = 9;
@@ -73,7 +71,7 @@ public class WitheringGaze extends Ability {
 		mRange = CharmManager.getRadius(mPlayer, CHARM_RANGE, WITHERING_GAZE_RANGE);
 		mStunDuration = CharmManager.getDuration(mPlayer, CHARM_STUN, WITHERING_GAZE_STUN_DURATION);
 		mDOTDuration = CharmManager.getDuration(player, CHARM_DOT, (isLevelOne() ? WITHERING_GAZE_DOT_DURATION_1 : WITHERING_GAZE_DOT_DURATION_2));
-		mDOTDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, AbilityUtils.getRegionScaled(player, WITHERING_GAZE_DOT_DAMAGE));
+		mDOTDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, WITHERING_GAZE_DOT_DAMAGE);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new WitheringGazeCS());
 	}
 
@@ -105,7 +103,7 @@ public class WitheringGaze extends Ability {
 				}
 
 				if (mCurrentRadius > mRange) {
-					cancel();
+					this.cancel();
 				}
 
 				mCurrentRadius += 1;
@@ -125,8 +123,8 @@ public class WitheringGaze extends Ability {
 			.addLine()
 			.addStat("Effect: Stun for %t")
 				.statValues(stat(a -> a.mStunDuration, WITHERING_GAZE_STUN_DURATION))
-			.addStat("Damage: %dR (s) every %t for %t1")
-				.statValues(perRegion(a -> a.mDOTDamage, WITHERING_GAZE_DOT_DAMAGE[0], WITHERING_GAZE_DOT_DAMAGE[1]), stat(WITHERING_GAZE_DOT_PERIOD), stat(a -> a.mDOTDuration, WITHERING_GAZE_DOT_DURATION_1))
+			.addStat("Damage: %d (s) every %t for %t1")
+				.statValues(stat(a -> a.mDOTDamage, WITHERING_GAZE_DOT_DAMAGE), stat(WITHERING_GAZE_DOT_PERIOD), stat(a -> a.mDOTDuration, WITHERING_GAZE_DOT_DURATION_1))
 			.addStat("Radius: %r (Cone-Shaped)")
 				.statValues(stat(a -> a.mRange, WITHERING_GAZE_RANGE))
 			.addStat("Cooldown: %t1")

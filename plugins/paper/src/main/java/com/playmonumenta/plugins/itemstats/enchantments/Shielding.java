@@ -4,10 +4,7 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
-import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.ItemUtils;
-import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.MetadataUtils;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -18,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Shielding implements Enchantment {
 	public static final double DISABLED_MULTIPLIER = 0.5;
-	public static final double DISTANCE = 2.2;
+	public static final double DISTANCE = 2.5;
 	public static final int DISABLE_DURATION = 5 * 20;
 	private static final String DISABLE_METAKEY = "ShieldingDisabled";
 
@@ -32,11 +29,6 @@ public class Shielding implements Enchantment {
 		return EnchantmentType.SHIELDING;
 	}
 
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DEFENSE_SITUATIONAL;
-	}
-
 	public static double applyShielding(DamageEvent event, Plugin plugin, Player player) {
 		LivingEntity source = event.getSource();
 		if (doesShieldingApply(player, source)) {
@@ -47,11 +39,7 @@ public class Shielding implements Enchantment {
 	}
 
 	public static boolean doesShieldingApply(Player player, @Nullable LivingEntity source) {
-		if (source == null || player.getWorld() != source.getWorld()) {
-			return false;
-		}
-		Hitbox sphereBox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(player), DISTANCE);
-		return sphereBox.intersects(source.getBoundingBox());
+		return source != null && player.getWorld() == source.getWorld() && player.getLocation().distance(source.getLocation()) <= DISTANCE;
 	}
 
 	public static void disable(Player player) {

@@ -10,8 +10,8 @@ import com.playmonumenta.plugins.cosmetics.skills.rogue.WindStepCS;
 import com.playmonumenta.plugins.cosmetics.skills.scout.hunter.FireworkStrikeCS;
 import com.playmonumenta.plugins.cosmetics.skills.warlock.AvalanchexCS;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.BrambleShellCS;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.integrations.luckperms.LuckPermsIntegration;
 import com.playmonumenta.plugins.integrations.luckperms.guildgui.GuildGui;
 import com.playmonumenta.plugins.itemstats.enums.Location;
@@ -45,7 +45,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class KnickKnackSackGui extends NjolGui {
+public class KnickKnackSackGui extends Gui {
 	private static final int INV_SIZE = 45;
 	private static final Component BASE_TITLE = Component.text("Knick-Knack Sack");
 
@@ -231,7 +231,7 @@ public class KnickKnackSackGui extends NjolGui {
 		setItem(4, info);
 
 		// PEB, free
-		NjolGuiItem tPeb = new NjolGuiItem(
+		GuiItem tPeb = new GuiItem(
 			getPlayerPEB()
 		).onClick((evt) -> runConsoleCommand("openpeb @S"));
 		setItem(pebSlot, tPeb);
@@ -240,7 +240,7 @@ public class KnickKnackSackGui extends NjolGui {
 		ItemStack charm = makeTrinketItemStack("epic:r3/charms/charms_trinket");
 		if (PlayerUtils.hasUnlockedRing(mPlayer)) {
 			GUIUtils.splitLoreLine(charm, "Click to open the Charms Menu.", NamedTextColor.GRAY, true);
-			NjolGuiItem tCharm = new NjolGuiItem(charm).onClick((evt) -> runConsoleCommand("charm gui @S"));
+			GuiItem tCharm = new GuiItem(charm).onClick((evt) -> runConsoleCommand("charm gui @S"));
 			setItem(charmSlot, tCharm);
 		} else {
 			charm = charm.withType(Material.BARRIER);
@@ -267,7 +267,7 @@ public class KnickKnackSackGui extends NjolGui {
 			}
 		}
 		if (playerFoundDepths || playerFoundZenith) {
-			NjolGuiItem tDepths = new NjolGuiItem(depths)
+			GuiItem tDepths = new GuiItem(depths)
 				.onRightClick(() -> {
 					runConsoleCommand("opendepthsgui summary @S");
 				}).onLeftClick(() -> {
@@ -284,7 +284,7 @@ public class KnickKnackSackGui extends NjolGui {
 		ItemStack bestiary = makeTrinketItemStack("epic:r1/quests/53_reward");
 		if (ScoreboardUtils.getScoreboardValue(mPlayer, "Quest53").orElse(0) > 10) {
 			GUIUtils.splitLoreLine(bestiary, "Keeps track of all the mobs you've killed across the world. Click to open.", NamedTextColor.GRAY, true);
-			NjolGuiItem tBestiary = new NjolGuiItem(bestiary).onClick((evt) -> {
+			GuiItem tBestiary = new GuiItem(bestiary).onClick((evt) -> {
 				// Resolve this event first so the bestiary doesn't use the same click event once opened
 				Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
 					runConsoleCommand("bestiary open @S");
@@ -298,14 +298,14 @@ public class KnickKnackSackGui extends NjolGui {
 		}
 
 		// Pass Trinket, always unlocked
-		NjolGuiItem tPass = makeTrinketGuiItem(
+		GuiItem tPass = makeTrinketGuiItem(
 			"epic:pass/seasonal_pass_trinket",
 			"Click to show active pass and weekly mission progress."
 		).onClick((evt) -> runConsoleCommand("battlepass gui @S"));
 		setItem(passSlot, tPass);
 
 		// Community missions trinket, always unlocked
-		NjolGuiItem tCommunity = makeTrinketGuiItem(
+		GuiItem tCommunity = makeTrinketGuiItem(
 			"epic:pass/community_trinket",
 			"Click to show active community mission progress."
 		).onClick((evt) -> {
@@ -315,14 +315,14 @@ public class KnickKnackSackGui extends NjolGui {
 		setItem(communitySlot, tCommunity);
 
 		// Cosmetics Trinket, always unlocked
-		NjolGuiItem tCosmetics = makeTrinketGuiItem(
+		GuiItem tCosmetics = makeTrinketGuiItem(
 			"epic:pass/personal_cosmetic_interface",
 			"Click to show and equip your unlocked cosmetics."
 		).onClick((evt) -> runConsoleCommand("cosmetics gui @S"));
 		setItem(cosmeticsSlot, tCosmetics);
 
 		// Parrot bell, always unlocked
-		NjolGuiItem tParrot = makeTrinketGuiItem(
+		GuiItem tParrot = makeTrinketGuiItem(
 			"epic:r2/items/randommistportjunk/portable_parrot_bell",
 			"Click to open the parrot menu."
 		).onClick((evt) -> runConsoleCommand("openparrotgui @S"));
@@ -340,7 +340,7 @@ public class KnickKnackSackGui extends NjolGui {
 			}
 			GUIUtils.splitLoreLine(record, "Click to open the menu and select a song to play.", NamedTextColor.GRAY, true);
 
-			NjolGuiItem tRecord = new NjolGuiItem(record).onClick((evt) -> runConsoleCommand("sqgui show recordplayer @S"));
+			GuiItem tRecord = new GuiItem(record).onClick((evt) -> runConsoleCommand("sqgui show recordplayer @S"));
 			setItem(recordSlot, tRecord);
 		} else {
 			// Locked item if neither record player nor soulsinger is unlocked
@@ -354,7 +354,7 @@ public class KnickKnackSackGui extends NjolGui {
 		if (PlayerUtils.hasUnlockedRing(mPlayer)) {
 			GUIUtils.splitLoreLine(delve, "Click to view Architect's Ring Overworld Delve Modifiers. Shift Right Click to clear modifiers.", NamedTextColor.GRAY, true);
 
-			NjolGuiItem tDelve = new NjolGuiItem(delve).onClick((evt) -> {
+			GuiItem tDelve = new GuiItem(delve).onClick((evt) -> {
 				// Gotta specify right-click from shift-right-click
 				String showCommand = "delves show mods @S ring";
 				if (evt.getClick() == ClickType.SHIFT_RIGHT) {
@@ -372,7 +372,7 @@ public class KnickKnackSackGui extends NjolGui {
 		}
 
 		// Emotes Trinket, always unlocked
-		NjolGuiItem tEmote = makeTrinketGuiItem(
+		GuiItem tEmote = makeTrinketGuiItem(
 			"epic:r1/items/misc/emotes_trinket",
 			"Left click to open the Emotes Menu.\nRight click to display Emote."
 		).onLeftClick(() -> runConsoleCommand("emoji @S")
@@ -384,7 +384,7 @@ public class KnickKnackSackGui extends NjolGui {
 		if (ScoreboardUtils.getScoreboardValue(mPlayer, "Quest36").orElse(0) >= 28) {
 			// Quest is complete
 			GUIUtils.splitLoreLine(contract, "Click to store/swap your experience.\nShift Left Click to check stored experience.\nShift Right Click to clear stored experience.", NamedTextColor.GRAY, 50, true);
-			NjolGuiItem tContract = new NjolGuiItem(contract).onClick((evt) -> {
+			GuiItem tContract = new GuiItem(contract).onClick((evt) -> {
 				if (!mPlayer.getGameMode().equals(GameMode.ADVENTURE) && !mPlayer.getGameMode().equals(GameMode.SURVIVAL)) {
 					mPlayer.sendMessage(Component.text("You can only use this item in Survival and Adventure mode.", NamedTextColor.RED));
 					return;
@@ -423,7 +423,7 @@ public class KnickKnackSackGui extends NjolGui {
 		// Depths Talismans, unlocked with Depths access
 		if (playerFoundDepths) {
 			ItemStack dTaliBase = GUIUtils.createBasicItem(Material.BLACK_DYE, "Depths Talismans", Location.DEPTHS.getColor(), true, "Click to view your Depths talismans.", NamedTextColor.YELLOW);
-			NjolGuiItem depthsTalismans = new NjolGuiItem(dTaliBase)
+			GuiItem depthsTalismans = new GuiItem(dTaliBase)
 				.onLeftClick(() -> {
 					mPage = Page.DEPTHS_TALISMANS;
 					update();
@@ -437,7 +437,7 @@ public class KnickKnackSackGui extends NjolGui {
 		// Zenith Talismans, unlocked with Zenith access
 		if (playerFoundZenith) {
 			ItemStack zTaliBase = GUIUtils.createBasicItem(Material.ENDER_EYE, "Zenith Talismans", Location.ZENITH.getColor(), true, "Click to view your Zenith talismans.", NamedTextColor.YELLOW);
-			NjolGuiItem zenithTalismans = new NjolGuiItem(zTaliBase)
+			GuiItem zenithTalismans = new GuiItem(zTaliBase)
 				.onLeftClick(() -> {
 					mPage = Page.ZENITH_TALISMANS;
 					update();
@@ -464,12 +464,12 @@ public class KnickKnackSackGui extends NjolGui {
 			.decoration(TextDecoration.ITALIC, false));
 		meta.lore(lore);
 		guildBase.setItemMeta(meta);
-		NjolGuiItem guildItem = new NjolGuiItem(guildBase)
+		GuiItem guildItem = new GuiItem(guildBase)
 			.onLeftClick(() -> GuildGui.showDefaultView(mPlugin, mPlayer));
 		setItem(guildSlot, guildItem);
 
 		// Quest Guide
-		NjolGuiItem questItem = new NjolGuiItem(
+		GuiItem questItem = new GuiItem(
 			GUIUtils.createBasicItem(
 				Material.SCUTE,
 				"Quest Guide",
@@ -481,7 +481,7 @@ public class KnickKnackSackGui extends NjolGui {
 		setItem(questSlot, questItem);
 
 		// Enchantopedia
-		NjolGuiItem enchantopedia = new NjolGuiItem(
+		GuiItem enchantopedia = new GuiItem(
 			GUIUtils.createBasicItem(
 				Material.ENCHANTED_BOOK,
 				"Enchantopedia",
@@ -547,7 +547,7 @@ public class KnickKnackSackGui extends NjolGui {
 
 		if (preference != null) {
 			ItemStack reset = GUIUtils.createBasicItem(Material.ENDER_EYE, "Your " + name + " tree preference is: " + preference.mTreeName, TextColor.color(preference.mColor), true, "Click to reset your " + name + " tree preference.", NamedTextColor.GRAY);
-			setItem(resetSlot, new NjolGuiItem(reset))
+			setItem(resetSlot, new GuiItem(reset))
 				.onClick((evt) -> {
 					mPlayer.playSound(mPlayer.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, SoundCategory.PLAYERS, 0.8f, 1f);
 					ScoreboardUtils.setScoreboardValue(mPlayer, objective, 0);
@@ -556,7 +556,7 @@ public class KnickKnackSackGui extends NjolGui {
 				});
 		} else {
 			ItemStack reset = GUIUtils.createBasicItem(Material.ENDER_PEARL, "No " + name + " preference set!", NamedTextColor.WHITE, false);
-			setItem(resetSlot, new NjolGuiItem(reset));
+			setItem(resetSlot, new GuiItem(reset));
 		}
 
 		if (!celestialZenith && Arrays.stream(talismans).anyMatch(this::canRefund)) {
@@ -579,13 +579,13 @@ public class KnickKnackSackGui extends NjolGui {
 			&& ScoreboardUtils.getScoreboardValue(mPlayer, t.mUnlockObjective).orElse(0) >= 1;
 	}
 
-	private NjolGuiItem makeTalismanItem(Talisman t, boolean celestialZenith) {
+	private GuiItem makeTalismanItem(Talisman t, boolean celestialZenith) {
 		Component baseMessage = Component.text("Your " + (celestialZenith ? "Zenith" : "Depths") + " tree preference has been set to ", NamedTextColor.LIGHT_PURPLE);
 
 		ItemStack talisman = makeTrinketItemStack(t.mPath);
 		if (ScoreboardUtils.getScoreboardValue(mPlayer, t.mUnlockObjective).orElse(0) >= 1) {
 			GUIUtils.splitLoreLine(talisman, "Click to guarantee the " + t.mTreeName + " tree as one of the options at the beginning of the dungeon.", NamedTextColor.GRAY, true);
-			return new NjolGuiItem(talisman)
+			return new GuiItem(talisman)
 				.onClick((evt) -> {
 					mPlayer.playSound(mPlayer.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 0.8f, 1f);
 					ScoreboardUtils.setScoreboardValue(mPlayer, celestialZenith ? "CZTalisman" : "DDTalisman", t.mPreferenceValue);
@@ -597,11 +597,11 @@ public class KnickKnackSackGui extends NjolGui {
 		} else {
 			talisman = ItemStackUtils.withTypePreserveName(talisman, Material.BARRIER);
 			GUIUtils.splitLoreLine(talisman, "Purchase the " + t.mTreeName + " " + (celestialZenith ? "Zenith" : "Depths") + " Talisman to unlock!", NamedTextColor.YELLOW, true);
-			return new NjolGuiItem(talisman);
+			return new GuiItem(talisman);
 		}
 	}
 
-	private NjolGuiItem makeRefundItem(Talisman t) {
+	private GuiItem makeRefundItem(Talisman t) {
 		Material displayItem;
 		switch (t.mAssociatedSkill) {
 			case SunriseBrewCS.NAME -> displayItem = Material.HONEYCOMB_BLOCK;
@@ -623,11 +623,11 @@ public class KnickKnackSackGui extends NjolGui {
 			canRefund ? "Click to claim a refund of 64 Voidstained Geodes. This will consume a " + t.mTreeName + " Talisman from your inventory." : "You are not eligible for this refund.", NamedTextColor.GRAY);
 
 		if (!canRefund) {
-			return new NjolGuiItem(i);
+			return new GuiItem(i);
 		}
 
 		// The item will only have an onClick if the player is eligible for a refund
-		return new NjolGuiItem(i).onClick((evt) -> {
+		return new GuiItem(i).onClick((evt) -> {
 			ItemStack trinket = makeTrinketItemStack(t.mPath);
 			if (mPlayer.getInventory().containsAtLeast(trinket, 1)) {
 				if (mPlayer.getInventory().firstEmpty() < 0) {
@@ -676,15 +676,15 @@ public class KnickKnackSackGui extends NjolGui {
 	private void addPrevButton() {
 		ItemStack arrow = GUIUtils.createBasicItem(Material.ARROW, "Previous Page", NamedTextColor.WHITE, true);
 		// Add to bottom-left corner
-		setItem(INV_SIZE - 9, new NjolGuiItem(arrow)).onLeftClick(() -> {
+		setItem(INV_SIZE - 9, new GuiItem(arrow)).onLeftClick(() -> {
 			mPlayer.playSound(mPlayer.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.PLAYERS, 0.5f, 1f);
 			mPage = Page.TRINKETS1;
 			update();
 		});
 	}
 
-	private NjolGuiItem makeTrinketGuiItem(String path, String lore) {
-		return new NjolGuiItem(makeTrinketItemStack(path, lore));
+	private GuiItem makeTrinketGuiItem(String path, String lore) {
+		return new GuiItem(makeTrinketItemStack(path, lore));
 	}
 
 	private ItemStack makeTrinketItemStack(String path) {

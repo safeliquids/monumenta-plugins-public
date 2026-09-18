@@ -10,8 +10,8 @@ import com.playmonumenta.plugins.depths.abilities.gifts.BottomlessBowl;
 import com.playmonumenta.plugins.depths.abilities.gifts.CombOfSelection;
 import com.playmonumenta.plugins.depths.abilities.gifts.RainbowGeode;
 import com.playmonumenta.plugins.depths.rooms.DepthsRoomType;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractDepthsRewardGUI extends NjolGui {
+public abstract class AbstractDepthsRewardGUI extends Gui {
 
 	public static final List<List<Integer>> SLOT_MAP = Arrays.asList(
 		List.of(13),
@@ -74,7 +74,7 @@ public abstract class AbstractDepthsRewardGUI extends NjolGui {
 			}
 
 			int slot = i;
-			setItem(slotsUsed.get(i), new NjolGuiItem(item).onLeftClick(() -> {
+			setItem(slotsUsed.get(i), new GuiItem(item).onLeftClick(() -> {
 				depthsPlayer.mCombOfSelectionLevels.clear();
 				playerClickedItem(slot, obscure);
 				close();
@@ -98,7 +98,7 @@ public abstract class AbstractDepthsRewardGUI extends NjolGui {
 			int rerolls = depthsPlayer.mRerolls;
 			if (rerolls > 0) {
 				ItemStack item = GUIUtils.createBasicItem(Material.NAUTILUS_SHELL, rerolls, "Reroll", NamedTextColor.DARK_AQUA, true, Component.text("Click to reroll these options.\n", NamedTextColor.GRAY).append(Component.text("You have " + rerolls + " reroll" + (rerolls > 1 ? "s" : "") + " remaining.")), 30, true);
-				setItem(2, 4, new NjolGuiItem(item).onLeftClick(() -> {
+				setItem(2, 4, new GuiItem(item).onLeftClick(() -> {
 					close();
 					depthsPlayer.mRerolls--;
 					depthsPlayer.mAbilityOfferings = null;
@@ -114,7 +114,7 @@ public abstract class AbstractDepthsRewardGUI extends NjolGui {
 			if ((depthsPlayer.hasAbility(BottomlessBowl.ABILITY_NAME) || depthsPlayer.hasAbility(RainbowGeode.ABILITY_NAME))
 				&& !depthsPlayer.mEarnedRewards.isEmpty() && depthsPlayer.peekRewardType() != DepthsRoomType.DepthsRewardType.CURSE) {
 				ItemStack item = GUIUtils.createBasicItem(Material.BARRIER, 1, "Skip", NamedTextColor.RED, true, Component.text("Click to skip these options.", NamedTextColor.GRAY), 30, true);
-				setItem(2, 8, new NjolGuiItem(item).onLeftClick(() -> {
+				setItem(2, 8, new GuiItem(item).onLeftClick(() -> {
 					close();
 					depthsPlayer.mAbilityOfferings = null;
 					depthsPlayer.mUpgradeOfferings = null;

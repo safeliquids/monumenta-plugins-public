@@ -9,7 +9,6 @@ import com.playmonumenta.plugins.integrations.LibraryOfSoulsIntegration;
 import com.playmonumenta.plugins.managers.GlowingManager;
 import com.playmonumenta.plugins.particle.PPLine;
 import com.playmonumenta.plugins.particle.PartialParticle;
-import com.playmonumenta.plugins.particle.ParticleCategory;
 import com.playmonumenta.plugins.utils.BlockUtils;
 import com.playmonumenta.plugins.utils.BossUtils;
 import com.playmonumenta.plugins.utils.DisplayEntityUtils;
@@ -222,16 +221,10 @@ public class SpellAstralGreatsword extends Spell implements CooldownReducible {
 				}
 				mLength = LocationUtils.rayLengthToSphereSurface(mCenter, mSwordLoc, Aurora.ARENA_RADIUS);
 
-				if (mTicks % 4 == 0) {
-					PPLine ppLine = new PPLine(Particle.REDSTONE, mSwordLoc.clone().add(mDir.clone().multiply(5)), mDir, mLength)
-						.data(new Particle.DustOptions(stillAiming ? Color.FUCHSIA : Color.RED, 1.65f))
-						.countPerMeter(2);
-					if (stillAiming) {
-						ppLine.spawnForPlayer(ParticleCategory.BOSS, target);
-					} else {
-						ppLine.spawnAsBoss();
-					}
-				}
+				new PPLine(Particle.REDSTONE, mSwordLoc.clone().add(mDir.clone().multiply(5)), mDir, mLength)
+					.data(new Particle.DustOptions(stillAiming ? Color.FUCHSIA : Color.RED, 1.36f))
+					.countPerMeter(2)
+					.spawnAsBoss();
 
 				if (stillAiming) {
 					if (mTicks % 20 == 0) {

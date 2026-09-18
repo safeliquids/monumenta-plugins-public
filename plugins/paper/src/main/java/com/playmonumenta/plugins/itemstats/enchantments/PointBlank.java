@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.EnumSet;
@@ -38,8 +37,8 @@ public class PointBlank implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.WEAPON_BASE_DAMAGE;
+	public double getPriorityAmount() {
+		return 8;
 	}
 
 	@Override
@@ -60,9 +59,7 @@ public class PointBlank implements Enchantment {
 	}
 
 	public static double apply(Player player, Location target, double level) {
-		Location eyeLoc = player.getEyeLocation();
-		if (level > 0 && eyeLoc.getWorld() != null && eyeLoc.getWorld().equals(target.getWorld())
-				&& eyeLoc.distance(target) < DISTANCE) {
+		if (level > 0 && player.getEyeLocation().distance(target) < DISTANCE) {
 			particles(target, player);
 			return (level * DAMAGE_PER_LEVEL);
 		}

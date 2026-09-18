@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.seasonalevents.community;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.utils.DateUtils;
 import com.playmonumenta.plugins.utils.FastUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
@@ -25,7 +25,7 @@ import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
 import org.jetbrains.annotations.Nullable;
 
-public class CommunityMissionsGui extends NjolGui {
+public class CommunityMissionsGui extends Gui {
 
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("d MMMM");
 

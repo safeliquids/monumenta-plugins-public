@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.integrations.luckperms.guildgui;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkRelayIntegration;
 import com.playmonumenta.plugins.integrations.luckperms.GuildPermission;
 import com.playmonumenta.plugins.integrations.luckperms.LuckPermsIntegration;
@@ -140,7 +140,7 @@ public class EmergencyLockdownView extends View {
 		}
 		confirmButton.setItemMeta(meta);
 
-		NjolGuiItem guiItem = mGui.setItem(y, x, confirmButton);
+		GuiItem guiItem = mGui.setItem(y, x, confirmButton);
 
 		if (!isLocked && hasLockdownAccess) {
 			guiItem

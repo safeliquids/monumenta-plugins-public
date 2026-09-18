@@ -208,12 +208,6 @@ public class Boss {
 		}
 	}
 
-	public void onMountHurt(DamageEvent event) {
-		for (BossAbilityGroup ability : mAbilities) {
-			ability.bossMountHurt(event);
-		}
-	}
-
 	/*
 	 * Boss was stunned by a player. Mobs with the "Boss" tag can't be stunned
 	 */

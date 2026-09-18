@@ -5,7 +5,6 @@ import com.playmonumenta.plugins.effects.OnHitTimerEffect;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -23,11 +22,6 @@ public class Ethereal implements Enchantment {
 	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.ETHEREAL;
-	}
-
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DEFENSE_SITUATIONAL;
 	}
 
 	@Override

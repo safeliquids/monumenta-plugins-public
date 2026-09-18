@@ -18,7 +18,6 @@ import com.playmonumenta.plugins.abilities.warrior.berserker.MeteorSlam;
 import com.playmonumenta.plugins.abilities.warrior.berserker.Rampage;
 import com.playmonumenta.plugins.abilities.warrior.guardian.Bodyguard;
 import com.playmonumenta.plugins.abilities.warrior.guardian.Challenge;
-import com.playmonumenta.plugins.abilities.warrior.guardian.Endurance;
 import com.playmonumenta.plugins.abilities.warrior.guardian.ShieldWall;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -67,7 +66,6 @@ public class Warrior extends PlayerClass {
 		mSpecTwo.mSpecialization = GUARDIAN_SPEC_ID;
 		mSpecTwo.mSpecName = "Guardian";
 		mSpecTwo.mDisplayItem = Material.SHIELD;
-		mSpecTwo.mPassive = Endurance.INFO;
 
 		mTriggerOrder = ImmutableList.of(
 			GloriousBattle.INFO,
@@ -77,8 +75,7 @@ public class Warrior extends PlayerClass {
 
 			Bodyguard.INFO,
 			Challenge.INFO,
-			ShieldWall.INFO,
-			Endurance.INFO
+			ShieldWall.INFO
 		);
 	}
 
@@ -112,16 +109,13 @@ public class Warrior extends PlayerClass {
 
 	@Override
 	public Component getSpecTwoDescription(Player player) {
-		return new FormattedDescriptionBuilder<>(() -> Endurance.INFO)
+		return new FormattedDescriptionBuilder<>()
 			.addDashedLine()
 			.addLine("*Guardians are known for their resilience,*").styles(WARRIOR_LORE)
 			.addLine("*acting as a shield for allies and a*").styles(WARRIOR_LORE)
 			.addLine("*fortress that will withstand any foe.*").styles(WARRIOR_LORE)
 			.addLine("(Tank, Absorption)")
-			.addLine()
-			.addLine("*" + Endurance.NAME + " (Spec. Passive):*").styles(Style.style(mClassColor))
-			.add(Endurance.getDescription())
 			.addDashedLine()
-			.get(AbilityManager.getManager().getPlayerAbilityIgnoringSilence(player, Endurance.class), player);
+			.get();
 	}
 }

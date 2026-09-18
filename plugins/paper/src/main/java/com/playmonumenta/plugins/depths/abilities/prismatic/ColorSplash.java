@@ -665,7 +665,7 @@ public class ColorSplash extends DepthsAbility {
 	@Override
 	public boolean onDamage(DamageEvent event, LivingEntity enemy) {
 		if (mShadowdancerActive && AbilityUtils.isStealthed(mPlayer)) {
-			event.updateDamageWithMultiplier(1 + SHADOWDANCER_DAMAGE_MULTIPLIER[mRarity - 1], DamageEvent.DamageType.getScalableDamageTypes());
+			event.updateDamageWithMultiplier(1 + SHADOWDANCER_DAMAGE_MULTIPLIER[mRarity - 1], DamageEvent.DamageType.getScalableDamageType());
 			AbilityUtils.removeStealth(Plugin.getInstance(), mPlayer, false, null);
 		}
 		if (mSteelsageRunnable != null) {

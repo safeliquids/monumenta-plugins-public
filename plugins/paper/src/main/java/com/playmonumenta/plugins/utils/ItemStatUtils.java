@@ -1171,25 +1171,6 @@ public class ItemStatUtils {
 		return getInfusionLevel(item, type) > 0;
 	}
 
-	public static boolean hasNonCopyableInfusion(@Nullable ItemStack item) {
-		if (item == null || item.getType() == Material.AIR) {
-			return false;
-		}
-		return NBT.get(item, nbt -> {
-			ReadableNBT infusions = getInfusions(nbt);
-			if (infusions == null) {
-				return false;
-			}
-			int possibleProblems = infusions.getKeys().size();
-
-			if (getInfusionLevel(infusions, InfusionType.SOULBOUND) > 0) {
-				possibleProblems--;
-			}
-
-			return possibleProblems > 0;
-		});
-	}
-
 	public static boolean checkOwnership(Player player, ItemStack item) {
 		if (!hasInfusion(item, InfusionType.OWNED)) {
 			return true;

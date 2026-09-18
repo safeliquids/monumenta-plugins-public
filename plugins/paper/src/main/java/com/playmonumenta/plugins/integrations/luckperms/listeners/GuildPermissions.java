@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.integrations.luckperms.listeners;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.integrations.luckperms.GuildPermission;
 import com.playmonumenta.plugins.integrations.luckperms.GuildPlotUtils;
 import com.playmonumenta.plugins.integrations.luckperms.LuckPermsIntegration;
@@ -248,7 +248,7 @@ public class GuildPermissions implements Listener {
 				+ " in guild ID " + guildId
 				+ "; updating relevant code"
 		);
-		NjolGui openGui = NjolGui.getOpenGui(player);
+		Gui openGui = Gui.getOpenGui(player);
 		if (openGui instanceof GuildGui guildGui) {
 			guildGui.refresh();
 		}

@@ -49,7 +49,7 @@ public class Stuck {
 							this.cancel();
 							return;
 						}
-						if (!mTarget.getWorld().equals(mStartLoc.getWorld()) || mTarget.getLocation().distance(mStartLoc) > 2) {
+						if (mTarget.getLocation().distance(mStartLoc) > 2) {
 							mTarget.sendMessage(Component.text("You've moved too far from your original location! Please try again.", NamedTextColor.RED)
 								.decoration(TextDecoration.ITALIC, false));
 							this.cancel();

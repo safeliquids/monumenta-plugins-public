@@ -20,21 +20,14 @@ import com.playmonumenta.plugins.itemstats.attributes.SpellPower;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
-import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.MovementUtils;
-import java.util.Comparator;
-import java.util.List;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.cooldown;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.stat;
@@ -46,13 +39,12 @@ public class Starfall extends Ability {
 
 	public static final int DAMAGE_1 = 15;
 	public static final int DAMAGE_2 = 27;
-	public static final int RADIUS = 6; // Size of Starfall explosion
-	public static final int RANGE = 25; // Maximum distance away that you can target
-	public static final int FIRE_TICKS = 5 * Constants.TICKS_PER_SECOND;
+	public static final int SIZE = 6;
+	public static final int DISTANCE = 25;
+	public static final int FIRE_TICKS = 5 * 20;
 	public static final float KNOCKBACK = 0.7f;
 	public static final int COOLDOWN_TICKS = 18 * 20;
 	public static final double FALL_INCREMENT = 0.25;
-	public static final double HITBOX = 1.2; // Blocks
 
 	public static final String CHARM_DAMAGE = "Starfall Damage";
 	public static final String CHARM_RANGE = "Starfall Range";
@@ -67,26 +59,24 @@ public class Starfall extends Ability {
 			.scoreboardId(NAME)
 			.shorthandName("SF")
 			.descriptions(getDescription1(), getDescription2())
-			.simpleDescription("Summon a meteor, which damages and ignites mobs upon impact.")
+			.simpleDescription("Summon a meteor, which upon impact damages and ignites mobs.")
 			.cooldown(COOLDOWN_TICKS, CHARM_COOLDOWN)
 			.addTrigger(new AbilityTriggerInfo<>("cast", "cast", Starfall::cast, new AbilityTrigger(AbilityTrigger.Key.SWAP).sneaking(false),
 				AbilityTriggerInfo.HOLDING_MAGIC_WAND_RESTRICTION))
 			.displayItem(Material.MAGMA_BLOCK);
 
 	private final double mLevelDamage;
-	private final double mRange;
+	private final double mDistance;
 	private final double mRadius;
 	private final int mFireDuration;
-	private final double mFallIncrement;
 	private final StarfallCS mCosmetic;
 
 	public Starfall(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
 		mLevelDamage = CharmManager.calculateFlatAndPercentValue(player, CHARM_DAMAGE, isLevelOne() ? DAMAGE_1 : DAMAGE_2);
-		mRange = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RANGE, RANGE);
-		mRadius = CharmManager.getRadius(mPlayer, CHARM_RADIUS, RADIUS);
+		mDistance = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RANGE, DISTANCE);
+		mRadius = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RADIUS, SIZE);
 		mFireDuration = CharmManager.getDuration(mPlayer, CHARM_FIRE, FIRE_TICKS);
-		mFallIncrement = CharmManager.getExtraPercent(mPlayer, CHARM_FALL_SPEED, FALL_INCREMENT);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new StarfallCS());
 	}
 
@@ -100,107 +90,56 @@ public class Starfall extends Ability {
 		World world = mPlayer.getWorld();
 
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
-		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
+		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
 		mCosmetic.starfallCastEffect(world, mPlayer, mPlayer.getLocation());
 		Vector dir = loc.getDirection().normalize();
+		int dist = (int) Math.ceil(mDistance);
+		for (int i = 0; i < dist; i++) {
+			loc.add(dir);
 
-		// Go until you hit a block or max range
-		RayTraceResult raycast = world.rayTraceBlocks(loc, dir, mRange, FluidCollisionMode.NEVER, true);
-		Location fallLoc;
-		if (raycast == null) {
-			fallLoc = loc.clone().add(dir.clone().multiply(mRange));
-		} else {
-			fallLoc = raycast.getHitPosition().toLocation(world);
-			if (!(BlockFace.DOWN.equals(raycast.getHitBlockFace()) || BlockFace.UP.equals(raycast.getHitBlockFace()))) {
-				// If you hit the side of a block, embed slightly into it
-				fallLoc.add(dir.clone().multiply(0.07));
+			mCosmetic.starfallCastTrail(loc, mPlayer);
+			int size = EntityUtils.getNearbyMobs(loc, 2, mPlayer).size();
+			if (!loc.isChunkLoaded() || loc.getBlock().getType().isSolid() || i >= dist - 1 || size > 0) {
+				break;
 			}
 		}
-
-		// Check for mobs at the landing location: if you would hit anything, then definitely go there.
-		if (EntityUtils.getNearbyMobs(fallLoc, 0.72 * mRadius, mPlayer).isEmpty() && fallLoc.distanceSquared(loc) > 1) {
-			// Otherwise, check for mobs along the length of the raycast.
-			List<LivingEntity> mobs = Hitbox.approximateCylinder(loc.clone().add(dir), fallLoc, HITBOX, true).accuracy(0.5).getHitMobs();
-			if (!mobs.isEmpty()) {
-				// Sort by distance along the ray
-				mobs.sort(Comparator.comparingDouble(mob -> LocationUtils.getVectorTo(mob.getLocation(), loc).dot(dir)));
-				fallLoc = loc.clone().add(dir.clone().multiply(
-					Math.min(mRange, LocationUtils.getVectorTo(mobs.getLast().getLocation(), loc).dot(dir))));
-			}
-		}
-
-		mCosmetic.starfallCastTrail(fallLoc, mPlayer);
-		launchMeteor(fallLoc, mPlayer.getLocation(), playerItemStats, damage);
+		launchMeteor(loc, mPlayer.getLocation(), playerItemStats, damage);
 
 		return true;
 	}
 
-	private void launchMeteor(final Location loc, final Location ogPlayerLoc, final ItemStatManager.PlayerItemStats playerItemStats, final double damage) {
+	private void launchMeteor(final Location loc, final Location ogPlayerLoc, final ItemStatManager.PlayerItemStats playerItemStats, final float damage) {
 		Location ogLoc = loc.clone();
 		loc.add(0, 40, 0);
 
 		new BukkitRunnable() {
 			double mT = 0;
-			@Nullable Location mGroundLoc = null;
 
 			@Override
 			public void run() {
-				mGroundLoc = null; // "has not been calculated this tick"
 				mT += 1;
 				World world = mPlayer.getWorld();
 				for (int i = 0; i < 8; i++) {
-					loc.subtract(0, mFallIncrement, 0);
-					double height = loc.getY() - ogLoc.getY(); // Height above the landing location
-					if (height <= 2) { // Meteor gains sentience
-						// Always stop on a block
-						if (!loc.isChunkLoaded() || loc.getBlock().isSolid()) {
-							cancel();
-							break;
-						}
-
-						// If you smack an enemy, check if hitting the ground would still hit this enemy. Else explode on the spot.
-						List<LivingEntity> directHitMobs = EntityUtils.getNearbyMobs(loc, Math.min(mRadius, HITBOX), mPlayer);
-						if (!directHitMobs.isEmpty()) {
-							if (mGroundLoc == null) {
-								mGroundLoc = LocationUtils.fallToGround(loc, 0); // If we ever have a world with combat that goes below Y = 0, this minimum height needs to be changed!
-								List<LivingEntity> groundHitMobs = EntityUtils.getNearbyMobs(mGroundLoc, mRadius, mPlayer);
-								directHitMobs.removeAll(groundHitMobs);
-								if (!directHitMobs.isEmpty()) {
-									cancel();
-									break;
-								}
+					loc.subtract(0, CharmManager.getExtraPercent(mPlayer, CHARM_FALL_SPEED, FALL_INCREMENT), 0);
+					if (!loc.isChunkLoaded() || loc.getBlock().getType().isSolid()) {
+						if (loc.getY() - ogLoc.getY() <= 2) {
+							mCosmetic.starfallLandEffect(world, mPlayer, loc, ogPlayerLoc, mRadius);
+							this.cancel();
+							Hitbox hitbox = new Hitbox.SphereHitbox(loc, mRadius);
+							for (LivingEntity e : hitbox.getHitMobs()) {
+								EntityUtils.applyFire(mPlugin, mFireDuration, e, mPlayer, playerItemStats);
+								DamageUtils.damage(mPlayer, e, new DamageEvent.Metadata(DamageType.MAGIC, mInfo.getLinkedSpell(), playerItemStats), damage, true, true, false);
+								MovementUtils.knockAway(loc, e, KNOCKBACK, true);
 							}
-						}
-
-						// Go down as far as you can WITHOUT missing the topmost enemy
-						List<LivingEntity> enemiesAbove =
-							EntityUtils.getNearbyMobs(loc, mRadius, mPlayer);
-						List<LivingEntity> enemiesStillHit =
-							EntityUtils.getNearbyMobs(loc.clone().add(0, -mFallIncrement, 0), mRadius, mPlayer);
-						enemiesAbove.removeAll(enemiesStillHit);
-						if (!enemiesAbove.isEmpty()) {
-							cancel();
 							break;
 						}
 					}
 				}
 				mCosmetic.starfallFallEffect(world, mPlayer, loc, ogPlayerLoc, ogLoc, mT);
 
-				if (mT >= Constants.TICKS_PER_SECOND * 30) {
-					cancel();
+				if (mT >= Constants.TICKS_PER_SECOND * 10) {
+					this.cancel();
 				}
-			}
-
-			@Override
-			public synchronized void cancel() {
-				mCosmetic.starfallLandEffect(mPlayer.getWorld(), mPlayer, loc, ogPlayerLoc, mRadius);
-				Hitbox hitbox = new Hitbox.SphereHitbox(loc, mRadius);
-				for (LivingEntity e : hitbox.getHitMobs()) {
-					EntityUtils.applyFire(mPlugin, mFireDuration, e, mPlayer, playerItemStats);
-					DamageUtils.damage(mPlayer, e, new DamageEvent.Metadata(DamageType.MAGIC, mInfo.getLinkedSpell(), playerItemStats), damage, true, true, false);
-					MovementUtils.knockAway(loc, e, KNOCKBACK, true);
-				}
-				super.cancel();
 			}
 		}.runTaskTimer(mPlugin, 0, 1);
 	}
@@ -218,9 +157,7 @@ public class Starfall extends Ability {
 			.addStat("Effect: Fire for %t")
 				.statValues(stat(a -> a.mFireDuration, FIRE_TICKS))
 			.addStat("Radius: %r")
-				.statValues(stat(a -> a.mRadius, RADIUS))
-			.addStat("Range: %r")
-				.statValues(stat(a -> a.mRange, RANGE))
+				.statValues(stat(a -> a.mRadius, SIZE))
 			.addStat("Cooldown: %t")
 				.statValues(cooldown(COOLDOWN_TICKS))
 			.addDashedLine();

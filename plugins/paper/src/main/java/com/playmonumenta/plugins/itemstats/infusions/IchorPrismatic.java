@@ -4,7 +4,6 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.effects.IchorCooldown;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.listeners.IchorListener;
 import com.playmonumenta.plugins.utils.FastUtils;
 import com.playmonumenta.plugins.utils.StringUtils;
@@ -35,8 +34,8 @@ public class IchorPrismatic implements Infusion {
 
 	// Need to run early to match Windwalker and Shadowdancer
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.FIRST;
+	public double getPriorityAmount() {
+		return 999;
 	}
 
 	@Override

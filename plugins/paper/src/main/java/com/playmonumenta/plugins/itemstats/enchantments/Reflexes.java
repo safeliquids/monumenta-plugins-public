@@ -8,7 +8,6 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import java.util.List;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -68,11 +67,6 @@ public class Reflexes implements Enchantment {
 	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.REFLEXES;
-	}
-
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DEFENSE_SITUATIONAL;
 	}
 
 	@Override

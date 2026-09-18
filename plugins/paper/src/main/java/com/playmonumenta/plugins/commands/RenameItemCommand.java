@@ -2,8 +2,8 @@ package com.playmonumenta.plugins.commands;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkChatIntegration;
 import com.playmonumenta.plugins.itemstats.enums.Region;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
@@ -177,7 +177,7 @@ public class RenameItemCommand {
 		new ItemSkinGui(player, itemStack, skins).open();
 	}
 
-	private static class ItemSkinGui extends NjolGui {
+	private static class ItemSkinGui extends Gui {
 		private final ItemStack mItemStack;
 		private final ImmutableList<String> mSkins;
 
@@ -194,7 +194,7 @@ public class RenameItemCommand {
 			ItemStack resetIcon = new ItemStack(mItemStack.getType());
 			ItemUtils.setPlainName(resetIcon, plainName);
 			ItemUtils.modifyMeta(resetIcon, meta -> meta.displayName(Component.text("Reset to default", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)));
-			setItem(0, new NjolGuiItem(resetIcon, false))
+			setItem(0, new GuiItem(resetIcon, false))
 				.onLeftClick(() -> {
 					NBT.modify(mItemStack, nbt -> {
 						ItemStatUtils.addPlayerModified(nbt).removeKey(ItemStatUtils.CUSTOM_SKIN_KEY);
@@ -210,7 +210,7 @@ public class RenameItemCommand {
 				NBT.modify(icon, nbt -> {
 					ItemStatUtils.addPlayerModified(nbt).setString(ItemStatUtils.CUSTOM_SKIN_KEY, skin);
 				});
-				setItem(i + 1, new NjolGuiItem(icon, false))
+				setItem(i + 1, new GuiItem(icon, false))
 					.onLeftClick(() -> {
 						NBT.modify(mItemStack, nbt -> {
 							ItemStatUtils.addPlayerModified(nbt).setString(ItemStatUtils.CUSTOM_SKIN_KEY, skin);

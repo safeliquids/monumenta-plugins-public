@@ -7,6 +7,7 @@ import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.abilities.Ability;
 import com.playmonumenta.plugins.abilities.warlock.reaper.VoodooBonds;
+import com.playmonumenta.plugins.bosses.bosses.Lich;
 import com.playmonumenta.plugins.classes.Alchemist;
 import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.classes.Cleric;
@@ -17,6 +18,7 @@ import com.playmonumenta.plugins.classes.Shaman;
 import com.playmonumenta.plugins.classes.Warlock;
 import com.playmonumenta.plugins.classes.Warrior;
 import com.playmonumenta.plugins.depths.abilities.curses.CurseOfDependency;
+import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.effects.RespawnStasis;
 import com.playmonumenta.plugins.effects.Stasis;
 import com.playmonumenta.plugins.effects.hexfall.Reincarnation;
@@ -45,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -243,6 +246,25 @@ public class PlayerUtils {
 		List<Player> players = playersInRange(player.getLocation(), radius, includeNonTargetable);
 		players.remove(player);
 		return players;
+	}
+
+	public static boolean isCursed(Plugin plugin, Player p) {
+		return plugin.mEffectManager.hasEffect(p, Lich.curseSource);
+	}
+
+	public static void removeCursed(Plugin plugin, Player p) {
+		setCursedTicks(plugin, p, 0);
+		p.removePotionEffect(PotionEffectType.BAD_OMEN);
+		p.removePotionEffect(PotionEffectType.UNLUCK);
+	}
+
+	public static void setCursedTicks(Plugin plugin, Player p, int ticks) {
+		NavigableSet<Effect> cursed = plugin.mEffectManager.getEffects(p, Lich.curseSource);
+		if (cursed != null) {
+			for (Effect curse : cursed) {
+				curse.setDuration(ticks);
+			}
+		}
 	}
 
 	public static void addFoodLevel(final Player player, final int amount) {

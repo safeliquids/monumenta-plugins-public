@@ -31,7 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import static com.playmonumenta.plugins.custominventories.DelveInfusionCustomInventory.mMaxLevelReachedItem;
 import static com.playmonumenta.plugins.custominventories.DelveInfusionCustomInventory.mMaxLevelReachedRevelationItem;
 
-public class SKRInfusionGUI extends NjolGui {
+public class SKRInfusionGUI extends Gui {
 
 	private static final NamespacedKey HAR_KEY = NamespacedKeyUtils.fromString("epic:r3/items/currency/hyperchromatic_archos_ring");
 	private static final NamespacedKey MEM_KEY = NamespacedKeyUtils.fromString("epic:r3/dungeons/skr/silver_memory_fragment");

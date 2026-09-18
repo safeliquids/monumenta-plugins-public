@@ -4,7 +4,6 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -23,8 +22,8 @@ public class SKTQuestDamageDealt implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGE_MULTIPLY;
+	public double getPriorityAmount() {
+		return 5000; // same priority as RegionScalingDamageDealt; both are multiplicative modifiers so the order between them doesn't matter
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.market.gui;
 
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.market.MarketListing;
 import com.playmonumenta.plugins.market.MarketManager;
 import com.playmonumenta.plugins.market.filters.MarketFilter;
@@ -19,7 +19,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.Nullable;
 
-public class MarketGui extends NjolGui {
+public class MarketGui extends Gui {
 	protected MarketGuiTab mCurrentTab;
 
 	final MarketGuiTab TAB_NOT_IMPLEMENTED = new TabNotImplemented(this);
@@ -91,7 +91,7 @@ public class MarketGui extends NjolGui {
 			current = 1;
 		}
 		if (current < 1) {
-			current = Math.max(max, 1);
+			current = max;
 		}
 
 		return current;
@@ -137,7 +137,7 @@ public class MarketGui extends NjolGui {
 	//
 	*/
 
-	public NjolGuiItem buildChangePageIcon(int mCurrentPage, int maxPage) {
+	public GuiItem buildChangePageIcon(int mCurrentPage, int maxPage) {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Left Click to go to the next page.", NamedTextColor.GRAY));
 		lore.add(Component.text("Right Click to go to the previous page.", NamedTextColor.GRAY));
@@ -149,7 +149,7 @@ public class MarketGui extends NjolGui {
 			.append(Component.text(nameParts[1], NamedTextColor.GOLD))
 			.append(Component.text(maxPage).decoration(TextDecoration.OBFUSCATED, maxPage == 0));
 
-		return new NjolGuiItem(GUIUtils.createBasicItem(Material.ARROW, 1, nameComp, lore, true, "gui_changePage"));
+		return new GuiItem(GUIUtils.createBasicItem(Material.ARROW, 1, nameComp, lore, true, "gui_changePage"));
 	}
 
 	/*

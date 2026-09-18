@@ -77,7 +77,7 @@ public class BruteForceCS implements CosmeticSkill {
 			.spawnAsPlayerActive(player);
 	}
 
-	public static BlockData getBlockData(Location loc) {
+	private static BlockData getBlockData(Location loc) {
 		Block block = loc.toBlockLocation().subtract(0, 1, 0).getBlock();
 		return block.isSolid() ? block.getBlockData() : Material.WHITE_CONCRETE_POWDER.createBlockData();
 	}

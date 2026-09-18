@@ -62,7 +62,7 @@ import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
 
 
 public class PredatorStrike extends Ability implements AbilityWithDuration {
-	private static final double COOLDOWN_REDUCTION = 0.4;
+	private static final double COOLDOWN_REDUCTION = 0.25;
 	private static final int COOLDOWN = TICKS_PER_SECOND * 16;
 	private static final double DAMAGE = 24;
 	private static final double DAMAGE_MULTIPLIER = 1.0;
@@ -71,7 +71,7 @@ public class PredatorStrike extends Ability implements AbilityWithDuration {
 	private static final int MAX_RANGE = 30;
 	private static final double EXPLODE_RADIUS = 3;
 	private static final double EXPLODE_KNOCKBACK = 0.25;
-	private static final int PIERCING = 2;
+	private static final int PIERCING = 0;
 	private static final int DURATION = TICKS_PER_SECOND * 5;
 	private static final double SPLINTER_CONE = 60;
 	private static final double SPLINTER_RADIUS = 6;

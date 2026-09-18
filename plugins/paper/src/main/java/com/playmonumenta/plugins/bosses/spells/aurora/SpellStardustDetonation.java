@@ -1,7 +1,6 @@
 package com.playmonumenta.plugins.bosses.spells.aurora;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.bosses.ChargeUpManager;
 import com.playmonumenta.plugins.bosses.bosses.aurora.Aurora;
 import com.playmonumenta.plugins.bosses.spells.Spell;
 import com.playmonumenta.plugins.bosses.spells.SpellCooldownManager;
@@ -16,9 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -42,7 +38,6 @@ public class SpellStardustDetonation extends Spell implements CooldownReducible 
 	private final double mRadius;
 
 	private final SpellCooldownManager mSpellCooldownManager;
-	private final ChargeUpManager mChargeUpManager;
 
 	public SpellStardustDetonation(Plugin plugin, LivingEntity boss, Location center, double radius, Aurora.BlockDestroyer blockDestroyer) {
 		mPlugin = plugin;
@@ -52,13 +47,6 @@ public class SpellStardustDetonation extends Spell implements CooldownReducible 
 		mRadius = radius;
 
 		mSpellCooldownManager = new SpellCooldownManager(35 * 20, boss::isValid, boss::hasAI);
-		mChargeUpManager = new ChargeUpManager(boss,
-			DURATION,
-			Component.text("Igniting ", NamedTextColor.WHITE).append(Component.text("Stardust Rings", NamedTextColor.GOLD)),
-			BossBar.Color.YELLOW,
-			BossBar.Overlay.PROGRESS,
-			Aurora.DETECTION_RANGE
-		);
 	}
 
 	@Override
@@ -80,23 +68,23 @@ public class SpellStardustDetonation extends Spell implements CooldownReducible 
 			.extra(1.2)
 			.spawnAsBoss();
 
-		mChargeUpManager.setTime(0);
-
 		BukkitRunnable runnable = new BukkitRunnable() {
+			int mTicks = 0;
+
 			@Override
 			public void run() {
-				if (mChargeUpManager.nextTick()) {
-					mChargeUpManager.remove();
+				if (mTicks >= DURATION) {
 					impact(targets);
-
 					this.cancel();
 					return;
 				}
 
 				for (LivingEntity target : targets) {
-					telegraph(target, mChargeUpManager.getTime());
+					telegraph(target, mTicks);
 				}
-				targets.removeIf(target -> target instanceof Player player && Aurora.isDead(player));
+				targets.removeIf(target -> target instanceof Player player && !Aurora.isAlive(player));
+
+				mTicks++;
 			}
 
 			@Override
@@ -148,9 +136,6 @@ public class SpellStardustDetonation extends Spell implements CooldownReducible 
 				world.playSound(location, Sound.ENTITY_PLAYER_HURT_ON_FIRE, SoundCategory.HOSTILE, 1.5f, 1.0f);
 				world.playSound(location, Sound.ENTITY_BLAZE_HURT, SoundCategory.HOSTILE, 1.0f, 1.5f);
 				world.playSound(location, Sound.ENTITY_GENERIC_EXPLODE, SoundCategory.HOSTILE, 0.5f, 1.25f);
-			} else {
-				world.playSound(location, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.HOSTILE, 1.5f, 1.25f);
-				world.playSound(location, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.HOSTILE, 1.5f, 0.75f);
 			}
 		}
 
@@ -162,18 +147,12 @@ public class SpellStardustDetonation extends Spell implements CooldownReducible 
 			Location location = Aurora.withSurfaceY(target.getLocation(), mCenter);
 			for (int i = 0; i < 4; i++) {
 				new PPCircle(Particle.REDSTONE, location, mRadius)
-					.count(24)
-					.delta(0, 0.2, 0)
+					.count(18)
+					.delta(0, 0.25, 0)
 					.data(new Particle.DustOptions(rollSolarColor(), 1.8f))
 					.spawnAsBoss();
 			}
-
-			new PPCircle(Particle.FLAME, location, mRadius)
-				.count(20 + 50 * ticks / DURATION)
-				.delta(0, 0.2, 0)
-				.extra(0.025)
-				.spawnAsBoss();
-			target.getWorld().playSound(location, Sound.ENTITY_BLAZE_SHOOT, SoundCategory.HOSTILE, 0.8f, 1.5f * ticks / DURATION);
+			target.getWorld().playSound(location, Sound.ENTITY_EVOKER_CAST_SPELL, SoundCategory.HOSTILE, 1.5f, 1.2f * ticks / DURATION);
 			target.getWorld().playSound(location, Sound.ITEM_FLINTANDSTEEL_USE, SoundCategory.HOSTILE, 1.5f, 1.5f * ticks / DURATION);
 		}
 	}

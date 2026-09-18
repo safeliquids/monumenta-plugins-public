@@ -47,7 +47,7 @@ public class Mooing implements Enchantment {
 
 			@Override
 			public void run() {
-				if (!item.getLocation().isWorldLoaded() || !item.getLocation().isChunkLoaded() || item.isDead() || !item.isValid()) {
+				if (!item.getLocation().isChunkLoaded() || item.isDead() || !item.isValid()) {
 					this.cancel();
 					return;
 				}

@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.market.gui;
 
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.market.MarketManager;
 import com.playmonumenta.plugins.market.MarketPlayerOptions;
 import com.playmonumenta.plugins.utils.GUIUtils;
@@ -45,7 +45,7 @@ public class TabEditOptions implements MarketGuiTab {
 		mGui.update();
 	}
 
-	private NjolGuiItem buildNotificationShardsIcon() {
+	private GuiItem buildNotificationShardsIcon() {
 		List<Component> lore = new ArrayList<>();
 
 		Component name = Component.text("Notification Shards", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
@@ -67,7 +67,7 @@ public class TabEditOptions implements MarketGuiTab {
 			lore.add(Component.text(header + "[" + value.getShortDisplay() + "]", color));
 		}
 
-		return new NjolGuiItem(GUIUtils.createBasicItem(Material.BELL, 1, name, lore, false), false);
+		return new GuiItem(GUIUtils.createBasicItem(Material.BELL, 1, name, lore, false), false);
 	}
 
 	@Override

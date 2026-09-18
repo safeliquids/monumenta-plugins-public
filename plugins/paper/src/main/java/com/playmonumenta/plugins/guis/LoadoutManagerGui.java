@@ -42,7 +42,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class LoadoutManagerGui extends NjolGui {
+public class LoadoutManagerGui extends Gui {
 
 	private static final int LOADOUTS_START = 9;
 	private static final int MAX_LOADOUTS_PER_PAGE = 5 * 9;
@@ -289,7 +289,7 @@ public class LoadoutManagerGui extends NjolGui {
 							meta.lore(lore);
 							meta.addItemFlags(ItemFlag.values());
 						});
-						setItem(LOADOUTS_START + (i % MAX_LOADOUTS_PER_PAGE), new NjolGuiItem(icon, false))
+						setItem(LOADOUTS_START + (i % MAX_LOADOUTS_PER_PAGE), new GuiItem(icon, false))
 							.onLeftClick(() -> {
 								mSelectedLoadout = loadout;
 								update();
@@ -365,7 +365,7 @@ public class LoadoutManagerGui extends NjolGui {
 					Component.text("Shift left click an item in your inventory or the class", NamedTextColor.GRAY),
 					Component.text("summary item to use it as display icon for this loadout.", NamedTextColor.GRAY)
 				), false);
-			setItem(0, 4, new NjolGuiItem(loadoutIcon, false))
+			setItem(0, 4, new GuiItem(loadoutIcon, false))
 				.onLeftClick(() -> {
 					close();
 					String name = selectedLoadout.mName;

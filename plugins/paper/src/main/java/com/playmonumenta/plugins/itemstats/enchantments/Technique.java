@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.Hitbox;
 import java.util.EnumSet;
@@ -69,7 +68,7 @@ public class Technique implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGE_MULTIPLY;
+	public double getPriorityAmount() {
+		return 999; // same as first strike
 	}
 }

@@ -1,7 +1,6 @@
 package com.playmonumenta.plugins.utils;
 
 import com.playmonumenta.plugins.integrations.luckperms.GuildPlotUtils;
-import com.playmonumenta.plugins.plots.PlotManager;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.scriptedquests.Plugin;
 import com.playmonumenta.scriptedquests.zones.Zone;
@@ -128,10 +127,6 @@ public class ZoneUtils {
 			}
 		}
 
-		if (PlotManager.onLockedPlot(player)) {
-			return GameMode.ADVENTURE;
-		}
-
 		/*
 		 * Everything after this point covers everywhere else in the game:
 		 * - Player plots have a zone covering the plot bounds
@@ -233,10 +228,6 @@ public class ZoneUtils {
 	public static boolean hasZoneProperty(Location loc, ZoneProperty property, String namespace) {
 		Plugin scriptedQuestsPlugin;
 		scriptedQuestsPlugin = (Plugin) Bukkit.getPluginManager().getPlugin("ScriptedQuests");
-
-		if (scriptedQuestsPlugin == null) {
-			return false;
-		}
 
 		return scriptedQuestsPlugin.mZoneManager.hasProperty(loc, namespace, property.getPropertyName());
 	}

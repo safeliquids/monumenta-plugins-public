@@ -3,7 +3,6 @@ package com.playmonumenta.plugins.depths.guis;
 import com.playmonumenta.plugins.depths.DepthsManager;
 import com.playmonumenta.plugins.depths.DepthsPlayer;
 import com.playmonumenta.plugins.depths.abilities.DepthsAbilityInfo;
-import com.playmonumenta.plugins.depths.abilities.DepthsTrigger;
 import com.playmonumenta.plugins.depths.abilities.prismatic.Generosity;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import org.bukkit.Material;
@@ -24,12 +23,6 @@ public class DepthsMutateAbilityGUI extends AbstractDepthsAbilityUtilityGUI {
 			dp.mUsedAbilityMutation = true;
 			String removedAbility = ability.getDisplayName();
 			DepthsManager.getInstance().setPlayerLevelInAbility(removedAbility, player, dp, 0, true, false);
-			// Special case for mutating Convergence: remove all wildcards
-			for (DepthsAbilityInfo<?> otherInfo : DepthsManager.getInstance().getPlayerAbilities(dp)) {
-				if (otherInfo.getDepthsTrigger() == DepthsTrigger.WILDCARD) {
-					DepthsManager.getInstance().setPlayerLevelInAbility(otherInfo.getDisplayName(), player, dp, 0, true, true);
-				}
-			}
 			player.closeInventory();
 			DepthsManager.getInstance().getMutatedAbility(player, dp, ability);
 			player.getWorld().playSound(player.getLocation(), Sound.BLOCK_END_PORTAL_SPAWN, SoundCategory.PLAYERS, 1.0f, 1.0f);

@@ -1,6 +1,5 @@
 package com.playmonumenta.plugins.bosses.spells.lich;
 
-import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.bosses.ChargeUpManager;
 import com.playmonumenta.plugins.bosses.bosses.Lich;
 import com.playmonumenta.plugins.bosses.bosses.ShieldSwitchBoss;
@@ -18,6 +17,7 @@ import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.FastUtils;
 import com.playmonumenta.plugins.utils.LocationUtils;
+import com.playmonumenta.plugins.utils.PlayerUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -46,6 +46,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -122,7 +123,7 @@ public class SpellDimensionDoor extends Spell {
 		List<Player> toRemove = new ArrayList<>();
 		for (Player p : players) {
 			p.sendMessage(Component.text("THE SHADOWS HOLD MANY SECRETS.", NamedTextColor.LIGHT_PURPLE));
-			if (Lich.isCursed(mPlugin, p)) {
+			if (PlayerUtils.isCursed(com.playmonumenta.plugins.Plugin.getInstance(), p)) {
 				p.sendMessage(Component.text("I can cleanse the curse on me if I enter the shadows.", NamedTextColor.AQUA));
 			}
 			if (p.getLocation().getY() < mSpawnLoc.getY() - 8) {
@@ -350,15 +351,15 @@ public class SpellDimensionDoor extends Spell {
 				mWarned.add(p.getUniqueId());
 			}
 			//remove curse only through portal
-			if (Lich.isCursed(plugin, p)) {
-				Lich.removeCursed(plugin, p);
+			if (PlayerUtils.isCursed(com.playmonumenta.plugins.Plugin.getInstance(), p)) {
+				PlayerUtils.removeCursed(com.playmonumenta.plugins.Plugin.getInstance(), p);
 				p.sendMessage(Component.text("You felt a curse being lifted.", NamedTextColor.AQUA));
 			}
-			plugin.mEffectManager.clearEffects(p, Lich.curseSource);
+			com.playmonumenta.plugins.Plugin.getInstance().mEffectManager.clearEffects(p, Lich.curseSource);
 		} else {
 			t = 20 * 10;
 			DamageUtils.damage(mBoss, p, DamageType.TRUE, 1);
-			plugin.mEffectManager.addEffect(p, "LichDimensionDoorWeakness",
+			com.playmonumenta.plugins.Plugin.getInstance().mEffectManager.addEffect(p, "LichDimensionDoorWeakness",
 				new PercentDamageDealt(TICKS_PER_SECOND * 30, -0.2));
 			Lich.cursePlayer(p);
 
@@ -421,10 +422,10 @@ public class SpellDimensionDoor extends Spell {
 					if (byPortal) {
 						p.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 20 * 5, 0));
 						p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 5, 0));
-						plugin.mEffectManager.addEffect(p, RESISTANCE_SOURCE,
+						com.playmonumenta.plugins.Plugin.getInstance().mEffectManager.addEffect(p, RESISTANCE_SOURCE,
 							new PercentDamageReceived(20 * 5, -1.0));
-						plugin.mEffectManager.addEffect(p, CustomRegeneration.effectID,
-							new CustomRegeneration(20 * 5, 1.0, 25, null, false, plugin));
+						com.playmonumenta.plugins.Plugin.getInstance().mEffectManager.addEffect(p, CustomRegeneration.effectID,
+							new CustomRegeneration(20 * 5, 1.0, 25, null, false, com.playmonumenta.plugins.Plugin.getInstance()));
 
 						p.sendMessage(Component.text("Something feels different. The shadows aren't clinging to me anymore.", NamedTextColor.AQUA));
 					} else {

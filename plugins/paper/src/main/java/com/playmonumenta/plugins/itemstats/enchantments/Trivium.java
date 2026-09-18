@@ -5,7 +5,6 @@ import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,12 +38,14 @@ public class Trivium implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGING_ENCHANTMENT;
+	public double getPriorityAmount() {
+		return 5500;
+		// This needs to be decently high as we need the final damage (After calculation of other enchants)
+		// The damage type will be set to "Other" to prevent iteration.
 	}
 
 	@Override
-	public void onDamageDelayed(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
+	public void onDamage(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
 		ClassAbility ca = event.getAbility();
 		if (ca != null && event.getType() == DamageEvent.DamageType.MAGIC) {
 			// Exception for Arcane Strike which can deal 2 different class abilities at once
@@ -80,7 +81,7 @@ public class Trivium implements Enchantment {
 					double gearDamageMultiplier = e.getGearDamageMultiplier();
 					double multiplierWithTrivium = gearDamageMultiplier + (DAMAGE_PER_LEVEL * value);
 					double multiplier = multiplierWithTrivium / gearDamageMultiplier - 1;
-					DamageUtils.damage(p, e.getDamagee(), DamageEvent.DamageType.UNSCALABLE_ENCH, e.getDamage() * multiplier, ClassAbility.TRIVIUM, true, false);
+					DamageUtils.damage(p, e.getDamagee(), DamageEvent.DamageType.UNSCALABLE_ENCH, e.getDamage() * multiplier, null, true, false);
 				}
 				// Find the average location of all entities hit
 				loc.multiply((double) 1 / eventList.size());

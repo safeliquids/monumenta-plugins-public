@@ -66,7 +66,7 @@ public class SpellKnockAway extends Spell {
 					BossUtils.blockableDamage(mLauncher, player, DamageType.MELEE, mDamage);
 					com.playmonumenta.plugins.Plugin.getInstance().mEffectManager.addEffect(player, KNOCK_AWAY_SLOWNESS_SOURCE, new PercentSpeed(mSlownessDuration, mSlownessPotency, KNOCK_AWAY_SLOWNESS_SOURCE));
 					com.playmonumenta.plugins.Plugin.getInstance().mEffectManager.addEffect(player, KNOCK_AWAY_WEAKNESS_SOURCE,
-						new PercentDamageDealt(mWeaknessDuration, mWeaknessPotency).damageTypes(DamageType.getScalableDamageTypes()));
+						new PercentDamageDealt(mWeaknessDuration, mWeaknessPotency).damageTypes(DamageType.getScalableDamageType()));
 					Vector dir = player.getLocation().subtract(mLauncher.getLocation().toVector()).toVector().multiply(mSpeed);
 					dir.setY(0.5f);
 					player.setVelocity(dir);

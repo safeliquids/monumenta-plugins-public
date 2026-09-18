@@ -72,8 +72,8 @@ public class ChestUtils {
 		if (lootTable == null) {
 			return false;
 		}
-
-		return LootTableManager.hasBonus(lootTable.getKey());
+		LootTableManager.LootTableEntry lootEntry = LootTableManager.getLootTableEntry(lootTable.getKey());
+		return lootEntry != null && lootEntry.hasBonusRolls();
 	}
 
 	public static void generateContainerLootWithScaling(Player player, Block block, Plugin plugin) {
@@ -108,11 +108,15 @@ public class ChestUtils {
 		List<Player> nearbyPlayers = Collections.singletonList(player); // All players that may receive loot slices
 
 		boolean isInLootroom = ZoneUtils.hasZoneProperty(inventory.getLocation() != null ? inventory.getLocation() : player.getLocation(), ZoneUtils.ZoneProperty.LOOTROOM);
-
-		if (isInLootroom) {
+		LootTableManager.LootTableEntry lootEntry = LootTableManager.getLootTableEntry(lootTable.getKey());
+		if (lootEntry == null) {
+			// This loot table doesn't exist, likely an error
+			MMLog.severe("Player '" + player.getName() + " opened loot chest '" + lootTable.getKey() + "' which wasn't loaded by LootTableManager");
+			luckAmount = 0;
+		} else if (isInLootroom) {
 			// Loot scaling is disabled (dungeon loot rooms)
 			luckAmount = 0;
-		} else if (!LootTableManager.hasBonus(lootTable.getKey())) {
+		} else if (!lootEntry.hasBonusRolls()) {
 			// This chest doesn't have bonus rolls, don't apply luck
 			MMLog.debug("Player '" + player.getName() + " opened loot chest '" + lootTable.getKey() + "' which did not have scaling enabled");
 			luckAmount = 0;

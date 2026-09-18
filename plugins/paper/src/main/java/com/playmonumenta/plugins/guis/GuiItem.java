@@ -10,18 +10,18 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * An item in a {@link NjolGui}.
+ * An item in a {@link Gui}.
  */
-public class NjolGuiItem {
+public class GuiItem {
 
 	final ItemStack mItem;
 	private final List<Consumer<InventoryClickEvent>> mClickListeners = new ArrayList<>(0);
 
-	public NjolGuiItem(ItemStack item) {
+	public GuiItem(ItemStack item) {
 		this(item, true);
 	}
 
-	public NjolGuiItem(ItemStack item, boolean setPlainTag) {
+	public GuiItem(ItemStack item, boolean setPlainTag) {
 		if (setPlainTag) {
 			ItemUtils.setPlainTag(item);
 		}
@@ -32,9 +32,9 @@ public class NjolGuiItem {
 	/**
 	 * Defines an action to be executed when this item is left-clicked.
 	 *
-	 * @return This {@link NjolGuiItem} (for method chaining)
+	 * @return This {@link GuiItem} (for method chaining)
 	 */
-	public NjolGuiItem onLeftClick(Runnable onClick) {
+	public GuiItem onLeftClick(Runnable onClick) {
 		return onClick(event -> {
 			if (event.getClick() == ClickType.LEFT) {
 				onClick.run();
@@ -45,9 +45,9 @@ public class NjolGuiItem {
 	/**
 	 * Defines an action to be executed when this item is right-clicked.
 	 *
-	 * @return This {@link NjolGuiItem} (for method chaining)
+	 * @return This {@link GuiItem} (for method chaining)
 	 */
-	public NjolGuiItem onRightClick(Runnable onClick) {
+	public GuiItem onRightClick(Runnable onClick) {
 		return onClick(event -> {
 			if (event.getClick() == ClickType.RIGHT) {
 				onClick.run();
@@ -59,9 +59,9 @@ public class NjolGuiItem {
 	 * Defines an action to be executed when this item is clicked. Will handle all click types - <b>make sure to check for click type</b>,
 	 * as some are most likely unwanted (e.g. drop or swap with hotbar).
 	 *
-	 * @return This {@link NjolGuiItem} (for method chaining)
+	 * @return This {@link GuiItem} (for method chaining)
 	 */
-	public NjolGuiItem onClick(Consumer<InventoryClickEvent> onClick) {
+	public GuiItem onClick(Consumer<InventoryClickEvent> onClick) {
 		mClickListeners.add(onClick);
 		return this;
 	}

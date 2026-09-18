@@ -126,13 +126,13 @@ public class DamageEvent extends Event implements Cancellable {
 			return enumSet;
 		}
 
-		public static EnumSet<DamageType> getScalableDamageTypes() {
+		public static EnumSet<DamageType> getScalableDamageType() {
 			EnumSet<DamageType> enumSet = getEnumSet();
 			enumSet.removeIf(damageType -> !damageType.isScalable());
 			return enumSet;
 		}
 
-		public static EnumSet<DamageType> getUnscalableDamageTypes() {
+		public static EnumSet<DamageType> getUnscalableDamageType() {
 			EnumSet<DamageType> enumSet = getEnumSet();
 			enumSet.removeIf(DamageType::isScalable);
 			return enumSet;

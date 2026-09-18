@@ -185,6 +185,11 @@ public class Relic implements Enchantment {
 		return EnumSet.of(Slot.MAINHAND);
 	}
 
+	@Override
+	public double getPriorityAmount() {
+		return 7;
+	}
+
 	public static void particles(Location loc, Player player) {
 		new PartialParticle(Particle.CRIT, loc, 30, 0, 0, 0, 0.65).spawnAsPlayerActive(player);
 		new PartialParticle(Particle.CRIT_MAGIC, loc, 30, 0, 0, 0, 0.65).spawnAsPlayerActive(player);

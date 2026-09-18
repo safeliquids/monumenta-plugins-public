@@ -49,11 +49,9 @@ public class DarkPactCS implements CosmeticSkill {
 	}
 
 	public void deactivationDamageApplied(Player player, World world, Location loc, double radius) {
-		world.playSound(loc, Sound.ITEM_TOTEM_USE, 0.3f, 1.4f);
-		world.playSound(loc, Sound.ENTITY_GUARDIAN_AMBIENT, SoundCategory.PLAYERS, 15f, 1.5f, 9999);
-		world.playSound(loc, Sound.ENTITY_WARDEN_SONIC_BOOM, SoundCategory.PLAYERS, 0.6f, 1.5f);
-		world.playSound(loc, Sound.ENTITY_ELDER_GUARDIAN_HURT, SoundCategory.PLAYERS, 3, 0.7f);
-		world.playSound(loc, Sound.ENTITY_BLAZE_HURT, SoundCategory.PLAYERS, 2, 0.5f);
+		world.playSound(loc, Sound.ENTITY_WITHER_BREAK_BLOCK, 0.4f, 1.5f);
+		world.playSound(loc, Sound.ENTITY_PHANTOM_DEATH, SoundCategory.PLAYERS, 0.4f, 0.5f);
+		world.playSound(loc, Sound.ENTITY_PHANTOM_DEATH, SoundCategory.PLAYERS, 0.4f, 0.75f);
 		new PPCircle(Particle.DAMAGE_INDICATOR, loc.clone().add(0, 0.2, 0), radius)
 			.ringMode(false)
 			.countPerMeter(10)

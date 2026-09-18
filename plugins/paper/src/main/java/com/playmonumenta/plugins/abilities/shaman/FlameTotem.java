@@ -173,7 +173,7 @@ public class FlameTotem extends TotemAbility {
 	@Override
 	public boolean onDamage(DamageEvent event, LivingEntity enemy) {
 		// Handle enhancement damage boost
-		if (isEnhanced() && mTotem != null && event.getAbility() != null && !TOTEM_ABILITY_LIST.contains(event.getAbility())) {
+		if (isEnhanced() && mTotem != null && !TOTEM_ABILITY_LIST.contains(event.getAbility())) {
 			if (new Hitbox.SphereHitbox(mTotem.getLocation(), getTotemRadius()).getHitMobs().contains(enemy)) {
 				event.updateDamageWithMultiplier(1 + mEnhanceDamageAmplifier, EnumSet.of(DamageEvent.DamageType.MAGIC));
 			}
@@ -211,7 +211,7 @@ public class FlameTotem extends TotemAbility {
 			.addLine()
 			.addLine("Casting non-*Totem* abilities inside *Flame*").styles(Shaman.TOTEM_COLOR, UNDERLINED)
 			.addLine("*Totem*'s area increases its damage").styles(UNDERLINED)
-			.addLine("by +%d (s), up to %d1u times.")
+			.addLine("by +%d (s), up to %d1e_only times.")
 				.statValues(stat(a -> a.mBonusDamageFlat, ABILITY_FLAT_DMG_ADDITION), stat(a -> a.mAbilityLimit, ABILITY_LIMIT))
 			.addDashedLine();
 	}

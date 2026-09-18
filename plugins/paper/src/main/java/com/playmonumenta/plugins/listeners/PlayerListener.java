@@ -19,7 +19,7 @@ import com.playmonumenta.plugins.events.EffectTypeApplyFromPotionEvent;
 import com.playmonumenta.plugins.events.EntityGainAbsorptionEvent;
 import com.playmonumenta.plugins.events.HemorrhageEvent;
 import com.playmonumenta.plugins.events.PotionEffectApplyEvent;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkChatIntegration;
 import com.playmonumenta.plugins.integrations.MonumentaNetworkRelayIntegration;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
@@ -41,7 +41,6 @@ import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.particle.ParticleCategory;
 import com.playmonumenta.plugins.particle.ParticleManager;
 import com.playmonumenta.plugins.player.EnderPearlTracker;
-import com.playmonumenta.plugins.plots.PlotManager;
 import com.playmonumenta.plugins.poi.POIManager;
 import com.playmonumenta.plugins.point.Point;
 import com.playmonumenta.plugins.portals.PortalManager;
@@ -63,6 +62,7 @@ import com.playmonumenta.plugins.utils.NmsUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import com.playmonumenta.plugins.utils.PotionUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
+import com.playmonumenta.plugins.utils.SignUtils;
 import com.playmonumenta.plugins.utils.ZoneUtils;
 import com.playmonumenta.plugins.utils.ZoneUtils.ZoneProperty;
 import com.playmonumenta.redissync.event.PlayerSaveEvent;
@@ -70,7 +70,6 @@ import com.playmonumenta.redissync.event.PlayerServerTransferEvent;
 import com.playmonumenta.redissync.event.PlayerTransferFailEvent;
 import com.playmonumenta.scriptedquests.managers.TranslationsManager;
 import de.tr7zw.nbtapi.NBT;
-import io.papermc.paper.event.player.CartographyItemEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -136,9 +135,39 @@ import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.SmithItemEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerChangedMainHandEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerFishEvent.State;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRegisterChannelEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerRiptideEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -320,7 +349,7 @@ public class PlayerListener implements Listener {
 
 		mPlugin.mTrackingManager.removeEntity(player);
 
-		NjolGui.playerQuit(player);
+		Gui.playerQuit(player);
 
 		Team playersTeam = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(PLAYERS_TEAM_NAME);
 		if (playersTeam != null) {
@@ -373,7 +402,6 @@ public class PlayerListener implements Listener {
 			if (
 				player.getGameMode() == GameMode.ADVENTURE
 					|| ZoneUtils.hasZoneProperty(block.getLocation(), ZoneProperty.RESTRICTED)
-					|| PlotManager.onLockedPlot(player)
 					|| (
 					guildPlotGameMode != null
 						&& guildPlotGameMode != GameMode.SURVIVAL
@@ -389,7 +417,7 @@ public class PlayerListener implements Listener {
 			player.getGameMode() != GameMode.CREATIVE
 				&& block != null
 				&& !(blockData instanceof Powerable)
-				&& (ZoneUtils.hasZoneProperty(block.getLocation(), ZoneProperty.RESTRICTED) || PlotManager.onLockedPlot(player))
+				&& ZoneUtils.hasZoneProperty(block.getLocation(), ZoneProperty.RESTRICTED)
 		) {
 			event.setCancelled(true);
 			event.setUseInteractedBlock(Event.Result.DENY);
@@ -591,7 +619,7 @@ public class PlayerListener implements Listener {
 			event.setCancelled(true);
 			if (event.getBlock().getState() instanceof Sign sign) {
 				int lineNum = 0;
-				for (Component oldLine : sign.getSide(event.getSide()).lines()) {
+				for (Component oldLine : SignUtils.getLines(sign)) {
 					event.line(lineNum, oldLine);
 					lineNum++;
 				}
@@ -654,9 +682,6 @@ public class PlayerListener implements Listener {
 				if (frameItem.getType().equals(Material.FILLED_MAP)) {
 					if (player.getGameMode().equals(GameMode.ADVENTURE)) {
 						ItemStack giveMap = frameItem.clone();
-						if (ItemUtils.hasLore(giveMap)) {
-							return;
-						}
 						ItemMeta mapMeta;
 
 						if (giveMap.hasItemMeta()) {
@@ -705,7 +730,6 @@ public class PlayerListener implements Listener {
 			(
 				ZoneUtils.hasZoneProperty(player, ZoneProperty.RESTRICTED)
 					|| GuildPlotUtils.guildPlotInventoryModificationBlocked(player)
-					|| PlotManager.onLockedPlot(player)
 			)
 				&& player.getGameMode() != GameMode.CREATIVE
 		) {
@@ -743,7 +767,7 @@ public class PlayerListener implements Listener {
 
 		/* Don't let the player do this when in a restricted zone */
 		if (
-			(ZoneUtils.hasZoneProperty(player, ZoneProperty.RESTRICTED) || PlotManager.onLockedPlot(player))
+			ZoneUtils.hasZoneProperty(player, ZoneProperty.RESTRICTED)
 				&& player.getGameMode() != GameMode.CREATIVE
 		) {
 			event.setCancelled(true);
@@ -1462,7 +1486,7 @@ public class PlayerListener implements Listener {
 		// If the teleport wasn't cancelled by anything, update their gamemode and other location-based info
 		mPlugin.mTrackingManager.mPlayers.updateLocation(player, event.getTo(), 0);
 
-		NjolGui gui = NjolGui.getOpenGui(player);
+		Gui gui = Gui.getOpenGui(player);
 		if (gui != null && gui.getCloseOnTeleport()) {
 			gui.close();
 		}
@@ -1933,36 +1957,25 @@ public class PlayerListener implements Listener {
 		boolean gotBanner = false;
 		boolean gotShield = resultMat.equals(Material.SHIELD);
 
-		boolean gotCopyMaterial = false;
-		boolean gotNonCopyableItem = false;
-
 		for (ItemStack item : event.getInventory().getMatrix()) {
-			if (item == null) {
-				continue;
-			}
+			if (item != null) {
+				Material mat = item.getType();
+				String matStr = mat.getKey().toString();
 
-			Material mat = item.getType();
-			String matStr = mat.getKey().toString();
-
-			ItemMeta meta = item.getItemMeta();
-			if (meta != null && meta.hasLore()) {
+				ItemMeta meta = item.getItemMeta();
 				if (
-					(Material.FILLED_MAP.equals(mat) || Material.WRITTEN_BOOK.equals(mat)) &&
-					ItemStatUtils.hasNonCopyableInfusion(item)
+					meta != null
+						&& meta.hasLore()
+						&& ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0
 				) {
-					gotNonCopyableItem = true;
-				}
-
-				if (ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0) {
 					cancel = true;
-				}
-			} else {
-				gotCopyMaterial |= Material.MAP.equals(item.getType()) || Material.WRITABLE_BOOK.equals(item.getType());
-				if (matStr.endsWith("_dye")) {
-					gotDye = true;
-				}
-				if (matStr.endsWith("_banner")) {
-					gotBanner = true;
+				} else {
+					if (matStr.endsWith("_dye")) {
+						gotDye = true;
+					}
+					if (matStr.endsWith("_banner")) {
+						gotBanner = true;
+					}
 				}
 			}
 		}
@@ -1978,9 +1991,6 @@ public class PlayerListener implements Listener {
 		}
 		if (resultMat.equals(Material.TIPPED_ARROW)) {
 			cancel = false;
-		}
-		if (gotCopyMaterial && gotNonCopyableItem) {
-			cancel = true;
 		}
 		event.setCancelled(cancel);
 
@@ -2013,37 +2023,6 @@ public class PlayerListener implements Listener {
 		event.setCancelled(cancel);
 	}
 
-	@EventHandler(ignoreCancelled = false)
-	public void cartographyTableUseEvent(CartographyItemEvent event) {
-		ItemStack result = event.getCurrentItem();
-		if (result == null) {
-			return;
-		}
-
-		boolean gotCopyMaterial = false;
-		boolean gotNonCopyableItem = false;
-
-		for (ItemStack item : event.getInventory().getContents()) {
-			if (item == null) {
-				continue;
-			}
-			gotCopyMaterial |= Material.MAP.equals(item.getType());
-
-			ItemMeta meta = item.getItemMeta();
-			if (meta != null && meta.hasLore()) {
-				gotNonCopyableItem |= ItemStatUtils.hasNonCopyableInfusion(item);
-
-				if (ItemStatUtils.getEnchantmentLevel(item, EnchantmentType.MATERIAL) == 0) {
-					event.setCancelled(true);
-					return;
-				}
-			}
-		}
-
-		if (gotCopyMaterial && gotNonCopyableItem) {
-			event.setCancelled(true);
-		}
-	}
 
 	private static final Set<DamageCause> SCALABLE_REGION_DAMAGE_CAUSES = Set.of(
 		DamageCause.FIRE_TICK,

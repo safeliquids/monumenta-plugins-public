@@ -159,7 +159,7 @@ public class EscapeArtist extends DepthsAbility {
 
 		new PartialParticle(Particle.CRIT, mPlayer.getEyeLocation().add(mPlayer.getLocation().getDirection()), 20, 0, 0, 0, 0.6).spawnAsPlayerActive(mPlayer);
 
-		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, mProjectileSpeed, "Escape Artist Projectile", Particle.SMOKE_NORMAL);
+		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, mProjectileSpeed, "Escape Artist Projectile", Particle.SMOKE_NORMAL, LocationUtils.isLocationInWater(mPlayer.getLocation()));
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 		mPlayerItemStatsMap.put(proj, playerItemStats);
 
@@ -218,9 +218,9 @@ public class EscapeArtist extends DepthsAbility {
 			if (stats != null) {
 				mPlugin.mProjectileEffectTimers.removeEntity(proj);
 				executeTeleport(proj.getLocation().add(0, 1, 0).setDirection(mPlayer.getEyeLocation().getDirection()));
-				proj.remove();
 			}
 		}
+		proj.remove();
 	}
 
 	public void executeTeleport(Location destination) {

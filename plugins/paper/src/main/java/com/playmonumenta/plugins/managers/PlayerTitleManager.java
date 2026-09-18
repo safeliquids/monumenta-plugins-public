@@ -34,10 +34,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDismountEvent;
-import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
@@ -305,70 +302,8 @@ public class PlayerTitleManager implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void entityMountEvent(EntityMountEvent event) {
-		final var mount = event.getMount();
-		if (!(mount instanceof final Player player)) {
-			return;
-		}
-		// usb: this is kinda hacky because it is respawning the nametags rather than fixing the existing ones and flicker for a tick
-		player.getScheduler().run(Plugin.getInstance(), (task) -> {
-			removeTrackedPlayers(player);
-		}, null);
-		player.getScheduler().runDelayed(Plugin.getInstance(), (task) -> {
-			addTrackedPlayers(player);
-		}, null, 2);
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void entityDismountEvent(EntityDismountEvent event) {
-		final var mount = event.getDismounted();
-		if (!(mount instanceof final Player player)) {
-			return;
-		}
-		// usb: this is kinda hacky because it is respawning the nametags rather than fixing the existing ones and flicker for a tick
-		player.getScheduler().run(Plugin.getInstance(), (task) -> {
-			removeTrackedPlayers(player);
-		}, null);
-		player.getScheduler().runDelayed(Plugin.getInstance(), (task) -> {
-			addTrackedPlayers(player);
-		}, null, 2);
-	}
-
-
-	public void removeTrackedPlayers(final Player player) {
-		mTrackedEntities.computeIfPresent(player.getUniqueId(), (uuid, existing) -> {
-			final var trackedPlayers = player.getTrackedBy();
-			if (existing != null) {
-				for (final var trackedPlayer : trackedPlayers) {
-					existing.removePlayer(trackedPlayer, player);
-				}
-			}
-			return null;
-		});
-	}
-
-	public void addTrackedPlayers(final Player player) {
-		mTrackedEntities.compute(player.getUniqueId(), (uuid, existing) -> {
-			if (existing == null) {
-				existing = new NameTag(player);
-			}
-			final var trackedPlayers = player.getTrackedBy();
-			for (final var trackedPlayer : trackedPlayers) {
-				if (existing.mViewers.contains(trackedPlayer.getUniqueId())) {
-					continue;
-				}
-				existing.addPlayer(trackedPlayer, player);
-			}
-			return existing;
-		});
-	}
-
 	public void handlePlayerHealthChanges() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (player == null || !player.isOnline()) {
-				continue;
-			}
 			NameTag nameTag = mTrackedEntities.get(player.getUniqueId());
 			if (nameTag != null) {
 				nameTag.update(player);

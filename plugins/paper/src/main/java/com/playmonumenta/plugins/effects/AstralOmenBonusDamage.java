@@ -35,7 +35,7 @@ public class AstralOmenBonusDamage extends Effect {
 		}
 		if (source == mPlayer) {
 			mCosmetic.bonusDamage(mPlayer, entity, COLOR);
-			event.updateDamageWithMultiplier(1 + mAmount, DamageEvent.DamageType.getScalableDamageTypes());
+			event.updateDamageWithMultiplier(1 + mAmount, DamageEvent.DamageType.getScalableDamageType());
 		}
 	}
 

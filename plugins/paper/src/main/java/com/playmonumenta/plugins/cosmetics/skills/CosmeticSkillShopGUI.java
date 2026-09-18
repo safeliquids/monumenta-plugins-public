@@ -6,8 +6,8 @@ import com.playmonumenta.plugins.cosmetics.Cosmetic;
 import com.playmonumenta.plugins.cosmetics.CosmeticType;
 import com.playmonumenta.plugins.cosmetics.CosmeticsManager;
 import com.playmonumenta.plugins.cosmetics.gui.CosmeticsGUI;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class CosmeticSkillShopGUI extends NjolGui {
+public class CosmeticSkillShopGUI extends Gui {
 
 	private static final List<Component> DEPTHS_INTRO;
 	private static final List<Component> DELVE_INTRO;
@@ -158,7 +158,7 @@ public class CosmeticSkillShopGUI extends NjolGui {
 				}
 				ItemStack item = createSkillIcon(name, mCurrentPage.mColor, price);
 				boolean locked = item.getType() == LOCKED;
-				setItem(slot, new NjolGuiItem(item).onClick(e -> {
+				setItem(slot, new GuiItem(item).onClick(e -> {
 					if (!locked && !CosmeticsManager.getInstance().playerHasCosmetic(mPlayer, CosmeticType.COSMETIC_SKILL, name)) {
 						// Try to buy
 						if (mPlayer.getGameMode() == GameMode.CREATIVE) {
@@ -210,7 +210,7 @@ public class CosmeticSkillShopGUI extends NjolGui {
 		ItemMeta meta = item.getItemMeta();
 		meta.displayName(Component.text(itemName, NamedTextColor.RED).decoration(TextDecoration.ITALIC, false).decoration(TextDecoration.BOLD, true));
 		item.setItemMeta(meta);
-		setItem(BACK_LOC, new NjolGuiItem(item).onClick(e -> {
+		setItem(BACK_LOC, new GuiItem(item).onClick(e -> {
 			if (mCurrentPage != null) {
 				mCurrentPage = null;
 				update();
@@ -222,15 +222,15 @@ public class CosmeticSkillShopGUI extends NjolGui {
 	}
 
 	private void setPageIcon(int location, CSSet set) {
-		NjolGuiItem item;
+		GuiItem item;
 		if (ScoreboardUtils.getScoreboardValue(mPlayer, set.mScoreboard).orElse(0) > 0 || mPlayer.getGameMode() == GameMode.CREATIVE) {
-			item = new NjolGuiItem(createPageIcon(set.mMat, set.mName.color(set.mColor), set.mIntro)).onClick(e -> {
+			item = new GuiItem(createPageIcon(set.mMat, set.mName.color(set.mColor), set.mIntro)).onClick(e -> {
 				mCurrentPage = set;
 				mPlayer.playSound(mPlayer.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.PLAYERS, 0.5f, 1f);
 				update();
 			});
 		} else {
-			item = new NjolGuiItem(createPageIcon(LOCKED, set.mLockedName.color(set.mColor), set.mLockedDescription));
+			item = new GuiItem(createPageIcon(LOCKED, set.mLockedName.color(set.mColor), set.mLockedDescription));
 		}
 		setItem(location, item);
 	}

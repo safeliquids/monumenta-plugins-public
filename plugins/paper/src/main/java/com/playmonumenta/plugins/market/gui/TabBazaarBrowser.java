@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.market.gui;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.inventories.WalletManager;
 import com.playmonumenta.plugins.market.MarketListing;
 import com.playmonumenta.plugins.market.MarketListingIndex;
@@ -74,7 +74,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 		loadItems();
 	}
 
-	private NjolGuiItem buildSortbySelectionIcon() {
+	private GuiItem buildSortbySelectionIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Left click, Right click", NamedTextColor.WHITE).append(Component.text(" or any", NamedTextColor.GRAY)));
 		lore.add(Component.text("of your ", NamedTextColor.GRAY).append(Component.text("Hotbar keys", NamedTextColor.WHITE).append(Component.text(" to", NamedTextColor.GRAY))));
@@ -102,7 +102,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(Material.MAGENTA_GLAZED_TERRACOTTA, 1, Component.text("Sort By", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new NjolGuiItem(icon, false);
+		return new GuiItem(icon, false);
 	}
 
 	private void clickSortbyAction(InventoryClickEvent clickEvent) {
@@ -141,7 +141,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 			.open(mPlayer);
 	}
 
-	private NjolGuiItem buildQuickSearchIcon() {
+	private GuiItem buildQuickSearchIcon() {
 		ArrayList<Component> lore = new ArrayList<>();
 		if (!mTabBazaarBrowserState.mQuicksearchValue.isEmpty()) {
 			lore.add(Component.text("Current search:", NamedTextColor.WHITE));
@@ -164,7 +164,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(Material.SPYGLASS, 1, Component.text("Quicksearch Item Name", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new NjolGuiItem(icon, false);
+		return new GuiItem(icon, false);
 	}
 
 	private void clickFilterAction(InventoryClickEvent clickEvent) {
@@ -185,7 +185,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 		mGui.update();
 	}
 
-	private NjolGuiItem buildFilterSelectionIcon() {
+	private GuiItem buildFilterSelectionIcon() {
 
 		ArrayList<Component> lore = new ArrayList<>();
 		lore.add(Component.text("Left click, Right click", NamedTextColor.WHITE).append(Component.text(" or any", NamedTextColor.GRAY)));
@@ -208,7 +208,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 
 		ItemStack icon = GUIUtils.createBasicItem(Material.BRUSH, 1, Component.text("Select a Filter", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true), lore, false);
 
-		return new NjolGuiItem(icon, false);
+		return new GuiItem(icon, false);
 	}
 
 	private void loadItems() {
@@ -245,7 +245,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 
 	private List<MarketListing> loadListingsInPageFromLoadedListingsIdList() {
 		int max = getMaxPageDisplayable();
-		if (mCurrentPage > max || mCurrentPage < 0) {
+		if (mCurrentPage > max) {
 			mCurrentPage = 0;
 		}
 		int searchIndex = mCurrentPage * 45;
@@ -287,7 +287,7 @@ public class TabBazaarBrowser implements MarketGuiTab {
 				if (i >= 54) {
 					break;
 				}
-				mGui.setItem(i++, new NjolGuiItem(listing.getListingDisplayItemStack(mGui.mPlayer, mGui.TAB_BAZAAR_BROWSER), false))
+				mGui.setItem(i++, new GuiItem(listing.getListingDisplayItemStack(mGui.mPlayer, mGui.TAB_BAZAAR_BROWSER), false))
 					.onClick((clickEvent) -> switchToBuyListingAction(listing));
 			}
 		}

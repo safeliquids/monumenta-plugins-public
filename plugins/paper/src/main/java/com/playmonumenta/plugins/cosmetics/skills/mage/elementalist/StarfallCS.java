@@ -3,7 +3,6 @@ package com.playmonumenta.plugins.cosmetics.skills.mage.elementalist;
 import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.cosmetics.skills.CosmeticSkill;
 import com.playmonumenta.plugins.particle.PPCircle;
-import com.playmonumenta.plugins.particle.PPLine;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,11 +32,7 @@ public class StarfallCS implements CosmeticSkill {
 	}
 
 	public void starfallCastTrail(Location loc, Player player) {
-		new PPLine(Particle.FLAME, player.getEyeLocation(), loc)
-			.countPerMeter(1)
-			.delta(0)
-			.delay(3)
-			.spawnAsPlayerActive(player);
+		new PartialParticle(Particle.FLAME, loc, 1, 0, 0, 0, 0).spawnAsPlayerActive(player);
 	}
 
 	public void starfallFallEffect(World world, Player player, Location loc, Location ogLoc, Location ogMeteorLoc, double tick) {

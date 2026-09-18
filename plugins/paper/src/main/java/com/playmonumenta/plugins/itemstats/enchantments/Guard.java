@@ -6,11 +6,7 @@ import com.playmonumenta.plugins.effects.OnHitTimerEffect;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageShieldedEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
-import com.playmonumenta.plugins.itemstats.attributes.Agility;
-import com.playmonumenta.plugins.itemstats.attributes.Armor;
-import com.playmonumenta.plugins.itemstats.enums.AttributeType;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.NavigableSet;
@@ -37,37 +33,13 @@ public class Guard implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.LATE_DEFENSE_SITUATIONAL; // make sure to capture all other situational enchantments first
-	}
-
-	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.GUARD;
 	}
 
 	@Override
 	public void onHurt(Plugin plugin, Player player, double value, DamageEvent event, @Nullable Entity damager, @Nullable LivingEntity source) {
-		double damageTaken = event.getFinalDamage(true);
-		if (!event.getType().isDefendable()) {
-			return;
-		}
-		double armor = plugin.mItemStatManager.getAttributeAmount(player, AttributeType.ARMOR);
-		double agility = plugin.mItemStatManager.getAttributeAmount(player, AttributeType.AGILITY);
-
-		// counts everything but guard as guard is 0 damage rn
-		boolean adaptability = plugin.mItemStatManager.getEnchantmentLevel(player, EnchantmentType.ADAPTABILITY) > 0;
-		if (agility > 0 && armor <= 0) {
-			damageTaken *= Armor.getDamageMultiplier(0, Armor.getSecondaryEnchantsMod(event, plugin, player),
-				agility, Agility.getSecondaryEnchantsLevel(event, plugin, player),
-				Armor.getSecondaryEnchantCap(player), Armor.getSecondaryEHPMultiplier(player), adaptability, 0, event.getType().getDefenseModifier());
-		} else if (armor > 0) {
-			damageTaken *= Armor.getDamageMultiplier(armor, Armor.getSecondaryEnchantsMod(event, plugin, player),
-				agility, Agility.getSecondaryEnchantsLevel(event, plugin, player),
-				Armor.getSecondaryEnchantCap(player), Armor.getSecondaryEHPMultiplier(player), adaptability, 0, event.getType().getDefenseModifier());
-		}
-
-		if (damageTaken / EntityUtils.getMaxHealth(player) >= HEALTH_RATIO) {
+		if (event.getFinalDamage(true) / EntityUtils.getMaxHealth(player) >= HEALTH_RATIO) {
 			addEffect(plugin, player, PAST_HIT_DURATION_TIME_HEALTH);
 		}
 	}
@@ -85,10 +57,11 @@ public class Guard implements Enchantment {
 
 	public static double applyGuard(DamageEvent event, Plugin plugin, Player player) {
 		NavigableSet<Effect> guard = plugin.mEffectManager.getEffects(player, GUARD_EFFECT_NAME);
-		if (guard != null) {
+		if (event.getFinalDamage(true) / EntityUtils.getMaxHealth(player) >= HEALTH_RATIO || guard != null) {
 			return plugin.mItemStatManager.getEnchantmentLevel(player, EnchantmentType.GUARD);
+		} else {
+			return 0;
 		}
-		return 0;
 	}
 
 }

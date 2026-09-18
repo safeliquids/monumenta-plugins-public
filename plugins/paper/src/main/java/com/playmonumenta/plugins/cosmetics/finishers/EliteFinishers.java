@@ -29,7 +29,6 @@ public class EliteFinishers {
 	private static final ImmutableMap<String, EliteFinisher> FINISHERS =
 		ImmutableMap.<String, EliteFinisher>builder()
 			.put(AdvancedAudioMechanism.NAME, new AdvancedAudioMechanism())
-			.put(AnniversaryFinisher.NAME, new AnniversaryFinisher())
 			.put(BirthdayThemeFinisher.NAME, new BirthdayThemeFinisher())
 			.put(BlastOffFinisher.NAME, new BlastOffFinisher())
 			.put(BuzzedFinisher.NAME, new BuzzedFinisher())
@@ -56,7 +55,6 @@ public class EliteFinishers {
 			.put(MaledictioRanae.NAME, new MaledictioRanae())
 			.put(MegalovaniaFinisher.NAME, new MegalovaniaFinisher())
 			.put(MoneyRainFinisher.NAME, new MoneyRainFinisher())
-			.put(MonumentMotifFinisher.NAME, new MonumentMotifFinisher())
 			.put(PaintSplashFinisher.NAME, new PaintSplashFinisher())
 			.put(PoultryficationFinisher.NAME, new PoultryficationFinisher())
 			.put(PrideFinisher.NAME, new PrideFinisher())

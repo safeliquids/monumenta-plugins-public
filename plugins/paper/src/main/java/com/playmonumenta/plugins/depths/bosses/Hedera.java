@@ -248,8 +248,7 @@ public class Hedera extends SerializedLocationBossAbilityGroup {
 				//Particles from consumed plant to Hedera
 				new BukkitRunnable() {
 					int mCount = 0;
-					final Location mParticleLoc = unluckyPlant.clone();
-					final int mMaxCount = Math.max(15, (int) mBoss.getEyeLocation().distance(mParticleLoc));
+					final int mMaxCount = Math.max(15, (int) mBoss.getEyeLocation().distance(unluckyPlant));
 
 					@Override
 					public void run() {
@@ -258,9 +257,9 @@ public class Hedera extends SerializedLocationBossAbilityGroup {
 						}
 
 						Location bossEyeLoc = mBoss.getEyeLocation();
-						Vector particleVector = bossEyeLoc.subtract(mParticleLoc).toVector().multiply(((double) mCount) / mMaxCount);
-						new PartialParticle(Particle.VILLAGER_HAPPY, mParticleLoc.clone().add(particleVector), 5).spawnAsEntityActive(mBoss);
-						new PartialParticle(Particle.SPELL_WITCH, mParticleLoc.clone().add(particleVector), 5).spawnAsEntityActive(mBoss);
+						Vector particleVector = bossEyeLoc.subtract(unluckyPlant).toVector().multiply(((double) mCount) / mMaxCount);
+						new PartialParticle(Particle.VILLAGER_HAPPY, unluckyPlant.add(particleVector), 5).spawnAsEntityActive(mBoss);
+						new PartialParticle(Particle.SPELL_WITCH, unluckyPlant.add(particleVector), 5).spawnAsEntityActive(mBoss);
 
 						mCount++;
 					}

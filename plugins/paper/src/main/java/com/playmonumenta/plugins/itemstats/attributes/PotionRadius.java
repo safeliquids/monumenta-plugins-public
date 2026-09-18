@@ -13,4 +13,9 @@ public class PotionRadius implements Attribute {
 	public AttributeType getAttributeType() {
 		return AttributeType.POTION_RADIUS;
 	}
+
+	@Override
+	public double getPriorityAmount() {
+		return 1999;
+	}
 }

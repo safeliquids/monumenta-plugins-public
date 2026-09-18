@@ -1,10 +1,8 @@
 package com.playmonumenta.plugins.cosmetics.skills.rogue.swordsage;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.particle.PPLine;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.FastUtils;
-import com.playmonumenta.plugins.utils.VectorUtils;
 import java.util.List;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -41,12 +39,12 @@ public class CosmicCleaveCS extends DeadlyRondeCS {
 	}
 
 	@Override
-	public void rondeHitEffect(World world, Player player, Entity enemy, double radius, double angle, boolean lvl2) {
+	public void rondeHitEffect(World world, Player player, Entity enemy, double radius, double rondeBaseRadius, boolean lv2) {
 		Location loc = player.getLocation();
 		Vector viewDirection = loc.getDirection();
 		switch (mMode) {
 			case 0 -> {
-				drawArc(player, viewDirection, Math.PI / 6, radius, angle);
+				drawArc(player, viewDirection, Math.PI / 6);
 				world.playSound(loc, Sound.ENTITY_DROWNED_SHOOT, SoundCategory.PLAYERS, 0.4f, 1.6f);
 				world.playSound(loc, Sound.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 0.5f);
 				world.playSound(loc, Sound.ITEM_TRIDENT_THROW, SoundCategory.PLAYERS, 1f, 0.6f);
@@ -56,7 +54,7 @@ public class CosmicCleaveCS extends DeadlyRondeCS {
 				mMode = 1;
 			}
 			case 1 -> {
-				drawArc(player, viewDirection, -Math.PI / 6, radius, angle);
+				drawArc(player, viewDirection, -Math.PI / 6);
 				world.playSound(loc, Sound.ENTITY_DROWNED_SHOOT, SoundCategory.PLAYERS, 0.4f, 1.6f);
 				world.playSound(loc, Sound.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 0.5f);
 				world.playSound(loc, Sound.ITEM_TRIDENT_THROW, SoundCategory.PLAYERS, 1f, 0.6f);
@@ -66,8 +64,8 @@ public class CosmicCleaveCS extends DeadlyRondeCS {
 				mMode = 2;
 			}
 			default -> {
-				drawArc(player, viewDirection, Math.PI / 6, radius, angle);
-				drawArc(player, viewDirection, -Math.PI / 6, radius, angle);
+				drawArc(player, viewDirection, Math.PI / 6);
+				drawArc(player, viewDirection, -Math.PI / 6);
 				world.playSound(loc, Sound.ENTITY_DROWNED_SHOOT, SoundCategory.PLAYERS, 0.4f, 1.3f);
 				world.playSound(loc, Sound.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 0.5f);
 				world.playSound(loc, Sound.ITEM_TRIDENT_THROW, SoundCategory.PLAYERS, 1f, 0.5f);
@@ -92,53 +90,34 @@ public class CosmicCleaveCS extends DeadlyRondeCS {
 		new PartialParticle(Particle.REDSTONE, loc.add(0, 1, 0), 50, 0.35, 0.5, 0.35, 0, new Particle.DustOptions(rollCosmicColor(), 0.75f)).spawnAsPlayerActive(player);
 	}
 
-	private void drawArc(Player player, Vector viewDirection, double tilt, double radius, double angle) {
-		Location eyeLocation = player.getEyeLocation();
-		Vector[] axes = VectorUtils.getAxesFromNormal(viewDirection);
-		Vector viewNormalUp = axes[1];
-		Vector viewNormal = axes[0].multiply(-1);
+	private void drawArc(Player player, Vector viewDirection, double tilt) {
+		Vector viewNormal = viewDirection.clone().crossProduct(new Vector(0, 1, 0)).normalize();
 
-		double signum = Math.signum(tilt);
-		double radians = Math.toRadians(angle);
 		new BukkitRunnable() {
-			double mAngle = -radians;
+			double mAngle = -Math.PI / 5;
 
 			@Override
 			public void run() {
-				for (int i = 0; i < 6; i++) {
-					if (mAngle > radians) {
-						this.cancel();
-						return;
-					}
-					Vector offsetX = viewDirection.clone().multiply(FastUtils.cos(signum * mAngle));
-					Vector offsetZ = viewNormal.clone().multiply(FastUtils.sin(signum * mAngle));
-					Vector offset = offsetX.add(offsetZ).rotateAroundAxis(viewDirection, tilt);
-					Vector delta = viewNormalUp.clone().rotateAroundAxis(viewDirection, tilt).crossProduct(offset).multiply(-signum);
-					Location critLoc = eyeLocation.clone().add(offset.clone().multiply(2.3));
-					Location dustLoc = eyeLocation.clone().add(offset.clone().multiply(radius));
+				if (mAngle > Math.PI / 5) {
+					this.cancel();
+				}
 
-					if (i % 2 == 0) {
-						new PPLine(Particle.CRIT_MAGIC, critLoc, dustLoc)
-							.countPerMeter(1)
-							.directionalMode(true)
-							.delta(delta.getX(), delta.getY(), delta.getZ())
-							.extra(1)
-							.spawnAsPlayerActive(player);
-						new PPLine(Particle.ELECTRIC_SPARK, critLoc, dustLoc, 0.06)
-							.countPerMeter(0.5)
-							.directionalMode(true)
-							.delta(delta.getX(), delta.getY(), delta.getZ())
-							.extra(1)
-							.spawnAsPlayerActive(player);
-					}
-					new PPLine(Particle.REDSTONE, critLoc, dustLoc, 0.06)
-						.countPerMeter(1)
-						.data(new Particle.DustOptions(rollCosmicColor(), 0.9f))
-						.spawnAsPlayerActive(player);
+				for (int i = 0; i < 6; i++) {
+					Vector offsetX = viewDirection.clone().multiply(2.3 * FastUtils.cos(Math.signum(tilt) * mAngle));
+					Vector offsetZ = viewNormal.clone().multiply(2.3 * FastUtils.sin(Math.signum(tilt) * mAngle));
+					drawCosmic(player, player.getEyeLocation().add(offsetX.add(offsetZ).rotateAroundAxis(viewDirection, tilt)));
 					mAngle += Math.PI / 45;
 				}
 			}
 		}.runTaskTimer(Plugin.getInstance(), 0, 1);
+	}
+
+	private void drawCosmic(Player player, Location loc) {
+		if (FastUtils.randomIntInRange(0, 3) == 0) {
+			new PartialParticle(Particle.CRIT_MAGIC, loc, 10, 0.06, 0.06, 0.06, 0).spawnAsPlayerActive(player);
+		} else {
+			new PartialParticle(Particle.REDSTONE, loc, 15, 0.06, 0.06, 0.06, 0, new Particle.DustOptions(rollCosmicColor(), 0.4f)).spawnAsPlayerActive(player);
+		}
 	}
 
 	private Color rollCosmicColor() {

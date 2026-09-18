@@ -3,7 +3,7 @@ package com.playmonumenta.plugins.depths.guis;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.depths.DepthsParty;
 import com.playmonumenta.plugins.depths.loot.ZenithLoot;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.NmsUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class DepthsAscensionGUI extends NjolGui {
+public class DepthsAscensionGUI extends Gui {
 	private static final Component MAIN_PAGE_TITLE = Component.text("Ascension Modifiers");
 
 	private static final int DELVE_POINTS_PER_LEVEL = 10;

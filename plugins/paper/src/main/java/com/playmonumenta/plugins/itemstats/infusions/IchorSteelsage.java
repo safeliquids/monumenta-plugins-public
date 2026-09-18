@@ -1,8 +1,6 @@
 package com.playmonumenta.plugins.itemstats.infusions;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.abilities.warrior.berserker.MeteorSlam;
-import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.effects.IchorCooldown;
 import com.playmonumenta.plugins.effects.IchorSteelEffect;
 import com.playmonumenta.plugins.itemstats.Infusion;
@@ -62,12 +60,6 @@ public class IchorSteelsage implements Infusion {
 		int adjustedEffectDuration = (int) (Quench.getDurationScaling(plugin, player) * EFFECT_DURATION);
 		PotionEffect playerJumpBoost = player.getPotionEffect(PotionEffectType.JUMP);
 		if (playerJumpBoost != null) {
-			Effect slamJumpBoost = plugin.mEffectManager.getActiveEffect(player, MeteorSlam.METEOR_SLAM_JUMP_BOOST_EFFECT);
-
-			// Prevents extending meteor slam duration
-			if (slamJumpBoost != null) {
-				adjustedJumpDuration = slamJumpBoost.getDuration();
-			}
 			plugin.mPotionManager.addPotion(player, PotionManager.PotionID.ITEM, new PotionEffect(PotionEffectType.JUMP, adjustedJumpDuration, playerJumpBoost.getAmplifier() + JUMP_AMPLIFIER));
 		}
 		plugin.mEffectManager.addEffect(player, EFFECT, new IchorSteelEffect(adjustedEffectDuration, DAMAGE * multiplier, isPrismatic));

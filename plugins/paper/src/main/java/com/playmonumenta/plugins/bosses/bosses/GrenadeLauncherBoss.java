@@ -80,12 +80,12 @@ public class GrenadeLauncherBoss extends BossAbilityGroup {
 		public SoundsList SOUND_LAUNCH = SoundsList.EMPTY;
 		@BossParam(help = "Sounds played at the grenade location each tick")
 		public SoundsList SOUND_GRENADE = SoundsList.builder()
-			.add(new SoundsList.CSound(Sound.BLOCK_ANVIL_FALL, 2.0f, 0.5f))
+			.add(new SoundsList.CSound(Sound.BLOCK_ANVIL_FALL, 3.0f, 0.5f))
 			.build();
 
 		@BossParam(help = "Sounds played when the grenade explodes")
 		public SoundsList SOUND_EXPLOSION = SoundsList.builder()
-			.add(new SoundsList.CSound(Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 1.0f))
+			.add(new SoundsList.CSound(Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 1.0f))
 			.build();
 
 
@@ -115,7 +115,7 @@ public class GrenadeLauncherBoss extends BossAbilityGroup {
 
 		@BossParam(help = "Sound played at the center of the lingering pool every 20 ticks")
 		public SoundsList SOUND_LINGERING = SoundsList.builder()
-			.add(new SoundsList.CSound(Sound.ENTITY_BLAZE_BURN, 1.0f, 1.5f))
+			.add(new SoundsList.CSound(Sound.ENTITY_BLAZE_BURN, 4.0f, 1.5f))
 			.build();
 
 		@BossParam(help = "LibraryOfSouls name of the mob spawned when the grenade explodes")

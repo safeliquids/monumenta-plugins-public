@@ -187,11 +187,6 @@ public class FloralFlurryCS extends CursedWoundCS {
 
 				Location to = optLoc != null ? optLoc : LocationUtils.getHalfHeightLocation(player);
 
-				if (to.getWorld() == null || !to.getWorld().equals(mL.getWorld())) {
-					this.cancel();
-					return;
-				}
-
 				for (int i = 0; i < 4; i++) {
 					if (mT <= 2) {
 						mD = dir.clone();

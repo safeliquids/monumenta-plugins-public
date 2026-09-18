@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -35,7 +34,7 @@ public class MinecartTracking implements EntityTracking {
 		Iterator<Minecart> minecartIter = mEntities.iterator();
 		while (minecartIter.hasNext()) {
 			Minecart minecart = minecartIter.next();
-			if (minecart != null && minecart.isValid() && minecart.getLocation().isWorldLoaded() && minecart.getLocation().isChunkLoaded()) {
+			if (minecart != null && minecart.isValid() && minecart.getLocation().isChunkLoaded()) {
 				if (!LocationUtils.isValidMinecartLocation(minecart.getLocation())) {
 					if (minecart instanceof ExplosiveMinecart) {
 						minecart.getWorld().dropItem(minecart.getLocation(), new ItemStack(Material.TNT_MINECART));
@@ -64,10 +63,6 @@ public class MinecartTracking implements EntityTracking {
 				minecartIter.remove();
 			}
 		}
-	}
-
-	public void clearWorld(World world) {
-		mEntities.removeIf(minecart -> minecart == null || world.equals(minecart.getWorld()));
 	}
 
 	@Override

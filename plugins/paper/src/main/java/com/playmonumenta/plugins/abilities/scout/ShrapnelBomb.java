@@ -159,7 +159,7 @@ public class ShrapnelBomb extends Ability {
 
 		final ItemStatManager.PlayerItemStats playerItemStats = Plugin.getInstance().mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
-		Projectile bomb = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, mPlayer.getWorld(), mVelocity, mCosmetic.getName(), mCosmetic.getParticle());
+		Projectile bomb = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, mPlayer.getWorld(), mVelocity, mCosmetic.getName(), mCosmetic.getParticle(), LocationUtils.isLocationInWater(mPlayer.getLocation()));
 
 		PROJECTILE_MAP.put(bomb, playerItemStats);
 
@@ -206,7 +206,7 @@ public class ShrapnelBomb extends Ability {
 
 		for (LivingEntity e : EntityUtils.getNearbyMobs(loc, mBombRadius)) {
 
-			DamageUtils.damage(mPlayer, e, new DamageEvent.Metadata(DamageEvent.DamageType.PROJECTILE_SKILL, mInfo.getLinkedSpell(), stats), mBombDamage, true, false, false);
+			DamageUtils.damage(mPlayer, e, DamageEvent.DamageType.PROJECTILE_SKILL, mBombDamage, mInfo.getLinkedSpell(), true);
 
 			MovementUtils.knockAwayDirection(dir, e, mKnockback / 2);
 
@@ -352,8 +352,7 @@ public class ShrapnelBomb extends Ability {
 				perRegion(a -> a.mShrapnelDamage, SHRAP_DAMAGE_L2[0], SHRAP_DAMAGE_L2[1], SHRAP_DAMAGE_L2[2]))
 			.addLine()
 			.addLine("*Shrapnel Bomb* now boosts your next").styles(UNDERLINED)
-			.addLine("instance of direct projectile damage")
-			.addLine("against targets hit with the explosion.")
+			.addLine("instance of damage against struck targets.")
 			.addLine()
 			.addStat("Damage Boost: %p for %t")
 			.statValues(stat(a -> a.mDamageBoost, DAMAGE_BOOST), stat(a -> a.mDamageBoostDuration, DAMAGE_BOOST_DURATION))
@@ -366,16 +365,13 @@ public class ShrapnelBomb extends Ability {
 	private static Description<ShrapnelBomb> getDescriptionEnhancement() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 3)
 			.addDashedLine()
-			.addLine("Mobs hit directly by *Shrapnel Bomb* explode").styles(UNDERLINED)
-			.addLine("when struck with a direct projectile.")
+			.addLine("Mobs staggered by *Shrapnel Bomb* boosts your").styles(UNDERLINED)
+			.addLine("next instance of damage as an explosion.")
 			.addLine()
-			.addStat("Damage: %p (p) (of weapon damage) for %t")
-			.statValues(stat(a -> a.mBombEnhancementDamage, BOMB_DAMAGE_ENHANCEMENT), stat(a -> a.mDamageBoostDuration, DAMAGE_BOOST_DURATION))
+			.addStat("Damage: %p (p) (of weapon damage)")
+			.statValues(stat(a -> a.mBombEnhancementDamage, BOMB_DAMAGE_ENHANCEMENT))
 			.addStat("Radius: %r")
 			.statValues(stat(a -> a.mBombEnhancementRadius, BOMB_RADIUS_ENHANCEMENT))
-			.addIf((a, p) -> a != null && a.mDamageBoostHits != 1, desc -> desc
-				.addStat("Explosive Hits: %d")
-				.statValues(stat(a -> a.mDamageBoostHits, DAMAGE_BOOST_HITS)))
 			.addDashedLine();
 	}
 }

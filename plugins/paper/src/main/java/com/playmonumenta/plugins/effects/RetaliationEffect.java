@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class RetaliationEffect extends Effect {
 	public static final String effectID = "RetaliationEffect";
-	private static final EnumSet<DamageType> AFFECTED_TYPES = DamageType.getScalableDamageTypes();
+	private static final EnumSet<DamageType> AFFECTED_TYPES = DamageType.getScalableDamageType();
 	private static final EnumSet<DamageType> SOUND_AND_DEBUFF_DAMAGE_TYPES = EnumSet.of(DamageType.MELEE, DamageType.PROJECTILE);
 	private static final EnumSet<DamageType> HALVED_BONUS_DAMAGE_TYPES = DamageEvent.DamageType.getAllProjectileAndMagicTypes();
 

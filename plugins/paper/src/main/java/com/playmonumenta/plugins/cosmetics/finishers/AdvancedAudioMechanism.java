@@ -34,8 +34,7 @@ public class AdvancedAudioMechanism implements EliteFinisher {
 	public void run(Player p, Entity killedMob, Location loc) {
 		loc = LocationUtils.fallToGround(loc, 0);
 		World world = p.getWorld();
-		Vector flatDir = LocationUtils.getDirectionTo(p.getLocation(), killedMob.getLocation()).setY(0);
-		Vector dir = VectorUtils.rotateTargetDirection(flatDir.lengthSquared() > 1e-6 ? flatDir.normalize() : new Vector(1, 0, 0), 135 + 90 * Math.random(), 0).multiply(DISPLAY_SIZE);
+		Vector dir = VectorUtils.rotateTargetDirection(LocationUtils.getDirectionTo(p.getLocation(), killedMob.getLocation()).setY(0).normalize(), 135 + 90 * Math.random(), 0).multiply(DISPLAY_SIZE);
 		Location middleLoc = loc.clone().add(dir.clone().multiply(2.8));
 		createDisplay(Material.LOOM, middleLoc, dir);
 		ItemDisplay speakerLeft = createDisplay(Material.JUKEBOX, middleLoc.clone().add(VectorUtils.rotateTargetDirection(dir, -90, 0)), dir);

@@ -485,7 +485,7 @@ public class ParticleUtilsCommand {
 	}
 
 	private static boolean isBlock(Particle particle) {
-		return particle.equals(Particle.BLOCK_CRACK) || particle.equals(Particle.BLOCK_MARKER) || particle.equals(Particle.FALLING_DUST);
+		return particle.equals(Particle.BLOCK_CRACK) || particle.equals(Particle.BLOCK_MARKER);
 	}
 
 	private static boolean isDustColorTransition(Particle particle) {

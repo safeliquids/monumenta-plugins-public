@@ -1,10 +1,12 @@
 package com.playmonumenta.plugins.bosses.spells;
 
+import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.enchantments.Shielding;
+import com.playmonumenta.plugins.itemstats.enums.InfusionType;
+import com.playmonumenta.plugins.itemstats.infusions.Sturdy;
 import com.playmonumenta.plugins.utils.FastUtils;
-import com.playmonumenta.plugins.utils.ItemUtils;
 import com.playmonumenta.plugins.utils.NmsUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -33,7 +35,7 @@ public class SpellShieldStun extends Spell {
 	public void onDamage(DamageEvent event, LivingEntity damagee) {
 		if (damagee instanceof Player player && event.getType() == mDamageType) {
 			if (event.isBlockedByShield()) {
-				int finalStunTicks = ItemUtils.getShieldStunDuration(player, mStunTicks);
+				int finalStunTicks = Sturdy.updateStunCooldown(mStunTicks, Plugin.getInstance().mItemStatManager.getInfusionLevel(player, InfusionType.STURDY));
 				NmsUtils.getVersionAdapter().stunShield(player, finalStunTicks);
 				player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BREAK, 0.8f, 0.8f + FastUtils.RANDOM.nextFloat() * 0.4F);
 				event.setBaseDamage(0);

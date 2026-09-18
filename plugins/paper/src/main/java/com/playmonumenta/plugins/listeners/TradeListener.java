@@ -215,9 +215,6 @@ public class TradeListener implements Listener {
 
 		InventoryView view = tradeSelectEvent.getView();
 		int index = tradeSelectEvent.getIndex();
-		if (index < 0 || index >= tradeSelectEvent.getMerchant().getRecipes().size()) {
-			return;
-		}
 		MerchantRecipe recipe = tradeSelectEvent.getMerchant().getRecipe(index);
 		List<ItemStack> ingredients = recipe.getIngredients();
 
@@ -461,7 +458,7 @@ public class TradeListener implements Listener {
 					return to;
 				};
 			} else if (source.getType() == Material.SHIELD) {
-				// Using Bukkit's shield API doesn't work properly and doesn't support shields without banners, so edit NBT directly
+				// Using Bukkit's shield API doesn't work properly and doesn't support shields without banners), so edit NBT directly
 				clearDye = itemStack -> {
 					ItemStack result = itemStack.clone();
 					NBT.modify(result, nbt -> {

@@ -8,7 +8,6 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageShieldedEvent;
 import com.playmonumenta.plugins.events.HemorrhageEvent;
 import com.playmonumenta.plugins.events.PotionEffectApplyEvent;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -64,8 +63,8 @@ public interface ItemStat {
 	 *
 	 * @return the priority order
 	 */
-	default StatPriority getPriorityAmount() {
-		return StatPriority.DEFAULT;
+	default double getPriorityAmount() {
+		return 1000;
 	}
 
 	/**

@@ -95,10 +95,10 @@ public class SpellTpBehindPlayer extends Spell {
 				Vector shift = loc.getDirection();
 				shift.setY(0).normalize().multiply(-0.5);
 
-				final double DISTANCE_TO_ENTITY = 2 * mParameters.DISTANCE; // How many half-blocks behind the player maximum
+				final int DISTANCE_TO_ENTITY = 2 * mParameters.DISTANCE; // How many half-blocks behind the player maximum
 
 				// Check from farthest horizontally to closest, lowest vertically to highest
-				for (double horizontalShift = DISTANCE_TO_ENTITY; horizontalShift > 0; horizontalShift--) {
+				for (int horizontalShift = DISTANCE_TO_ENTITY; horizontalShift > 0; horizontalShift--) {
 					for (int verticalShift = 0; verticalShift <= VERTICAL_DISTANCE_TO_ENTITY; verticalShift++) {
 						Location locTest = loc.clone().add(shift.clone().multiply(horizontalShift));
 						locTest.setY(locTest.getY() + verticalShift);

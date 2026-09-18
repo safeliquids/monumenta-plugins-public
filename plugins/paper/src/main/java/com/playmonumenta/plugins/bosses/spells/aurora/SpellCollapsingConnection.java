@@ -131,9 +131,11 @@ public class SpellCollapsingConnection extends Spell {
 		mConnected.forEach(player -> {
 			player.sendMessage(Component.text("The connection weakens under the harsh starlight.", NamedTextColor.AQUA, TextDecoration.ITALIC));
 		});
-		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.4, SpellStarShower.COMPLETE_DURATION - 20);
-		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.2, SpellStarShower.COMPLETE_DURATION);
-		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.0, SpellStarShower.COMPLETE_DURATION + 20);
+		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.4, SpellStarShower.COMPLETE_DURATION - 3 * 20);
+		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.3, SpellStarShower.COMPLETE_DURATION - 2 * 20);
+		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.2, SpellStarShower.COMPLETE_DURATION - 20);
+		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1.1, SpellStarShower.COMPLETE_DURATION - 10);
+		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPullingMultiplier = 1, SpellStarShower.COMPLETE_DURATION);
 	}
 
 	private void linkPlayers(Player player1, Player player2) {
@@ -153,17 +155,11 @@ public class SpellCollapsingConnection extends Spell {
 
 			@Override
 			public void run() {
-				if (Aurora.isDead(player1) || Aurora.isDead(player2)) {
-					this.cancel();
-
-					SpellCollapsingConnection.this.run();
-					return;
-				}
 				Location p2Loc = player2.getLocation();
 				Location p1Loc = player1.getLocation();
+				p2Loc.setY(p1Loc.getY());
 				double pullThreshold = PULL_THRESHOLD * mPullingMultiplier;
-				double distance = LocationUtils.xzDistance(p1Loc, p2Loc);
-				if (distance > pullThreshold - 3) {
+				if (p1Loc.distance(p2Loc) > pullThreshold - 3) {
 					mConnected.forEach(player -> {
 						player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 0.25f, 1.1f);
 					});
@@ -182,12 +178,10 @@ public class SpellCollapsingConnection extends Spell {
 					mCooldown -= 2;
 					return;
 				}
-				if (mTicks >= GRACE_PERIOD && distance > pullThreshold) {
+				if (mTicks >= GRACE_PERIOD && p1Loc.distance(p2Loc) > pullThreshold) {
 					mConnected.forEach(player -> {
 						player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.5f);
 					});
-					p2Loc.setY(mCenter.getY() + 4);
-					p1Loc.setY(mCenter.getY() + 4);
 					MovementUtils.pullTowards(p2Loc, player1, PULL_SPEED);
 					MovementUtils.pullTowards(p1Loc, player2, PULL_SPEED);
 					summonMeteors();
@@ -201,7 +195,7 @@ public class SpellCollapsingConnection extends Spell {
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
 				player1.sendMessage(Component.text(String.format("You feel the presence of %s's mind leave... Your binds are broken!", player2.getName()), NamedTextColor.AQUA));
-				player2.sendMessage(Component.text(String.format("You feel the presence of %s's mind leave... Your binds are broken!", player1.getName()), NamedTextColor.AQUA));
+				player2.sendMessage(Component.text(String.format("You feel the Presence of %s's mind leave... Your binds are broken!", player1.getName()), NamedTextColor.AQUA));
 				super.cancel();
 			}
 		};
@@ -219,10 +213,6 @@ public class SpellCollapsingConnection extends Spell {
 
 			@Override
 			public void run() {
-				if (Aurora.isDead(player1)) {
-					this.cancel();
-					return;
-				}
 				Location p2Loc = mBoss.getLocation();
 				Location p1Loc = player1.getLocation();
 				p2Loc.setY(p1Loc.getY());
@@ -257,7 +247,7 @@ public class SpellCollapsingConnection extends Spell {
 
 			@Override
 			public synchronized void cancel() throws IllegalStateException {
-				player1.sendMessage("You feel the presence of Aurora's mind leave... Your binds are broken!");
+				player1.sendMessage("You feel the presence of Aurora's mind leave... Your bind is is broken!");
 				super.cancel();
 			}
 		};

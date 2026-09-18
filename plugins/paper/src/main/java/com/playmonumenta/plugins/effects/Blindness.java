@@ -8,25 +8,13 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.jetbrains.annotations.Nullable;
 
 public class Blindness extends ZeroArgumentEffect {
 	public static final String effectID = "Blindness";
 	public static final String attributeModifierName = "BlindnessFollowRange";
-	@Nullable
-	private final Aesthetics.TickEffectAction mAesthetics;
 
 	public Blindness(int duration) {
-		this(duration, (entity, fourHertz, twoHertz, oneHertz) -> {
-			if (entity instanceof LivingEntity le) {
-				new PartialParticle(Particle.FIREWORKS_SPARK, le.getEyeLocation()).count(4).delta(0.3).extra(0.04).spawnAsEnemyBuff();
-			}
-		});
-	}
-
-	public Blindness(int duration, @Nullable Aesthetics.TickEffectAction aesthetics) {
 		super(duration, effectID);
-		mAesthetics = aesthetics;
 	}
 
 	@Override
@@ -47,8 +35,8 @@ public class Blindness extends ZeroArgumentEffect {
 
 	@Override
 	public void entityTickEffect(Entity entity, boolean fourHertz, boolean twoHertz, boolean oneHertz) {
-		if (mAesthetics != null) {
-			mAesthetics.run(entity, fourHertz, twoHertz, oneHertz);
+		if (entity instanceof LivingEntity le && !EntityUtils.isCCImmuneMob(le)) {
+			new PartialParticle(Particle.FIREWORKS_SPARK, le.getEyeLocation()).count(4).delta(0.3).extra(0.04).spawnAsEnemyBuff();
 		}
 	}
 

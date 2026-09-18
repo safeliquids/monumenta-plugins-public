@@ -13,6 +13,7 @@ import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.network.ClientModHandler;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
+import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +85,7 @@ public abstract class TotemAbility extends Ability implements AbilityWithDuratio
 		}
 
 		World world = mPlayer.getWorld();
-		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, VELOCITY, mProjectileName, null);
+		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, VELOCITY, mProjectileName, null, LocationUtils.isLocationInWater(mPlayer.getLocation()));
 		mCosmetic.totemCast(mPlayer, proj, mTotemName);
 
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);

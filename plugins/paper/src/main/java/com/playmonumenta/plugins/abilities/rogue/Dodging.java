@@ -12,7 +12,6 @@ import com.playmonumenta.plugins.effects.PercentSpeed;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
-import com.playmonumenta.plugins.itemstats.enchantments.CurseOfInstability;
 import com.playmonumenta.plugins.listeners.EntityListener;
 import java.util.Collection;
 import org.bukkit.Bukkit;
@@ -112,8 +111,7 @@ public class Dodging extends Ability {
 	@Override
 	public void onHurt(DamageEvent event, @Nullable Entity damager, @Nullable LivingEntity source) {
 		// See if we should dodge. If false, allow the event to proceed normally
-		DamageType type = CurseOfInstability.getType(mPlayer, event.getType());
-		if (type == DamageType.PROJECTILE && !event.isBlocked() && dodge()) {
+		if (event.getType() == DamageType.PROJECTILE && !event.isBlocked() && dodge()) {
 			mPlayer.setNoDamageTicks(20);
 			mPlayer.setLastDamage(event.getDamage());
 			event.setBaseDamage(0);
@@ -166,13 +164,6 @@ public class Dodging extends Ability {
 			 * This ability is actually on cooldown (and was not triggered this tick)
 			 * Don't process dodging
 			 */
-			return false;
-		}
-
-		if (CurseOfInstability.getType(mPlayer, DamageType.PROJECTILE) != DamageType.PROJECTILE) {
-			// Curse of Instability is causing this projectile attack to not be
-			// projectile damage. Don't proc Dodging.
-			// (Instability rolls the same type for all events for a player in a given tick)
 			return false;
 		}
 

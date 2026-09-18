@@ -8,6 +8,7 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
+import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.EnumSet;
 import java.util.List;
 import org.bukkit.entity.Entity;
@@ -51,7 +52,7 @@ public class VoodooBondsCurse extends Effect {
 
 		if (event.getDamager() instanceof Player player
 			&& event.getType() == DamageType.MELEE
-			&& player.getCooledAttackStrength(0.5f) > 0.9) {
+			&& PlayerUtils.isFallingAttack(player)) {
 
 			List<LivingEntity> notCursedMobs = new Hitbox.SphereHitbox(entity.getLocation(), mSpreadRadius).getHitMobs();
 			notCursedMobs.removeIf(e -> Plugin.getInstance().mEffectManager.hasEffect(e, VoodooBonds.CURSE_EFFECT));
@@ -80,6 +81,6 @@ public class VoodooBondsCurse extends Effect {
 
 	@Override
 	public String toString() {
-		return String.format("VoodooBondsCurse duration:%d", getDuration());
+		return String.format("VoodooBondsCurse duration:%d", this.getDuration());
 	}
 }

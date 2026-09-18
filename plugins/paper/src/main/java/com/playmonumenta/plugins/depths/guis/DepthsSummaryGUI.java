@@ -10,8 +10,8 @@ import com.playmonumenta.plugins.depths.DepthsTree;
 import com.playmonumenta.plugins.depths.abilities.DepthsTrigger;
 import com.playmonumenta.plugins.depths.abilities.prismatic.Convergence;
 import com.playmonumenta.plugins.guis.AbilityTriggersGui;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class DepthsSummaryGUI extends NjolGui {
+public class DepthsSummaryGUI extends Gui {
 	public static final List<Integer> HEAD_LOCATIONS = new ArrayList<>(Arrays.asList(48, 50, 47, 51, 46, 52, 45, 53));
 	public static final List<Integer> TREE_LOCATIONS = new ArrayList<>(Arrays.asList(3, 5, 2, 6, 1, 7, 0, 8));
 	private static final int START_OF_PASSIVES = 27;
@@ -90,7 +90,7 @@ public class DepthsSummaryGUI extends NjolGui {
 		} else {
 			rewardItem = GUIUtils.createBasicItem(Material.GOLD_NUGGET, "All Room Rewards Claimed!", NamedTextColor.YELLOW);
 		}
-		setItem(REWARD_LOCATION, new NjolGuiItem(rewardItem).onClick(event -> {
+		setItem(REWARD_LOCATION, new GuiItem(rewardItem).onClick(event -> {
 			if (!mDebugVersion && !mRequestingPlayer.mEarnedRewards.isEmpty()) {
 				close();
 				DepthsManager.getInstance().getRoomReward(mPlayer, null, true);
@@ -127,7 +127,7 @@ public class DepthsSummaryGUI extends NjolGui {
 
 		if (mPage > 0) {
 			ItemStack backItem = GUIUtils.createBasicItem(Material.ARROW, "Previous", NamedTextColor.GRAY);
-			setItem(START_OF_PASSIVES - 9, new NjolGuiItem(backItem).onClick(event -> {
+			setItem(START_OF_PASSIVES - 9, new GuiItem(backItem).onClick(event -> {
 				mPage--;
 				update();
 			}));
@@ -135,7 +135,7 @@ public class DepthsSummaryGUI extends NjolGui {
 
 		if (passiveItems.size() > PASSIVES_PER_PAGE + startIndex) {
 			ItemStack forwardItem = GUIUtils.createBasicItem(Material.ARROW, "Next", NamedTextColor.GRAY);
-			setItem(START_OF_PASSIVES - 1, new NjolGuiItem(forwardItem).onClick(event -> {
+			setItem(START_OF_PASSIVES - 1, new GuiItem(forwardItem).onClick(event -> {
 				mPage++;
 				update();
 			}));
@@ -160,7 +160,7 @@ public class DepthsSummaryGUI extends NjolGui {
 
 		ItemStack triggersItem = GUIUtils.createBasicItem(Material.JIGSAW, "Change Ability Triggers", NamedTextColor.WHITE, false,
 			"Click here to change which key combinations are used to cast abilities.", NamedTextColor.LIGHT_PURPLE);
-		setItem(TRIGGER_GUI_LOCATION, new NjolGuiItem(triggersItem).onClick(event -> new AbilityTriggersGui(mPlayer, false).open()));
+		setItem(TRIGGER_GUI_LOCATION, new GuiItem(triggersItem).onClick(event -> new AbilityTriggersGui(mPlayer, false).open()));
 	}
 
 	private void updatePlayerHeads() {
@@ -185,7 +185,7 @@ public class DepthsSummaryGUI extends NjolGui {
 					setItem(HEAD_LOCATIONS.get(i), activePlayerIndicator);
 					setItem(4, playerHead);
 				} else {
-					setItem(HEAD_LOCATIONS.get(i), new NjolGuiItem(playerHead).onClick(event -> {
+					setItem(HEAD_LOCATIONS.get(i), new GuiItem(playerHead).onClick(event -> {
 						mTargetPlayer = dp;
 						mPage = 0;
 						update();

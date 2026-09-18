@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.EnumSet;
 import org.bukkit.Sound;
@@ -34,8 +33,8 @@ public final class Backstab implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGE_MULTIPLY;
+	public double getPriorityAmount() {
+		return 31;
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.market.gui;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.market.MarketListing;
 import com.playmonumenta.plugins.market.MarketManager;
 import com.playmonumenta.plugins.utils.GUIUtils;
@@ -50,7 +50,7 @@ public class TabEditListing implements MarketGuiTab {
 			.onClick((clickEvent) -> actionToggleMarkedForDeletion());
 	}
 
-	private NjolGuiItem buildEditListingToggleVisibility() {
+	private GuiItem buildEditListingToggleVisibility() {
 		ItemStack icon;
 
 		List<Component> lore = new ArrayList<>(List.of(
@@ -77,10 +77,10 @@ public class TabEditListing implements MarketGuiTab {
 				lore, true, "gui_visible");
 		}
 
-		return new NjolGuiItem(icon, false);
+		return new GuiItem(icon, false);
 	}
 
-	private NjolGuiItem buildEditListingConfirmButton() {
+	private GuiItem buildEditListingConfirmButton() {
 		List<Component> lore = new ArrayList<>();
 
 		if (mMarkedForDeletion) {
@@ -97,7 +97,7 @@ public class TabEditListing implements MarketGuiTab {
 
 		}
 
-		return new NjolGuiItem(GUIUtils.createBasicItem(Material.GREEN_STAINED_GLASS_PANE, 1, GUIUtils.formatName("Confirm the edits", NamedTextColor.GREEN, true),
+		return new GuiItem(GUIUtils.createBasicItem(Material.GREEN_STAINED_GLASS_PANE, 1, GUIUtils.formatName("Confirm the edits", NamedTextColor.GREEN, true),
 			lore, true, "gui_checkmark"), false);
 	}
 
@@ -106,7 +106,7 @@ public class TabEditListing implements MarketGuiTab {
 		mGui.update();
 	}
 
-	private NjolGuiItem buildToggleMarkedForDeletion() {
+	private GuiItem buildToggleMarkedForDeletion() {
 		ItemStack icon;
 
 		List<Component> lore = new ArrayList<>(List.of(
@@ -126,7 +126,7 @@ public class TabEditListing implements MarketGuiTab {
 				lore, true, "gui_keepListing");
 		}
 
-		return new NjolGuiItem(icon, false);
+		return new GuiItem(icon, false);
 	}
 
 	private List<Component> calculateMarkedForDeletionLoreLines() {

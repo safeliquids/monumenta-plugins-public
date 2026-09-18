@@ -22,7 +22,7 @@ public class CurseOfArachnophobia extends DepthsAbility {
 	public static final String ABILITY_NAME = "Curse of Arachnophobia";
 	public static final double DAMAGE_DEALT = 0.50;
 	public static final double DAMAGE_TAKEN = 0.50;
-	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageTypes();
+	public static final EnumSet<DamageEvent.DamageType> AFFECTED_TYPES = DamageEvent.DamageType.getScalableDamageType();
 
 	public static final DepthsAbilityInfo<CurseOfArachnophobia> INFO =
 		new DepthsAbilityInfo<>(CurseOfArachnophobia.class, ABILITY_NAME, CurseOfArachnophobia::new, DepthsTree.CURSE, DepthsTrigger.PASSIVE)

@@ -33,7 +33,6 @@ import com.playmonumenta.plugins.cosmetics.skills.cleric.ContortingBoltCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.DarkPunishmentCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.EnbyRainCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.ForceFieldCS;
-import com.playmonumenta.plugins.cosmetics.skills.cleric.PsychicConnectionCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.PurgingPyreCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.RebirthCS;
 import com.playmonumenta.plugins.cosmetics.skills.cleric.SoulStrainCS;
@@ -133,7 +132,6 @@ import com.playmonumenta.plugins.cosmetics.skills.warlock.tenebrist.PrestigiousS
 import com.playmonumenta.plugins.cosmetics.skills.warlock.tenebrist.VerdantApparitionCS;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.BrambleShellCS;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.ColossalBruteCS;
-import com.playmonumenta.plugins.cosmetics.skills.warrior.OldShieldWallCS;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.berserker.GloryExecutionCS;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.berserker.PrestigiousSlamCS;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.berserker.SoulBurstCS;
@@ -191,7 +189,6 @@ public class CosmeticSkills {
 		BloodbathCS::new,
 		PurgingPyreCS::new,
 		ContortingBoltCS::new,
-		PsychicConnectionCS::new,
 		ForceFieldCS::new,
 		AnathemaCS::new,
 		RipplingBeamCS::new,
@@ -308,8 +305,7 @@ public class CosmeticSkills {
 		PrestigiousShieldCS::new,
 		EssenceBurstCS::new,
 		BiLineCS::new,
-		SoulBurstCS::new,
-		OldShieldWallCS::new
+		SoulBurstCS::new
 	);
 
 	private static final ImmutableMap<String, Supplier<CosmeticSkill>> COSMETIC_SKILLS_BY_NAME = COSMETIC_SKILLS.stream()

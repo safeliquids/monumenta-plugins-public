@@ -1,21 +1,15 @@
 package com.playmonumenta.plugins.adapters;
 
 import com.google.gson.JsonObject;
-import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -28,7 +22,6 @@ import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.BoundingBox;
@@ -257,30 +250,5 @@ public class VersionAdapter_unsupported implements VersionAdapter {
 	@Override
 	public float getEntityHeadRotation(Entity entity) {
 		return 0.0f;
-	}
-
-	@Override
-	public CompletableFuture<Void> reloadAsync(ServerResourcesReloadedEvent.Cause cause, Executor async, boolean rescan) {
-		return CompletableFuture.runAsync(() -> Bukkit.getServer().reloadData(), Runnable::run);
-	}
-
-	@Override
-	public boolean hasBonusRolls(LootTable table) {
-		return false;
-	}
-
-	@Override
-	public Stream<NamespacedKey> lootTableChildren(LootTable table) {
-		return Stream.empty();
-	}
-
-	@Override
-	public Stream<NamespacedKey> allLootTables() {
-		return Stream.empty();
-	}
-
-	@Override
-	public Optional<ItemStack> materializeItemLikeLootTable(LootTable table) {
-		return Optional.empty();
 	}
 }

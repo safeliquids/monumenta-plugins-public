@@ -34,6 +34,11 @@ public class Knockback implements Enchantment {
 	}
 
 	@Override
+	public double getPriorityAmount() {
+		return 31;
+	}
+
+	@Override
 	public void onDamage(Plugin plugin, Player player, double level, DamageEvent event, LivingEntity enemy) {
 		if (event.getType() == DamageEvent.DamageType.MELEE) {
 			applyKnockback(plugin, level, enemy, player.getLocation().getDirection());

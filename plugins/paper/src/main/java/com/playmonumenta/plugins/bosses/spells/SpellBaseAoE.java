@@ -17,7 +17,7 @@ public abstract class SpellBaseAoE extends Spell {
 
 	protected final Plugin mPlugin;
 	protected final LivingEntity mLauncher;
-	protected final double mRadius;
+	protected final int mRadius;
 	protected final int mDuration;
 	protected final int mCooldown;
 	protected final boolean mCanMoveWhileCasting;
@@ -26,22 +26,22 @@ public abstract class SpellBaseAoE extends Spell {
 	protected final int mSoundDensity;
 	protected final boolean mLineOfSight;
 
-	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, double radius, int duration, int cooldown, boolean canMoveWhileCasting, boolean needLineOfSight,
+	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, int radius, int duration, int cooldown, boolean canMoveWhileCasting, boolean needLineOfSight,
 	                    Sound chargeSound) {
 		this(plugin, launcher, radius, duration, cooldown, canMoveWhileCasting, needLineOfSight, chargeSound, 1f, 1);
 	}
 
-	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, double radius, int duration, int cooldown, boolean canMoveWhileCasting,
+	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, int radius, int duration, int cooldown, boolean canMoveWhileCasting,
 	                    Sound chargeSound) {
 		this(plugin, launcher, radius, duration, cooldown, canMoveWhileCasting, chargeSound, 1f, 1);
 	}
 
-	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, double radius, int duration, int cooldown, boolean canMoveWhileCasting,
+	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, int radius, int duration, int cooldown, boolean canMoveWhileCasting,
 	                    Sound chargeSound, float soundVolume, int soundDensity) {
 		this(plugin, launcher, radius, duration, cooldown, canMoveWhileCasting, true, chargeSound, soundVolume, soundDensity);
 	}
 
-	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, double radius, int duration, int cooldown, boolean canMoveWhileCasting, boolean needLineOfSight,
+	public SpellBaseAoE(Plugin plugin, LivingEntity launcher, int radius, int duration, int cooldown, boolean canMoveWhileCasting, boolean needLineOfSight,
 	                    Sound chargeSound, float soundVolume, int soundDensity) {
 		mPlugin = plugin;
 		mLauncher = launcher;

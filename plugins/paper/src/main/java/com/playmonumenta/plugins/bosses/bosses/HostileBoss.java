@@ -76,7 +76,7 @@ public class HostileBoss extends BossAbilityGroup {
 			MMLog.severe("Failed to construct HostileBoss", e);
 		} finally {
 			//this will make the mobs get damage from abilities
-			boss.addScoreboardTag(EntityUtils.HOSTILE_TAG);
+			boss.addScoreboardTag("Hostile");
 		}
 		super.constructBoss(SpellManager.EMPTY, Collections.emptyList(), -1, null);
 	}

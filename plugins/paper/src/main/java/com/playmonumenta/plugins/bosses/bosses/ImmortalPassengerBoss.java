@@ -14,7 +14,6 @@ import com.playmonumenta.plugins.events.CustomEffectApplyEvent;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
-import com.playmonumenta.plugins.utils.MetadataUtils;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -69,33 +68,27 @@ public class ImmortalPassengerBoss extends BossAbilityGroup {
 		if (mTransferDamage && mBoss.getVehicle() instanceof LivingEntity vehicle && event.getSource() != null) {
 			mPassengerDamageThisTick += event.getDamage();
 			// Do this at the end of the tick so we can't miss the passenger being damaged
-			if (MetadataUtils.checkOnceThisTick(mPlugin, mBoss, "ScheduledDamageTransfer")) {
-				Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
-					if (mVehicleDamageThisTick < mPassengerDamageThisTick) {
-						Entity damager = event.getDamager();
-						LivingEntity livingDamager = null;
-						if (damager instanceof LivingEntity livingEntity) {
-							livingDamager = livingEntity;
-						}
-						DamageUtils.damage(livingDamager, vehicle, DamageEvent.DamageType.UNSCALABLE, mPassengerDamageThisTick - mVehicleDamageThisTick, null, false);
+			Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
+				if (mVehicleDamageThisTick < mPassengerDamageThisTick) {
+					Entity damager = event.getDamager();
+					LivingEntity livingDamager = null;
+					if (damager instanceof LivingEntity livingEntity) {
+						livingDamager = livingEntity;
 					}
-					mPassengerDamageThisTick = 0;
-				}, 0);
-			}
+					DamageUtils.damage(livingDamager, vehicle, DamageEvent.DamageType.UNSCALABLE, mVehicleDamageThisTick - mPassengerDamageThisTick, null, false);
+				}
+				mPassengerDamageThisTick = 0;
+			}, 0);
 		}
 		event.setBaseDamage(0);
 	}
 
 	@Override
-	public void bossMountHurt(DamageEvent event) {
-		if (!mTransferDamage) {
-			return;
+	public void bossPassengerHurt(DamageEvent event) {
+		if (mTransferDamage && event.getDamagee() == mBoss.getVehicle()) {
+			mVehicleDamageThisTick = Math.max(mVehicleDamageThisTick, event.getDamage());
+			Bukkit.getScheduler().runTaskLater(mPlugin, () -> mVehicleDamageThisTick = 0, 1);
 		}
-		mVehicleDamageThisTick = Math.max(mVehicleDamageThisTick, event.getDamage());
-		if (!MetadataUtils.checkOnceThisTick(mPlugin, mBoss, "ResetVehicleDamage")) {
-			return;
-		}
-		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mVehicleDamageThisTick = 0, 1);
 	}
 
 	@Override

@@ -1,8 +1,8 @@
 package com.playmonumenta.plugins.guis.peb;
 
 import com.playmonumenta.plugins.Constants;
-import com.playmonumenta.plugins.guis.lib.FloweyGuiItem;
-import com.playmonumenta.plugins.guis.lib.PagedFloweyGui;
+import com.playmonumenta.plugins.guis.lib.GuiItem;
+import com.playmonumenta.plugins.guis.lib.PagedGui;
 import com.playmonumenta.plugins.guis.lib.ReactiveValue;
 import com.playmonumenta.plugins.utils.MessagingUtils;
 import java.util.function.Consumer;
@@ -15,15 +15,15 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.CheckReturnValue;
 
-class PebPage extends PagedFloweyGui.Page {
+class PebPage extends PagedGui.Page {
 	protected class PebEntryHelper {
-		private static final Supplier<FloweyGuiItem.Builder> BUILDER = FloweyGuiItem.builder()
+		private static final Supplier<GuiItem.Builder> BUILDER = GuiItem.builder()
 			.defaultNameColor(NamedTextColor.WHITE)
 			.defaultNameColor(TextDecoration.UNDERLINED)
 			.defaultLoreColor(NamedTextColor.GRAY)
 			::copy;
 
-		private final FloweyGuiItem.Builder mBuilder;
+		private final GuiItem.Builder mBuilder;
 
 		protected PebEntryHelper(Material item, String title, String desc) {
 			mBuilder = BUILDER.get().name(title).lore(desc).material(item);
@@ -38,7 +38,7 @@ class PebPage extends PagedFloweyGui.Page {
 		}
 
 		@CheckReturnValue
-		protected PebEntryHelper switchTo(PagedFloweyGui.PageType target) {
+		protected PebEntryHelper switchTo(PagedGui.PageType target) {
 			mBuilder.lore("");
 			mBuilder.lore("-> <blue>" + MessagingUtils.plainText(target.name()));
 			mBuilder.onMouseClick(() -> setPage(target));
@@ -162,11 +162,11 @@ class PebPage extends PagedFloweyGui.Page {
 		}
 	}
 
-	private final FloweyGuiItem mTitleItem;
+	private final GuiItem mTitleItem;
 
 	public PebPage(PebGui gui, Material item, String title, String desc) {
 		super(gui);
-		final var titleBuilder = FloweyGuiItem.builder(item)
+		final var titleBuilder = GuiItem.builder(item)
 			.defaultNameColor(NamedTextColor.GOLD)
 			.defaultNameColor(TextDecoration.BOLD)
 			.defaultNameColor(TextDecoration.UNDERLINED)

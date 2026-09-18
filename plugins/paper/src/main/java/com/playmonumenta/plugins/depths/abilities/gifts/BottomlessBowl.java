@@ -46,7 +46,7 @@ public class BottomlessBowl extends DepthsAbility {
 		DepthsPlayer dp = DepthsManager.getInstance().getDepthsPlayer(mPlayer);
 		if (dp != null) {
 			double damageMultiplier = 1 + (dp.mRewardSkips * 0.05);
-			event.updateDamageWithMultiplier(damageMultiplier, DamageEvent.DamageType.getScalableDamageTypes());
+			event.updateDamageWithMultiplier(damageMultiplier, DamageEvent.DamageType.getScalableDamageType());
 		}
 		return false;
 	}

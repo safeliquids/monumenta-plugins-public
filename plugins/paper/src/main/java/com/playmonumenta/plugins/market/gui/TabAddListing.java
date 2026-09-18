@@ -1,6 +1,6 @@
 package com.playmonumenta.plugins.market.gui;
 
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.market.MarketManager;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.InventoryUtils;
@@ -82,7 +82,7 @@ public class TabAddListing implements MarketGuiTab {
 		mGui.setItem(0, 0, MarketGuiIcons.BACK_TO_MAIN_MENU).onClick((clickEvent) -> mGui.switchToTab(mGui.TAB_MAIN_MENU));
 
 
-		mGui.setItem(1, 1, new NjolGuiItem(buildAddListingItemToBeSoldIcon(), false))
+		mGui.setItem(1, 1, new GuiItem(buildAddListingItemToBeSoldIcon(), false))
 			.onClick((clickEvent) -> {
 				mItemToSell = null;
 				mGui.update();
@@ -102,7 +102,7 @@ public class TabAddListing implements MarketGuiTab {
 			.onClick(this::changeAmountOfTradesAction);
 
 		// Change currency item
-		mGui.setItem(1, 5, new NjolGuiItem(buildChangeCurrencyIcon(), false))
+		mGui.setItem(1, 5, new GuiItem(buildChangeCurrencyIcon(), false))
 			.onLeftClick(() -> mGui.switchToTab(mGui.TAB_CHOOSE_CURRENCY));
 
 		mGui.setItem(2, 5, buildAddListingPricePerTradeMultiplierIcon())
@@ -133,7 +133,7 @@ public class TabAddListing implements MarketGuiTab {
 		// tax calculation
 		WalletUtils.Debt taxDebt = MarketManager.getInstance().calculateTaxDebt(mPlayer, mCurrencyItem, mPricePerTradeAmount * mAmountOfTrades);
 
-		NjolGuiItem guiItem = mGui.setItem(1, 7, new NjolGuiItem(buildAddListingConfirmWithTaxStatusIcon(enoughItemsInInventory, priceCorrect, taxDebt), false));
+		GuiItem guiItem = mGui.setItem(1, 7, new GuiItem(buildAddListingConfirmWithTaxStatusIcon(enoughItemsInInventory, priceCorrect, taxDebt), false));
 		if (enoughItemsInInventory && priceCorrect && taxDebt.mMeetsRequirement()) {
 			guiItem.onClick((clickEvent) -> {
 				if (MarketGui.initiatePlayerAction(mGui.mPlayer)) {
@@ -261,9 +261,9 @@ public class TabAddListing implements MarketGuiTab {
 		return icon;
 	}
 
-	private NjolGuiItem buildAddListingTradeAmountIcon() {
+	private GuiItem buildAddListingTradeAmountIcon() {
 		ItemStack icon = GUIUtils.createBasicItem(Material.CHEST, mAmountOfTrades, "Amount of Trades: " + mAmountOfTrades, NamedTextColor.GOLD, true, new ArrayList<>(), false);
-		return new NjolGuiItem(icon, false);
+		return new GuiItem(icon, false);
 	}
 
 	public ItemStack buildAddListingTradeAmountMultiplierIcon() {

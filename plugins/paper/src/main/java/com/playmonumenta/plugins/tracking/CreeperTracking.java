@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
 import org.bukkit.Particle;
-import org.bukkit.World;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 
@@ -30,7 +29,7 @@ public class CreeperTracking implements EntityTracking {
 		Iterator<Creeper> creeperIter = mEntities.iterator();
 		while (creeperIter.hasNext()) {
 			Creeper creeper = creeperIter.next();
-			if (creeper != null && creeper.isValid() && creeper.getLocation().isWorldLoaded() && creeper.getLocation().isChunkLoaded()) {
+			if (creeper != null && creeper.isValid() && creeper.getLocation().isChunkLoaded()) {
 				Set<String> tags = creeper.getScoreboardTags();
 				if (tags.contains("Snuggles")) {
 					new PartialParticle(Particle.HEART, creeper.getLocation().add(0, 1, 0), 1, 0.4, 1, 0.4, 0)
@@ -49,10 +48,6 @@ public class CreeperTracking implements EntityTracking {
 				creeperIter.remove();
 			}
 		}
-	}
-
-	public void clearWorld(World world) {
-		mEntities.removeIf(creeper -> creeper == null || world.equals(creeper.getWorld()));
 	}
 
 	@Override

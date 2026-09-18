@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.inventories;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.guis.WalletGui;
 import com.playmonumenta.plugins.mail.recipient.Recipient;
 import com.playmonumenta.plugins.utils.ItemUtils;
@@ -197,7 +197,7 @@ public abstract class BaseWallet {
 
 	public void onUpdate() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (NjolGui.getOpenGui(player) instanceof WalletGui walletGui) {
+			if (Gui.getOpenGui(player) instanceof WalletGui walletGui) {
 				walletGui.updateIfWalletMatches(this);
 			}
 		}

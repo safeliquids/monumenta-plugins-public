@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.effects.VengefulTag;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.LocationUtils;
 import java.util.EnumSet;
@@ -38,8 +37,8 @@ public class Vengeful implements Infusion {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGE_MULTIPLY;
+	public double getPriorityAmount() {
+		return 30;
 	}
 
 	@Override

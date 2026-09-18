@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 public enum ClassAbility {
 	// [Mage]
 	ARCANE_STRIKE("Arcane Strike"),
-	ARCANE_STRIKE_ENHANCED("Arcane Strike (Enhanced)"), // special case for aspect enchants
+	ARCANE_STRIKE_ENHANCED("Arcane Strike"), // special case for aspect enchants
 	ELEMENTAL_ARROWS(ElementalArrows.NAME),
 	ELEMENTAL_ARROWS_FIRE("Fire Elemental Arrows"),
 	ELEMENTAL_ARROWS_ICE("Ice Elemental Arrows"),
@@ -95,7 +95,7 @@ public enum ClassAbility {
 	VOLLEY("Volley"),
 	WIND_BOMB("Wind Bomb"),
 	HUNTING_COMPANION("Hunting Companion"),
-	SHRAPNEL_BOMB("Shrapnel Bomb"),
+	SHRAPNEL_BOMB("Shrapnel Bomb"), //placeholder for cosmetic
 	SWIFTNESS("Swiftness"),
 	SHARPSHOOTER("Sharpshooter"),
 	STEEL_TRAP("Steel Trap"),
@@ -114,7 +114,7 @@ public enum ClassAbility {
 	AMPLIFYING("Amplifying Hex"),
 	CHOLERIC_FLAMES("Choleric Flames"),
 	CURSED_WOUND("Cursed Wound"),
-	CURSED_WOUND_DOT("Cursed Wound DoT"), // Separates the base DoT and enhancement burst
+	CURSED_WOUND_DOT("Cursed Wound Damage Over Time"), // Separates the base DoT and enhancement burst
 	PHLEGMATIC_RESOLVE("Phlegmatic Resolve"),
 	GRASPING_CLAWS("Grasping Claws"),
 	MELANCHOLIC_LAMENT("Melancholic Lament"),
@@ -134,11 +134,12 @@ public enum ClassAbility {
 
 	// [Warrior]
 	BRUTE_FORCE("Brute Force"),
-	BRUTE_FORCE_AOE("Brute Force AoE"), // separate so it doesn't spoil hunts bosses
+	BRUTE_FORCE_AOE("Brute Force"), // special case for glorious battle
 	COUNTER_STRIKE("Counter Strike"),
 	DEFENSIVE_LINE("Defensive Line"),
 	RIPOSTE("Riposte"),
 	SHIELD_BASH("Shield Bash"),
+	SHIELD_BASH_AOE("Shield Bash"), // special case for glorious battle
 	FRENZY("Frenzy"),
 	WEAPON_MASTERY("Weapon Mastery"),
 	TOUGHNESS("Toughness"),
@@ -153,7 +154,6 @@ public enum ClassAbility {
 	BODYGUARD("Bodyguard"),
 	CHALLENGE("Challenge"),
 	SHIELD_WALL("Shield Wall"),
-	ENDURANCE("Endurance"),
 
 	// [Alchemist]
 	ALCHEMIST_POTION("Alchemist Potion"),
@@ -161,7 +161,7 @@ public enum ClassAbility {
 	BEZOAR("Bezoar"),
 	BRUTAL_ALCHEMY("Brutal Alchemy"),
 	ENERGIZING_ELIXIR("Energizing Elixir"),
-	GRUESOME_ALCHEMY("Gruesome Alchemy"),
+	GRUESOME_ALCHEMY("Gruesome Alchemy"), //placeholder for cosmetic
 	IRON_TINCTURE("Iron Tincture"),
 	UNSTABLE_AMALGAM("Unstable Amalgam"),
 	EMPOWERING_ODOR("Empowering Odor"),
@@ -289,8 +289,8 @@ public enum ClassAbility {
 	// Fake class abilities for some enchantments
 	// Used to trigger other events
 	ERUPTION("Eruption", true),
-	QUAKE_MELEE("Quake (Melee)", true),
-	QUAKE_PROJ("Quake (Projectile)", true),
+	QUAKE_MELEE("Quake", true),
+	QUAKE_PROJ("Quake", true),
 	SWEEPING_EDGE("Sweeping Edge", true),
 	ARCANE_THRUST("Arcane Thrust", true),
 	EXPLOSIVE("Explosive", true),

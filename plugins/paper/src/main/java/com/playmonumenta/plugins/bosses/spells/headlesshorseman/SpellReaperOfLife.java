@@ -1,18 +1,17 @@
 package com.playmonumenta.plugins.bosses.spells.headlesshorseman;
 
-import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.bosses.bosses.HeadlessHorsemanBoss;
 import com.playmonumenta.plugins.bosses.spells.Spell;
-import com.playmonumenta.plugins.effects.PercentDamageReceived;
 import com.playmonumenta.plugins.integrations.LibraryOfSoulsIntegration;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.BossUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
+import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.PlayerUtils;
-import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -26,6 +25,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -33,13 +33,12 @@ import org.bukkit.util.Vector;
 
 
 public class SpellReaperOfLife extends Spell {
-	private static final String TAG = "ReaperOfLifeNuke";
-	private static final String VULN_SOURCE = "ReaperOfLifeVulnerability";
 
 	private final Plugin mPlugin;
 	private final LivingEntity mBoss;
 	private final double mRange;
 	private final Location mCenter;
+	private final Set<UUID> mSummoned = new HashSet<>();
 	private final Set<Player> mWarnedPlayers = new HashSet<>();
 	private final int mCooldownTicks;
 
@@ -55,7 +54,7 @@ public class SpellReaperOfLife extends Spell {
 	public boolean canRun() {
 		for (LivingEntity entity : mCenter.getNearbyLivingEntities(30)) {
 			//If there exists a magma cube currently alive in the fight, return and do not run this spell.
-			if (entity.getType() == EntityType.MAGMA_CUBE && ScoreboardUtils.checkTag(entity, TAG)) {
+			if (entity.getType() == EntityType.MAGMA_CUBE) {
 				return false;
 			}
 		}
@@ -68,69 +67,72 @@ public class SpellReaperOfLife extends Spell {
 		Location sLoc = mBoss.getLocation();
 		sLoc.setY(sLoc.getY() + 1.7f);
 
-		FallingBlock fallingBlock = sLoc.getWorld().spawn(sLoc, FallingBlock.class, b -> b.setBlockData(Material.JACK_O_LANTERN.createBlockData()));
-		fallingBlock.setDropItem(false);
-		EntityUtils.disableBlockPlacement(fallingBlock);
+		try {
+			FallingBlock fallingBlock = sLoc.getWorld().spawn(sLoc, FallingBlock.class, b -> b.setBlockData(Material.JACK_O_LANTERN.createBlockData()));
+			fallingBlock.setDropItem(false);
+			EntityUtils.disableBlockPlacement(fallingBlock);
 
-		Location pLoc = mCenter;
-		Location tLoc = fallingBlock.getLocation();
-		Vector vector = new Vector(pLoc.getX() - tLoc.getX(), 0, pLoc.getZ() - tLoc.getZ());
-		vector.normalize().multiply(pLoc.distance(tLoc) / 25);
-		if (!Double.isFinite(vector.getX())) {
-			vector = new Vector(0, 1, 0);
-		}
-		vector.setY(0.7f);
-		fallingBlock.setVelocity(vector);
-
-		world.playSound(mBoss.getLocation(), Sound.ENTITY_BLAZE_DEATH, SoundCategory.HOSTILE, 3, 1.5f);
-		new PartialParticle(Particle.FLAME, fallingBlock.getLocation().add(0, fallingBlock.getHeight() / 2, 0), 3, 0.25, .25, .25, 0.025).spawnAsEntityActive(mBoss);
-		new PartialParticle(Particle.SMOKE_NORMAL, fallingBlock.getLocation().add(0, fallingBlock.getHeight() / 2, 0), 2, 0.25, .25, .25, 0.025).spawnAsEntityActive(mBoss);
-		List<Player> players = PlayerUtils.playersInRange(mCenter, HeadlessHorsemanBoss.arenaSize, true);
-		for (Player player : players) {
-			player.sendMessage(Component.text("[The Horseman] ", NamedTextColor.DARK_RED)
-				.append(Component.text("May your life force fuel ", NamedTextColor.GOLD))
-				.append(Component.text("our ", NamedTextColor.DARK_RED))
-				.append(Component.text("existence.", NamedTextColor.GOLD)));
-			if (!mWarnedPlayers.contains(player)) {
-				mWarnedPlayers.add(player);
-				player.sendMessage(Component.text("Seems like the Horseman threw a bomb to the center of the arena. Maybe you can disarm it?", NamedTextColor.AQUA));
+			Location pLoc = mCenter;
+			Location tLoc = fallingBlock.getLocation();
+			Vector vector = new Vector(pLoc.getX() - tLoc.getX(), 0, pLoc.getZ() - tLoc.getZ());
+			vector.normalize().multiply(pLoc.distance(tLoc) / 25);
+			if (!Double.isFinite(vector.getX())) {
+				vector = new Vector(0, 1, 0);
 			}
-		}
+			vector.setY(0.7f);
+			fallingBlock.setVelocity(vector);
 
-		new BukkitRunnable() {
-			double mTempPlayerScalingHP = 0;
-			double mPlayerScalingHP = 0;
-
-			@Override
-			public void run() {
-				if (fallingBlock.isOnGround() || !fallingBlock.isValid()) {
-					fallingBlock.remove();
-					this.cancel();
-
-					List<Player> players = PlayerUtils.playersInRange(mCenter, mRange, true);
-					if (players.isEmpty()) {
-						return;
-					}
-
-					int playerCount = players.size();
-					for (int i = 1; i <= playerCount; i++) {
-						mTempPlayerScalingHP = mTempPlayerScalingHP + (150 / (Math.log(i + 1) / Math.log(2)));
-					}
-					mPlayerScalingHP = mTempPlayerScalingHP;
-					if (mPlayerScalingHP > 1000) {
-						mPlayerScalingHP = 1000;
-					}
-					LivingEntity nuke = (LivingEntity) LibraryOfSoulsIntegration.summon(mCenter, "WorldEnder");
-					if (nuke == null) {
-						return;
-					}
-					EntityUtils.setAttributeBase(nuke, Attribute.GENERIC_MAX_HEALTH, mPlayerScalingHP);
-					nuke.setHealth(mPlayerScalingHP);
-					nuke.addScoreboardTag(TAG);
-					bomb(nuke, mPlayerScalingHP);
+			world.playSound(mBoss.getLocation(), Sound.ENTITY_BLAZE_DEATH, SoundCategory.HOSTILE, 3, 1.5f);
+			new PartialParticle(Particle.FLAME, fallingBlock.getLocation().add(0, fallingBlock.getHeight() / 2, 0), 3, 0.25, .25, .25, 0.025).spawnAsEntityActive(mBoss);
+			new PartialParticle(Particle.SMOKE_NORMAL, fallingBlock.getLocation().add(0, fallingBlock.getHeight() / 2, 0), 2, 0.25, .25, .25, 0.025).spawnAsEntityActive(mBoss);
+			List<Player> players = PlayerUtils.playersInRange(mCenter, HeadlessHorsemanBoss.arenaSize, true);
+			for (Player player : players) {
+				player.sendMessage(Component.text("[The Horseman] ", NamedTextColor.DARK_RED)
+					.append(Component.text("May your life force fuel ", NamedTextColor.GOLD))
+					.append(Component.text("our ", NamedTextColor.DARK_RED))
+					.append(Component.text("existence.", NamedTextColor.GOLD)));
+				if (!mWarnedPlayers.contains(player)) {
+					mWarnedPlayers.add(player);
+					player.sendMessage(Component.text("Seems like the Horseman threw a bomb to the center of the arena. Maybe you can disarm it?", NamedTextColor.AQUA));
 				}
 			}
-		}.runTaskTimer(mPlugin, 0, 1);
+
+			new BukkitRunnable() {
+				double mTempPlayerScalingHP = 0;
+				double mPlayerScalingHP = 0;
+
+				@Override
+				public void run() {
+					if (fallingBlock.isOnGround() || !fallingBlock.isValid()) {
+						fallingBlock.remove();
+
+						List<Player> players = PlayerUtils.playersInRange(mCenter, mRange, true);
+						if (players.isEmpty()) {
+							return;
+						}
+
+						int playerCount = players.size();
+						for (int i = 1; i <= playerCount; i++) {
+							mTempPlayerScalingHP = mTempPlayerScalingHP + (150 / (Math.log(i + 1) / Math.log(2)));
+						}
+						mPlayerScalingHP = mTempPlayerScalingHP;
+						if (mPlayerScalingHP > 1000) {
+							mPlayerScalingHP = 1000;
+						}
+						LivingEntity nuke = (LivingEntity) LibraryOfSoulsIntegration.summon(mCenter, "WorldEnder");
+						if (nuke != null) {
+							EntityUtils.setAttributeBase(nuke, Attribute.GENERIC_MAX_HEALTH, mPlayerScalingHP);
+							nuke.setHealth(mPlayerScalingHP);
+							mSummoned.add(nuke.getUniqueId());
+							bomb(nuke, mPlayerScalingHP);
+						}
+						this.cancel();
+					}
+				}
+			}.runTaskTimer(mPlugin, 0, 1);
+		} catch (Exception e) {
+			MMLog.severe("Failed to summon nuke for Reaper Of Life", e);
+		}
 	}
 
 	public void bomb(LivingEntity nuke, double playerScalingHP) {
@@ -177,8 +179,8 @@ public class SpellReaperOfLife extends Spell {
 					for (Player player : PlayerUtils.playersInRange(mCenter, mRange, true)) {
 						if (mCenter.distance(player.getLocation()) < mRange) {
 							BossUtils.bossDamagePercent(mBoss, player, 0.85, "Reaper of Life");
-							EntityUtils.applyFire(mPlugin, 20 * 3, player, mBoss);
-							mPlugin.mEffectManager.addEffect(player, VULN_SOURCE, new PercentDamageReceived(20 * 10, 0.2));
+							EntityUtils.applyFire(com.playmonumenta.plugins.Plugin.getInstance(), 20 * 3, player, mBoss);
+							player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 20 * 10, 4));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 10, 2));
 						}
 					}

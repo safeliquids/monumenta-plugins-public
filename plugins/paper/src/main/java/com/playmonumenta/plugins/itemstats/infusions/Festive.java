@@ -52,7 +52,7 @@ public class Festive implements Infusion {
 			@Override
 			public void run() {
 				final Location loc = item.getLocation().add(0, 0.15, 0);
-				if (!loc.isWorldLoaded() || !loc.isChunkLoaded() || item.isDead() || !item.isValid()) {
+				if (!loc.isChunkLoaded() || item.isDead() || !item.isValid()) {
 					this.cancel();
 					return;
 				}

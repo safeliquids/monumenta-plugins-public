@@ -14,7 +14,6 @@ import com.playmonumenta.plugins.events.CustomEffectApplyEvent;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
-import com.playmonumenta.plugins.utils.MetadataUtils;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -95,33 +94,27 @@ public class ImmortalMountBoss extends BossAbilityGroup {
 		if (mTransferDamage && mPassenger != null && event.getSource() != null) {
 			mMountDamageThisTick += event.getDamage();
 			// Do this at the end of the tick so we can't miss the passenger being damaged
-			if (MetadataUtils.checkOnceThisTick(mPlugin, mBoss, "ScheduledDamageTransfer")) {
-				Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
-					if (mPassengerDamageThisTick < mMountDamageThisTick) {
-						Entity damager = event.getDamager();
-						LivingEntity livingDamager = null;
-						if (damager instanceof LivingEntity livingEntity) {
-							livingDamager = livingEntity;
-						}
-						DamageUtils.damage(livingDamager, mPassenger, DamageEvent.DamageType.UNSCALABLE, mMountDamageThisTick - mPassengerDamageThisTick, null, false);
+			Bukkit.getScheduler().runTaskLater(mPlugin, () -> {
+				if (mPassengerDamageThisTick < mMountDamageThisTick) {
+					Entity damager = event.getDamager();
+					LivingEntity livingDamager = null;
+					if (damager instanceof LivingEntity livingEntity) {
+						livingDamager = livingEntity;
 					}
-					mMountDamageThisTick = 0;
-				}, 0);
-			}
+					DamageUtils.damage(livingDamager, mPassenger, DamageEvent.DamageType.UNSCALABLE, mMountDamageThisTick - mPassengerDamageThisTick, null, false);
+				}
+				mMountDamageThisTick = 0;
+			}, 0);
 		}
 		event.setBaseDamage(0);
 	}
 
 	@Override
 	public void bossPassengerHurt(DamageEvent event) {
-		if (!mTransferDamage || event.getDamagee() != mPassenger) {
-			return;
+		if (mTransferDamage && event.getDamagee() == mPassenger) {
+			mPassengerDamageThisTick = Math.max(mPassengerDamageThisTick, event.getDamage());
+			Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPassengerDamageThisTick = 0, 1);
 		}
-		mPassengerDamageThisTick = Math.max(mPassengerDamageThisTick, event.getDamage());
-		if (!MetadataUtils.checkOnceThisTick(mPlugin, mBoss, "ResetPassengerDamage")) {
-			return;
-		}
-		Bukkit.getScheduler().runTaskLater(mPlugin, () -> mPassengerDamageThisTick = 0, 1);
 	}
 
 	@Override

@@ -2,10 +2,9 @@ package com.playmonumenta.plugins.cosmetics.skills.rogue.swordsage;
 
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.cosmetics.skills.PrestigeCS;
-import com.playmonumenta.plugins.particle.PPLine;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.FastUtils;
-import com.playmonumenta.plugins.utils.VectorUtils;
+import com.playmonumenta.plugins.utils.ParticleUtils;
 import java.util.List;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -48,28 +47,34 @@ public class PrestigiousRondeCS extends DeadlyRondeCS implements PrestigeCS {
 	}
 
 	@Override
-	public void rondeHitEffect(World world, Player player, Entity enemy, double radius, double angle, boolean lvl2) {
+	public void rondeHitEffect(World world, Player player, Entity enemy, double radius, double rondeBaseRadius, boolean lv2) {
 		Vector mFront = player.getEyeLocation().getDirection();
-		Location particleLoc = player.getEyeLocation().add(mFront.multiply(0.3 * radius));
+		Location particleLoc = player.getEyeLocation().add(mFront.multiply(0.6 * radius));
+		double multiplier = radius / rondeBaseRadius;
+		double delta = 1.25 * multiplier;
+		new PartialParticle(Particle.SWEEP_ATTACK, particleLoc, (int) (5 * multiplier), delta, 0.5, delta).spawnAsPlayerActive(player);
+		new PartialParticle(Particle.CRIT_MAGIC, particleLoc, (int) (30 * multiplier), delta, 0.5, delta, 0.15).spawnAsPlayerActive(player);
+		new PartialParticle(Particle.CLOUD, particleLoc, (int) (15 * multiplier), delta, 0.5, delta, 0.25).spawnAsPlayerActive(player);
+		new PartialParticle(Particle.SPELL, particleLoc, (int) (20 * multiplier), delta, 0.5, delta, 0.15).spawnAsPlayerActive(player);
 
-		slash(world, player, particleLoc, radius, FastUtils.randomDoubleInRange(-angle, angle), GOLD_COLOR, GOLD_TINY);
+		slash(world, player, particleLoc, radius, GOLD_COLOR, GOLD_TINY);
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				slash(world, player, particleLoc, radius, FastUtils.randomDoubleInRange(-angle, angle), LIGHT_COLOR, LIGHT_TINY);
+				slash(world, player, particleLoc, radius, LIGHT_COLOR, LIGHT_TINY);
 			}
 		}.runTaskLater(Plugin.getInstance(), 3);
-		if (lvl2) {
+		if (lv2) {
 			new BukkitRunnable() {
 				@Override
 				public void run() {
-					slash(world, player, particleLoc, radius, FastUtils.randomDoubleInRange(-angle, angle), GOLD_COLOR, LIGHT_TINY);
+					slash(world, player, particleLoc, radius, GOLD_COLOR, LIGHT_TINY);
 				}
 			}.runTaskLater(Plugin.getInstance(), 5);
 		}
 	}
 
-	private void slash(World world, Player player, Location pLoc, double radius, double angle, Particle.DustOptions color1, Particle.DustOptions color2) {
+	private void slash(World world, Player player, Location pLoc, double radius, Particle.DustOptions color1, Particle.DustOptions color2) {
 		double r = 0.05 * radius * Math.min(FastUtils.RANDOM.nextDouble() * FastUtils.RANDOM.nextDouble(), 0.75);
 		double theta = FastUtils.RANDOM.nextDouble() * 2 * 3.1416;
 		double dF = 0.048 * radius + FastUtils.RANDOM.nextDouble() * 0.032 * radius;
@@ -78,25 +83,27 @@ public class PrestigiousRondeCS extends DeadlyRondeCS implements PrestigeCS {
 		double dX = 1.4 * radius * Math.pow(FastUtils.RANDOM.nextDouble() - 0.5, 3);
 		double dY = 1.4 * radius * Math.pow(FastUtils.RANDOM.nextDouble() - 0.5, 3);
 		double dZ = 1.4 * radius * Math.pow(FastUtils.RANDOM.nextDouble() - 0.5, 3);
-		Location center = pLoc.clone().add(dX, dY, dZ);
-		Vector direction = center.getDirection();
-		Vector axisAngle = VectorUtils.getAxesFromNormal(direction)[1];
-		direction = direction.rotateAroundAxis(axisAngle, Math.toRadians(angle));
+		Location mCenter = pLoc.clone().add(dX, dY, dZ);
 
-		new PPLine(Particle.REDSTONE, center, direction, radius * 0.7)
-			.countPerMeter(3)
-			.delta(dF, dR, dU)
-			.data(color1)
-			.spawnAsPlayerActive(player);
-		new PPLine(Particle.REDSTONE, center, direction, radius * 0.7)
-			.countPerMeter(6)
-			.delta(dF, dR, dU)
-			.data(color2)
-			.spawnAsPlayerActive(player);
-		new PPLine(Particle.SWEEP_ATTACK, center, direction, radius * 0.7)
-			.countPerMeter(0.25)
-			.delta(dF, dR, dU)
-			.spawnAsPlayerActive(player);
+		new BukkitRunnable() {
+			int mTick = 0;
+			final int mUnits = 4;
+
+			@Override
+			public void run() {
+				ParticleUtils.drawCurve(mCenter, 0, mUnits - 1, player.getLocation().getDirection(),
+					t -> dF * (t + mUnits * (mTick - 0.3 * radius)),
+					t -> dU * (t + mUnits * (mTick - 0.3 * radius)), t -> dR * (t + mUnits * (mTick - 0.3 * radius)),
+					(l, t) -> {
+						new PartialParticle(Particle.REDSTONE, l, 2, 0.05, 0.05, 0.05, 0, color1).spawnAsPlayerActive(player);
+						new PartialParticle(Particle.REDSTONE, l, 4, 0.25, 0.25, 0.25, 0, color2).spawnAsPlayerActive(player);
+					});
+
+				if (++mTick > radius) {
+					this.cancel();
+				}
+			}
+		}.runTaskTimer(Plugin.getInstance(), 0, 1);
 
 		world.playSound(pLoc, Sound.ENTITY_BLAZE_HURT, SoundCategory.PLAYERS, 0.65f, 1.6f);
 		world.playSound(pLoc, Sound.ITEM_TRIDENT_THROW, SoundCategory.PLAYERS, 1.1f, 0.7f);
@@ -117,7 +124,8 @@ public class PrestigiousRondeCS extends DeadlyRondeCS implements PrestigeCS {
 	public void rondeTickEffect(Player player, int charges, int mTicks) {
 		for (int i = 0; i < charges; i++) {
 			double angle = 2 * 3.1416 * i / charges + 0.28 * 3.1416 * mTicks / (charges + 1);
-			new PartialParticle(Particle.REDSTONE, player.getLocation().add(FastUtils.cos(angle), 0, -FastUtils.sin(angle)),
+			double height = 0.86 + 0.17 * FastUtils.sin(0.067 * 3.1416 * mTicks + charges * 3.1416);
+			new PartialParticle(Particle.REDSTONE, player.getLocation().add(FastUtils.cos(angle), height, -FastUtils.sin(angle)),
 				(i + mTicks) % 3, 0.05, 0.45, 0.05, i % 2 == 0 ? GOLD_COLOR : LIGHT_COLOR).spawnAsPlayerBuff(player);
 		}
 	}

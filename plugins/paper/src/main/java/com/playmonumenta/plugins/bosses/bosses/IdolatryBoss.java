@@ -1,6 +1,7 @@
 package com.playmonumenta.plugins.bosses.bosses;
 
 import com.playmonumenta.plugins.Plugin;
+import com.playmonumenta.plugins.abilities.mage.ElementalArrows;
 import com.playmonumenta.plugins.bosses.SpellManager;
 import com.playmonumenta.plugins.bosses.parameters.BossParam;
 import com.playmonumenta.plugins.bosses.parameters.SoundsList;
@@ -72,6 +73,8 @@ public class IdolatryBoss extends BossAbilityGroup {
 		LivingEntity damagedEntity = event.getDamagee();
 		if (mBoss == null || mBoss.isDead()
 			|| damagedEntity.equals(mBoss)
+			|| event.getType() == DamageEvent.DamageType.PROJECTILE // Prevents doubled Projectile damage
+			|| ElementalArrows.isElementalArrowDamage(event) // Prevents doubled EArrows damage
 			|| event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION
 			|| damagedEntity instanceof Player
 			|| damagedEntity instanceof Creeper
@@ -80,8 +83,7 @@ public class IdolatryBoss extends BossAbilityGroup {
 			|| damagedEntity.getScoreboardTags().contains(identityTag)
 			|| damagedEntity.getScoreboardTags().contains(IDOLATRY_IMMUNE_TAG)
 			|| event.getAbility() == ClassAbility.COUP_DE_GRACE
-			|| event.getDamager() == damagedEntity
-			|| !EntityUtils.isHostileMob(damagedEntity)) {
+			|| event.getDamager() == damagedEntity) {
 			return;
 		} // This event is called a LOT and has a LOT of if statements. someone very very experienced with the damage pipeline should optimise the order
 		// Note on the doubled proj and earrows damage: Projectile hits deal both a normal and a True damage pop, because of... iframes probably.

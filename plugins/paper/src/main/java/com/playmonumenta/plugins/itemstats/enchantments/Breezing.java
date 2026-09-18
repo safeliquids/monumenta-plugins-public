@@ -45,6 +45,11 @@ public class Breezing implements Enchantment {
 	}
 
 	@Override
+	public double getPriorityAmount() {
+		return 50;
+	}
+
+	@Override
 	public void onDamage(Plugin plugin, Player player, double level, DamageEvent event, LivingEntity enemy) {
 		if (AbilityUtils.isAspectTriggeringEvent(event, player)
 			&& EntityUtils.isHostileMob(enemy)) {

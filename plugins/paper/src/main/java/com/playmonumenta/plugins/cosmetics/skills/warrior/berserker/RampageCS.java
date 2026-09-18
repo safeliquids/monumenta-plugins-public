@@ -88,8 +88,4 @@ public class RampageCS implements CosmeticSkill {
 		AbilityUtils.playPassiveAbilitySound(player.getLocation(), Sound.ENTITY_BLAZE_DEATH, 0.4f, 1.5f);
 		AbilityUtils.playPassiveAbilitySound(player.getLocation(), Sound.ENTITY_PLAYER_BREATH, 0.7f, 0.4f);
 	}
-
-	public void cannotRecast(Player player) {
-		player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, SoundCategory.PLAYERS, 2f, 0.8f);
-	}
 }

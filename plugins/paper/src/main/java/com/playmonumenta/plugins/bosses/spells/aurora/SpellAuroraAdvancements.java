@@ -30,7 +30,7 @@ public class SpellAuroraAdvancements extends Spell {
 
 	public SpellAuroraAdvancements(Location center, List<Player> players) {
 		mPlayers = players;
-		long blockCount = BlockUtils.getBlocksInCylinder(center, Aurora.ARENA_RADIUS, 6).stream()
+		long blockCount = BlockUtils.getBlocksInCylinder(center.clone().subtract(0, 1, 0), Aurora.ARENA_RADIUS, 10).stream()
 			.filter(Block::isSolid)
 			.count();
 		mBlocksThreshold = blockCount * 9 / 10;

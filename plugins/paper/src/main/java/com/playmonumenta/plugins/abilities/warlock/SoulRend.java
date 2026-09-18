@@ -1,6 +1,5 @@
 package com.playmonumenta.plugins.abilities.warlock;
 
-import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.abilities.Ability;
 import com.playmonumenta.plugins.abilities.AbilityInfo;
@@ -45,7 +44,7 @@ public class SoulRend extends Ability {
 	private static final int RADIUS = 7;
 	private static final int COOLDOWN = 20 * 8;
 	private static final int ABSORPTION_CAP = 4;
-	private static final int ABSORPTION_DURATION = 10 * Constants.TICKS_PER_SECOND;
+	private static final int ABSORPTION_DURATION = 50;
 	public static final int DARK_PACT_HEAL_1 = 2;
 	public static final int DARK_PACT_HEAL_2 = 4;
 
@@ -201,9 +200,9 @@ public class SoulRend extends Ability {
 			.addLine("Critical scythe attacks heal you.")
 			.addLine()
 			.addStat("Healing: %d HP")
-			.statValues(stat(a -> a.mHeal, HEAL))
+				.statValues(stat(a -> a.mHeal, HEAL))
 			.addStat("Cooldown: %t")
-			.statValues(cooldown(COOLDOWN))
+				.statValues(cooldown(COOLDOWN))
 			.addDashedLine();
 	}
 
@@ -211,7 +210,7 @@ public class SoulRend extends Ability {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
 			.addLine("*Soul Rend* marks the mob you hit for %t.").styles(UNDERLINED)
-			.statValues(stat(a -> a.mMarkDuration, MARK_DURATION))
+				.statValues(stat(a -> a.mMarkDuration, MARK_DURATION))
 			.addLine()
 			.addLine("Your next %d critical attacks against that")
 				.statValues(stat(a -> a.mMarks, MARK_COUNT))

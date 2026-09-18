@@ -10,7 +10,6 @@ import com.playmonumenta.plugins.itemstats.enchantments.Reflexes;
 import com.playmonumenta.plugins.itemstats.enchantments.Tempo;
 import com.playmonumenta.plugins.itemstats.enums.AttributeType;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -26,11 +25,6 @@ public class Agility implements Attribute {
 	@Override
 	public AttributeType getAttributeType() {
 		return AttributeType.AGILITY;
-	}
-
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.GEAR_DEFENSE; // after other damage reduction enchants
 	}
 
 	@Override

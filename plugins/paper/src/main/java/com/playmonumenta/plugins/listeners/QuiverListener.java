@@ -2,7 +2,7 @@ package com.playmonumenta.plugins.listeners;
 
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.ArrowConsumeEvent;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.inventories.CustomContainerItemGui;
 import com.playmonumenta.plugins.inventories.CustomContainerItemManager;
 import com.playmonumenta.plugins.itemstats.enchantments.Multiload;
@@ -156,7 +156,7 @@ public class QuiverListener implements Listener {
 			}
 
 			@Override
-			public void createAdditionalGuiItems(ItemStack quiver, NjolGui gui) {
+			public void createAdditionalGuiItems(ItemStack quiver, Gui gui) {
 				if (ItemStatUtils.isArrowTransformingQuiver(quiver)) {
 					ArrowTransformMode mode = ItemStatUtils.getArrowTransformMode(quiver);
 					ItemStack icon = mode.mItemStack == null ? new ItemStack(Material.ARROW) : ItemUtils.clone(mode.mItemStack);
@@ -528,7 +528,7 @@ public class QuiverListener implements Listener {
 			CustomContainerItemManager.addToContainer(player, quiver, config, transformedItemStack, true, true);
 			itemStack.setAmount(transformedItemStack.getAmount());
 
-			if (NjolGui.getOpenGui(player) instanceof CustomContainerItemGui gui && NmsUtils.getVersionAdapter().isSameItem(gui.getContainer(), quiver)) {
+			if (Gui.getOpenGui(player) instanceof CustomContainerItemGui gui && NmsUtils.getVersionAdapter().isSameItem(gui.getContainer(), quiver)) {
 				// Update quiver GUI if it is open
 				gui.update();
 			}

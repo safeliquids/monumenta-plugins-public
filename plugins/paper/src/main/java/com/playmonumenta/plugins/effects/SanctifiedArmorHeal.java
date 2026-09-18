@@ -34,7 +34,7 @@ public class SanctifiedArmorHeal extends Effect {
 	@Override
 	public void onHurt(LivingEntity entity, DamageEvent event) {
 		DamageEvent.DamageType type = event.getType();
-		if (DamageEvent.DamageType.getUnscalableDamageTypes().contains(type)) {
+		if (DamageEvent.DamageType.getUnscalableDamageType().contains(type)) {
 			return;
 		}
 		if (event.getSource() instanceof Player player) {

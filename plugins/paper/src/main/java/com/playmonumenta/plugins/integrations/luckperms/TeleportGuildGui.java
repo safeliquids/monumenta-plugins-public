@@ -2,8 +2,8 @@ package com.playmonumenta.plugins.integrations.luckperms;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.integrations.luckperms.guildgui.GuildGui;
 import com.playmonumenta.plugins.integrations.luckperms.guildgui.GuildOrder;
 import com.playmonumenta.plugins.utils.CommandUtils;
@@ -36,7 +36,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.Nullable;
 
 // Note: Much of this is copied from GuildGui's AccessibleGuildsView
-public class TeleportGuildGui extends NjolGui {
+public class TeleportGuildGui extends Gui {
 	private static final int HEADER_Y = 0;
 	private static final int PAGE_START_X = 0;
 	private static final int PAGE_START_Y = 1;
@@ -206,7 +206,7 @@ public class TeleportGuildGui extends NjolGui {
 		meta.lore(lore);
 
 		item.setItemMeta(meta);
-		setItem(row, column, new NjolGuiItem(item, false))
+		setItem(row, column, new GuiItem(item, false))
 			.onClick((InventoryClickEvent event) -> {
 				if (!GuildPermission.VISIT.hasAccess(guild, mPlayerUser)) {
 					mPlayer.sendMessage(Component.text("You no longer have access to that guild's plot.", NamedTextColor.RED));

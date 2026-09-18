@@ -27,7 +27,7 @@ public class BoonOfThePit extends ZeroArgumentEffect {
 		if (mEffectedMobs.contains(enemy)) {
 			return;
 		}
-		event.updateDamageWithMultiplier(DAMAGE_BONUS, DamageEvent.DamageType.getScalableDamageTypes());
+		event.updateDamageWithMultiplier(DAMAGE_BONUS, DamageEvent.DamageType.getScalableDamageType());
 		mEffectedMobs.add(enemy);
 	}
 

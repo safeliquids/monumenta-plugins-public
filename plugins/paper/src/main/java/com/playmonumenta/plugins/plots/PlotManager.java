@@ -7,9 +7,7 @@ import com.playmonumenta.networkrelay.NetworkRelayMessageEvent;
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.integrations.MonumentaRedisSyncIntegration;
-import com.playmonumenta.plugins.integrations.luckperms.GuildPlotUtils;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
-import com.playmonumenta.plugins.tracking.PlayerTracking;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.MessagingUtils;
@@ -24,7 +22,6 @@ import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,39 +33,21 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Lockable;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class PlotManager implements Listener {
 	private static final String MYPLOTACCESS_KEY = "myplotaccess|";
 	private static final String OTHERPLOTACCESS_KEY = "otherplotaccess|";
-
-	private static final String LOCK = "Chekhov's Gun"; // because it's Key to the Plot
-
-	private static final Vector BOTTOM_LEFT_CORNER = new Vector(-1293, 63, -1293);
-	private static final Vector TOP_RIGHT_CORNER = new Vector(-1265, 137, -1265);
-	private static final Vector TEST_BLOCK = new Vector(-1280, 135, -1280);
 
 	private static final String PLOT_ACCESS_GRANTED_NOTIFICATION_CHANNEL = "plotAccessGrantedNotificationChannel";
 	private static final String MODERATOR_FORCE_ADDED_PLOT_ACCESS_NOTIFICATION_CHANNEL = "moderatorForceAddedPlotAccessNotificationChannel";
@@ -191,6 +170,9 @@ public class PlotManager implements Listener {
 		}));
 	}
 
+	/* TODO: There needs to be some security mechanism that verifies players still have access to a plot if they last visited it but it expired */
+	/* Maybe when player joins, fetch their access and see if it's currently expired? And boot them to their own plot if so?  */
+
 	static void plotAccessRemove(Player owner, String removedName) throws WrapperCommandSyntaxException {
 		UUID removedUUID = StringUtils.getUuidFromInput(removedName);
 
@@ -280,16 +262,6 @@ public class PlotManager implements Listener {
 			mOwnerAccessToOtherPlots = ownerAccessToOtherPlots;
 		}
 
-		// Does not include your own plot
-		public Collection<Integer> accessiblePlots() {
-			Collection<Integer> result = new ArrayList<>();
-			result.add(mOwnedPlotId);
-			for (OwnerAccessToOtherPlotsRecord record : mOwnerAccessToOtherPlots.values()) {
-				result.add(record.mPlotId);
-			}
-			return result;
-		}
-
 		/* Call this to fetch the player's name and head */
 		public CompletableFuture<PlotInfo> populateNamesAndHeads() {
 			CompletableFuture<PlotInfo> future = new CompletableFuture<>();
@@ -335,7 +307,7 @@ public class PlotManager implements Listener {
 						ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
 						SkullMeta meta = (SkullMeta) head.getItemMeta();
 						meta.setPlayerProfile(rec.mProfile);
-						meta.displayName(Component.text(rec.mName == null ? " " : rec.mName, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+						meta.displayName(Component.text(rec.mName, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
 						List<Component> lore = new ArrayList<>();
 						lore.add(Component.text("Access expires in:", NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false));
 						String timeLeft = (rec.mExpiration == -1) ? "Unlimited" : MessagingUtils.getTimeDifferencePretty(rec.mExpiration);
@@ -532,193 +504,5 @@ public class PlotManager implements Listener {
 				// Do nothing
 			}
 		}
-	}
-
-	// TODO: You can still access an inaccessible plot if you come from guildplots, don't own your own plot, and can't access anyone else's plots!
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void playerJoinEvent(PlayerJoinEvent event) {
-		if (!ServerProperties.getShardName().contains("playerplots")) {
-			return;
-		}
-
-		Player player = event.getPlayer();
-		World world = player.getWorld();
-		if (world.getName().length() < 5) {
-			return;
-		}
-		int plotUUID = Integer.parseInt(world.getName().substring(4));
-
-
-		// Notify if on locked plot
-		if (onLockedPlot(player)) {
-			player.sendMessage(Component.text("This plot has been locked! Contact a moderator if you believe this action was in error.", NamedTextColor.RED));
-		}
-
-		// Kick if on inaccessible plot
-		getPlotInfo(player.getUniqueId()).whenComplete((plotInfo, throwable) -> {
-			Collection<Integer> otherPlots = plotInfo.accessiblePlots();
-			int ownPlot = ScoreboardUtils.getScoreboardValue(player, Constants.Objectives.OWN_PLOT).orElse(-1);
-			if (!otherPlots.contains(plotUUID) && ownPlot != plotUUID) {
-				if (ownPlot != -1) {
-					ScoreboardUtils.setScoreboardValue(player, Constants.Objectives.CURRENT_PLOT, ownPlot);
-					try {
-						MonumentaWorldManagementAPI.sortWorld(player);
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				} else if (!otherPlots.isEmpty()) {
-					ScoreboardUtils.setScoreboardValue(player, Constants.Objectives.CURRENT_PLOT, otherPlots.iterator().next());
-					try {
-						MonumentaWorldManagementAPI.sortWorld(player);
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				} else {
-					player.sendMessage(Component.text("You have logged in on a playerplot that you no longer have access to. As such, you have been safely ", NamedTextColor.GRAY)
-						.append(Component.text("moved to guildplots.", NamedTextColor.WHITE))
-						.appendNewline()
-						.append(Component.text("Enjoy the scenery!", NamedTextColor.GRAY)));
-					GuildPlotUtils.sendGuildPlotHub(player, true);
-				}
-			}
-		});
-	}
-
-	public static boolean onLockedPlot(Player player) {
-		return ServerProperties.getShardName().contains("playerplots")
-			&& player.getWorld().getBlockAt(TEST_BLOCK.toLocation(player.getWorld())).getType().equals(Material.BEDROCK);
-	}
-
-	public static void lockPlot(UUID ownerUUID, @Nullable Player commandSender) {
-		getPlotInfo(ownerUUID).whenComplete((plotInfo, ex) -> {
-			int plotUUID = plotInfo.mOwnedPlotId;
-			try {
-				World plotWorld = MonumentaWorldManagementAPI.ensureWorldLoaded("plot" + plotUUID, null);
-				Location loc = BOTTOM_LEFT_CORNER.toLocation(plotWorld);
-				for (int x = BOTTOM_LEFT_CORNER.getBlockX(); x < TOP_RIGHT_CORNER.getBlockX(); x++) {
-					for (int y = BOTTOM_LEFT_CORNER.getBlockY(); y < TOP_RIGHT_CORNER.getBlockY(); y++) {
-						for (int z = BOTTOM_LEFT_CORNER.getBlockZ(); z < TOP_RIGHT_CORNER.getBlockZ(); z++) {
-							loc.set(x, y, z);
-							/* Lock tile entities */
-							BlockState state = loc.getBlock().getState();
-							if (state instanceof Lockable lockable && lockable.getLock().isEmpty()) {
-								lockable.setLock(LOCK);
-								state.update();
-							}
-						}
-					}
-				}
-
-				/* Lock regular entities */
-				for (Entity entity : plotWorld.getEntities()) {
-					if (entity instanceof ItemFrame) {
-						entity.setInvulnerable(true);
-					} else if (entity instanceof ArmorStand armorStand) {
-						if (!armorStand.getName().contains("Plot Doorway")) {
-							entity.setInvulnerable(true);
-							armorStand.setDisabledSlots(EquipmentSlot.values());
-						}
-					}
-				}
-
-				plotWorld.setBlockData(TEST_BLOCK.toLocation(plotWorld), Material.BEDROCK.createBlockData());
-
-				plotWorld.getPlayers().forEach(victim -> {
-					if (!victim.equals(commandSender)) {
-						victim.sendMessage(Component.text("The playerplot you were on has been locked by moderator action.", NamedTextColor.RED)
-							.appendNewline()
-							.append(Component.text("As such, you have been safely ", NamedTextColor.GRAY))
-							.append(Component.text("moved to guildplots.", NamedTextColor.WHITE))
-							.appendNewline()
-							.append(Component.text("Enjoy the scenery!", NamedTextColor.GRAY)));
-						GuildPlotUtils.sendGuildPlotHub(victim, true);
-					}
-				});
-
-
-
-				if (commandSender != null) {
-					commandSender.getWorld().playSound(commandSender, Sound.BLOCK_CHEST_LOCKED, 1.8f, 0.9f);
-					commandSender.sendMessage(Component.text(
-						"Successfully locked the plot of " + MonumentaRedisSyncIntegration.cachedUuidToNameOrUuid(ownerUUID) + "!",
-						NamedTextColor.GREEN));
-					Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () -> {
-						if (commandSender.isOnline() && commandSender.getGameMode().equals(GameMode.SURVIVAL) && commandSender.getWorld().equals(plotWorld)) {
-							PlayerTracking.getInstance().updateLocation(commandSender, commandSender.getLocation(), 0);
-						}
-					}, 10);
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-				MMLog.severe("Error occurred while trying to unlock the plot of " + MonumentaRedisSyncIntegration.cachedUuidToNameOrUuid(ownerUUID) + "!");
-				if (commandSender != null) {
-					commandSender.sendMessage(Component.text(
-						"Error occurred while trying to lock the plot of " + MonumentaRedisSyncIntegration.cachedUuidToNameOrUuid(ownerUUID) + "!",
-						NamedTextColor.RED));
-				}
-			}
-		});
-	}
-
-	public static void unlockPlot(UUID ownerUUID, @Nullable Player commandSender) {
-		getPlotInfo(ownerUUID).whenComplete((plotInfo, ex) -> {
-			int plotUUID = plotInfo.mOwnedPlotId;
-			try {
-				World plotWorld = MonumentaWorldManagementAPI.ensureWorldLoaded("plot" + plotUUID, null);
-				Location loc = BOTTOM_LEFT_CORNER.toLocation(plotWorld);
-				for (int x = BOTTOM_LEFT_CORNER.getBlockX(); x < TOP_RIGHT_CORNER.getBlockX(); x++) {
-					for (int y = BOTTOM_LEFT_CORNER.getBlockY(); y < TOP_RIGHT_CORNER.getBlockY(); y++) {
-						for (int z = BOTTOM_LEFT_CORNER.getBlockZ(); z < TOP_RIGHT_CORNER.getBlockZ(); z++) {
-							loc.set(x, y, z);
-							/* Unlock tile entities */
-							BlockState state = loc.getBlock().getState();
-							if (state instanceof Lockable lockable && lockable.getLock().startsWith(LOCK)) {
-								lockable.setLock(null);
-								state.update();
-							}
-						}
-					}
-				}
-
-				/* Unlock regular entities */
-				for (Entity entity : plotWorld.getEntities()) {
-					if (entity instanceof ItemFrame) {
-						entity.setInvulnerable(false);
-					} else if (entity instanceof ArmorStand armorStand) {
-						if (!armorStand.getName().contains("Plot Doorway")) {
-							entity.setInvulnerable(false);
-							armorStand.removeDisabledSlots(EquipmentSlot.values());
-						}
-					}
-				}
-
-				plotWorld.setBlockData(TEST_BLOCK.toLocation(plotWorld), Material.BARRIER.createBlockData());
-
-				Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () ->
-					plotWorld.getPlayers().forEach(victim -> {
-						if (victim.isOnline() && victim.getGameMode().equals(GameMode.ADVENTURE) && victim.getWorld().equals(plotWorld)) {
-							PlayerTracking.getInstance().updateLocation(victim, victim.getLocation(), 0);
-						}
-					}), 10);
-
-				if (commandSender != null) {
-					commandSender.getWorld().playSound(commandSender, Sound.BLOCK_CHEST_OPEN, 1.8f, 0.9f);
-					commandSender.getWorld().playSound(commandSender, Sound.BLOCK_ENDER_CHEST_OPEN, 1.8f, 0.9f);
-					commandSender.sendMessage(Component.text(
-						"Successfully unlocked the plot of " + MonumentaRedisSyncIntegration.cachedUuidToNameOrUuid(ownerUUID) + "!",
-						NamedTextColor.GREEN));
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-				MMLog.severe("Error occurred while trying to unlock the plot of " + MonumentaRedisSyncIntegration.cachedUuidToNameOrUuid(ownerUUID) + "!");
-				if (commandSender != null) {
-					commandSender.sendMessage(Component.text(
-						"Error occurred while trying to unlock the plot of " + MonumentaRedisSyncIntegration.cachedUuidToNameOrUuid(ownerUUID) + "!",
-						NamedTextColor.RED));
-				}
-			}
-		});
 	}
 }

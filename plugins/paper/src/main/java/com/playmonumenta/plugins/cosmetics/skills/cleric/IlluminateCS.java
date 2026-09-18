@@ -63,7 +63,7 @@ public class IlluminateCS implements CosmeticSkill {
 		Location loc = location.clone();
 
 		// don't draw trail if already close enough to the enhance zone
-		if (enhanceZone != null && location.getWorld() != null && location.getWorld().equals(enhanceZone.getWorld()) && location.distance(enhanceZone) < enhanceRadius + 0.5) {
+		if (enhanceZone != null && location.distance(enhanceZone) < enhanceRadius + 0.5) {
 			return;
 		}
 

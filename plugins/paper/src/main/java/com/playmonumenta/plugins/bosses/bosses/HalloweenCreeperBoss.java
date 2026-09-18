@@ -61,8 +61,6 @@ public class HalloweenCreeperBoss extends BossAbilityGroup {
 					World world = loc.getWorld();
 					world.playSound(loc, Sound.ENTITY_CREEPER_HURT, SoundCategory.HOSTILE, 1.0f, 0.9f);
 					switch (mTicks) {
-						case 2, 6 -> summonFirework(loc, true);
-						case 9 -> summonFirework(loc, false);
 						case 12 -> {
 							Block block = world.getBlockAt(loc);
 							if ((block.getType() == Material.AIR || block.isLiquid())
@@ -70,16 +68,18 @@ public class HalloweenCreeperBoss extends BossAbilityGroup {
 								&& !ZoneUtils.hasZoneProperty(loc, ZoneUtils.ZoneProperty.RESTRICTED)
 								&& !ZoneUtils.hasZoneProperty(loc, ZoneUtils.ZoneProperty.BLOCKBREAK_DISABLED)) {
 								block.setType(Material.CHEST);
+								ChestUtils.setNonLootLimitedChest(block, true);
 								if (block.getState() instanceof Chest chest) {
 									chest.customName(Component.text("Creeperween Chest", NamedTextColor.GOLD, TextDecoration.BOLD));
 									chest.setLootTable(Bukkit.getLootTable(LOOT_TABLE));
 									chest.update();
 								}
-								ChestUtils.setNonLootLimitedChest(block, true);
 							} else {
 								InventoryUtils.getItemsFromLootTable(loc, LOOT_TABLE).forEach(item -> loc.getWorld().dropItemNaturally(loc, item));
 							}
 						}
+						case 2, 6 -> summonFirework(loc, true);
+						case 9 -> summonFirework(loc, false);
 						case 13 -> {
 							summonFirework(loc, false);
 							this.cancel();

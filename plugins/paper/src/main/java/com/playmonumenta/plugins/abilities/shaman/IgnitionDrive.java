@@ -47,7 +47,6 @@ public class IgnitionDrive extends Ability {
 	private static final double LAUNCH_DISTANCE_1 = 0.8;
 	private static final double LAUNCH_DISTANCE_2 = 1.0;
 	private static final int FALL_IMMUNITY_DURATION = 10 * 20;
-	private static final String FALL_IMMUNITY_SOURCE = "IgnitionDriveFallImmunity";
 	private static final int STUN_LIMIT_1 = 2;
 	private static final int STUN_LIMIT_2 = 3;
 	private static final int STUN_DURATION = 20;
@@ -128,7 +127,7 @@ public class IgnitionDrive extends Ability {
 		}
 
 		// Apply damage immunity from cast to landing
-		mPlugin.mEffectManager.addEffect(mPlayer, FALL_IMMUNITY_SOURCE,
+		mPlugin.mEffectManager.addEffect(mPlayer, "IgnitionDriveFallImmunity",
 			new DamageImmunity(FALL_IMMUNITY_DURATION, EnumSet.of(DamageEvent.DamageType.FALL)).deleteOnAbilityUpdate(true));
 
 		putOnCooldown();
@@ -188,7 +187,7 @@ public class IgnitionDrive extends Ability {
 					dealDamageAtLocation(mPlayer.getLocation(), false, false);
 
 					// Apply damage immunity from cast to landing
-					mPlugin.mEffectManager.clearEffects(mPlayer, FALL_IMMUNITY_SOURCE);
+					mPlugin.mEffectManager.clearEffects(mPlayer, "IgnitionDriveFallImmunity");
 
 					this.cancel();
 					return;
@@ -251,9 +250,9 @@ public class IgnitionDrive extends Ability {
 	private static Description<IgnitionDrive> getDescription2() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
-			.addLine("Increase *Ignition Drive*'s damage, radius,").styles(UNDERLINED)
-			.addLine("maximum mobs stunned, and launch velocity.")
-			.addLine("Additionally, reduce *Ignition Drive*'s cooldown.").styles(UNDERLINED)
+			.addLine("Increase *Ignition Drive*'s damage,").styles(UNDERLINED)
+			.addLine("radius, maximum mobs stunned, and")
+			.addLine("launch velocity.")
 			.addLine()
 			.addStatComparison("Damage: %d1 -> %d2 (s)")
 				.statValues(stat(DAMAGE_1), stat(a -> a.mDamage, DAMAGE_2))
@@ -263,8 +262,6 @@ public class IgnitionDrive extends Ability {
 				.statValues(stat(STUN_LIMIT_1), stat(a -> a.mStunLimit, STUN_LIMIT_2))
 			.addStat("Velocity: +%p")
 				.statValues(stat((LAUNCH_DISTANCE_2 - LAUNCH_DISTANCE_1) / LAUNCH_DISTANCE_1))
-			.addStatComparison("Cooldown: %t1 -> %t2")
-				.statValues(cooldown(COOLDOWN_1), cooldown(COOLDOWN_2))
 			.addDashedLine();
 	}
 

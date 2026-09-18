@@ -34,7 +34,7 @@ import com.playmonumenta.plugins.fishing.FishingCombatManager;
 import com.playmonumenta.plugins.fishing.FishingManager;
 import com.playmonumenta.plugins.gallery.GalleryCommands;
 import com.playmonumenta.plugins.gallery.GalleryManager;
-import com.playmonumenta.plugins.guis.lib.FloweyGuiListener;
+import com.playmonumenta.plugins.guis.lib.GuiListener;
 import com.playmonumenta.plugins.hexfall.HexfallListener;
 import com.playmonumenta.plugins.hunts.HuntsCommand;
 import com.playmonumenta.plugins.hunts.HuntsManager;
@@ -211,7 +211,6 @@ public class Plugin extends JavaPlugin {
 	public LoadoutManager mLoadoutManager;
 	public DoubleJumpManager mDoubleJumpManager;
 	public PlaylistManager mPlaylistManager;
-	public PlacedBlocksListener mPlacedBlocksListener;
 	public DataCollectionManager mDataCollectionManager;
 	public PzeroManager mPzeroManager;
 	public ShulkerEquipmentListener mShulkerEquipmentListener;
@@ -221,8 +220,6 @@ public class Plugin extends JavaPlugin {
 	public HuntsManager mHuntsManager;
 	public BalanceModeManager mBalanceModeManager;
 	public @Nullable ProtocolLibIntegration mProtocolLibIntegration = null;
-	public LootingLimiter mLootingLimiter;
-	public PlayerSkinManager mPlayerSkinManager;
 
 	// INSTANCE is set if the plugin is properly enabled
 	@Nullable
@@ -297,12 +294,10 @@ public class Plugin extends JavaPlugin {
 		LoadoutManagerCommand.register();
 		MailMan.registerCommands();
 		MarketCommands.register();
-		MMLogCommand.register();
 		MMQuest.register(this);
 		MonumentaReload.register(this);
 		MonumentaTrigger.register();
 		NameMCVerify.register(this);
-		NBTGlowingCommand.register();
 		if (!IS_PLAY_SERVER) {
 			NodePlanner.registerCommands();
 			BalanceModeManager.register();
@@ -320,7 +315,6 @@ public class Plugin extends JavaPlugin {
 		Portal1.register();
 		Portal2.register();
 		PZeroCommand.register();
-		ReAsyncCommand.register(this);
 		RedeemVoteRewards.register(this);
 		RefreshClass.register(this);
 		RegisterTorch.register();
@@ -378,6 +372,7 @@ public class Plugin extends JavaPlugin {
 		AddSpawnerEffectMarkersCommand.register();
 		SiriusNPCBoss.register();
 		EffectListCommand.register();
+		PlayerSkinManagerCommand.register();
 		ScanMobsCommand.register();
 		WhatTableCommand.register();
 		StatTrackAdd.register();
@@ -388,7 +383,6 @@ public class Plugin extends JavaPlugin {
 		RotateCommand.register();
 		DamageTraceCommand.register();
 		ShowMyDpsCommand.register();
-		RedisItemDebugCommand.register();
 
 		try {
 			mHttpManager = new HttpManager(this);
@@ -423,7 +417,6 @@ public class Plugin extends JavaPlugin {
 		ItemStatCommands.registerNameCommand();
 		ItemStatCommands.registerRemoveCommand();
 		ItemStatCommands.registerCopyCommand();
-		PlayerSkinManagerCommand.register(this);
 
 		mJunkItemsListener = new JunkItemListener();
 		mItemDropListener = new ItemDropListener();
@@ -452,7 +445,7 @@ public class Plugin extends JavaPlugin {
 		MMLog.info("Setting $IsPlay const = " + (IS_PLAY_SERVER ? 1 : 0) + " (" + (IS_PLAY_SERVER ? "play" : "build") + " server)");
 
 		PluginManager manager = getServer().getPluginManager();
-		mPlayerSkinManager = new PlayerSkinManager(this);
+		PlayerSkinManager playerSkinManager = new PlayerSkinManager();
 
 		if (mHttpManager != null) {
 			mHttpManager.start();
@@ -490,8 +483,6 @@ public class Plugin extends JavaPlugin {
 		mGrapplingListener = new GrapplingListener();
 		mHuntsManager = new HuntsManager(this);
 		mBalanceModeManager = new BalanceModeManager();
-		mPlacedBlocksListener = new PlacedBlocksListener();
-		mLootingLimiter = new LootingLimiter();
 
 
 		new ClientModHandler(this);
@@ -599,6 +590,7 @@ public class Plugin extends JavaPlugin {
 		manager.registerEvents(new WitchListener(this), this);
 		manager.registerEvents(new SeasonalEventListener(), this);
 		manager.registerEvents(CosmeticsManager.getInstance(), this);
+		LootTableManager.INSTANCE.reload();
 		manager.registerEvents(LootTableManager.INSTANCE, this);
 		manager.registerEvents(new CharmListener(this), this);
 		manager.registerEvents(new QuiverListener(), this);
@@ -609,6 +601,7 @@ public class Plugin extends JavaPlugin {
 		manager.registerEvents(POIManager.getInstance(), this);
 		manager.registerEvents(new BrokenEquipmentListener(), this);
 		manager.registerEvents(PortalManager.getInstance(), this);
+		manager.registerEvents(new LootingLimiter(), this);
 		manager.registerEvents(new InventoryUpdateListener(), this);
 		GuildPlotUtils.initialize(spawn);
 		WalletManager.initialize(spawn);
@@ -634,10 +627,10 @@ public class Plugin extends JavaPlugin {
 		manager.registerEvents(new WinterListener(), this);
 		new SpawnerVisualisation().register();
 		manager.registerEvents(MailMan.getInstance(), this);
-		manager.registerEvents(new FloweyGuiListener(), this);
+		manager.registerEvents(new GuiListener(), this);
 		manager.registerEvents(mHuntsManager, this);
 		PlayerTitleManager.getInstance().onEnable(this, manager);
-		manager.registerEvents(mPlayerSkinManager, this);
+		manager.registerEvents(playerSkinManager, this);
 		manager.registerEvents(mDoubleJumpManager, this);
 
 		if (ServerProperties.getDepthsEnabled()) {
@@ -669,17 +662,6 @@ public class Plugin extends JavaPlugin {
 
 		if (ServerProperties.getShardName().contains("rush")) {
 			manager.registerEvents(new RushManager(), this);
-		}
-
-		// Do not track player placed blocks on dev
-		// Do not track player placed blocks on any kind of plot, or buildshard
-		if (IS_PLAY_SERVER
-			&& ServerProperties.lootingLimiterEnabled()
-			&& !(ServerProperties.getShardName().contains("plot") || ServerProperties.getShardName().contains("build"))) {
-			manager.registerEvents(mLootingLimiter, this);
-			manager.registerEvents(mPlacedBlocksListener, this);
-			PlayerPlacedBlocksCommand.register();
-			LootingLimiterCommand.register();
 		}
 
 		//TODO Move the logic out of Plugin and into it's own class that derives off Runnable, a Timer class of some type.

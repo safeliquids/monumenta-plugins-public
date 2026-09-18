@@ -670,7 +670,7 @@ public class BossTagCommand {
 			if (nbtTagsList != null && nbtTagsList.getAsArray() != null) {
 				for (Object tag : nbtTagsList.getAsArray()) {
 
-					if (tag instanceof String stringTag && stringTag.equals(realBossTag)) {
+					if (tag instanceof String stringTag && stringTag.contains(realBossTag)) {
 						shouldAdd = true;
 
 						if (!param.isEmpty()) {

@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.utils.EntityUtils;
 import dev.jorel.commandapi.CommandAPICommand;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -23,8 +22,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import static com.playmonumenta.plugins.Constants.TICKS_PER_SECOND;
-
 public class ShowMyDpsCommand {
 	private static final String TAG = "ShowMyDps";
 	private static final NumberFormat FORMAT = NumberFormat.getCompactNumberInstance(Locale.getDefault(), NumberFormat.Style.SHORT);
@@ -33,48 +30,34 @@ public class ShowMyDpsCommand {
 		FORMAT.setMaximumFractionDigits(1);
 	}
 
-	private record DPS(double damage, Map<DamageEvent.DamageType, Double> perTypeDamage,
-					   Map<ClassAbility, Double> perAbilityDamage,
-					   long startTime, long downTime, long lastHitTime) {
+	private record DPS(double damage, long startTime, Map<ClassAbility, Double> perAbilityDamage) {
 		public Component getMessage(Component bossName, long timeNow) {
 			List<Component> abilities = new ArrayList<>();
-			abilities.add(Component.text("Damage Breakdown", NamedTextColor.AQUA, TextDecoration.BOLD));
+			abilities.add(Component.text("Ability Damage", NamedTextColor.AQUA, TextDecoration.BOLD));
 
-			for (Map.Entry<DamageEvent.DamageType, Double> entry : perTypeDamage.entrySet()) {
-				TextComponent element = Component.text(entry.getKey().getDisplay() + ": ", NamedTextColor.GRAY)
-					.append(Component.text(FORMAT.format(entry.getValue()).toLowerCase(Locale.ROOT), NamedTextColor.WHITE));
-				abilities.add(element);
-			}
 			for (Map.Entry<ClassAbility, Double> entry : perAbilityDamage.entrySet()) {
 				TextComponent element = Component.text(entry.getKey().getName() + ": ", NamedTextColor.GRAY)
 					.append(Component.text(FORMAT.format(entry.getValue()).toLowerCase(Locale.ROOT), NamedTextColor.WHITE));
 				abilities.add(element);
 			}
 
-			long killTimeMillis = timeNow - startTime;
-			double killTimeSeconds = Math.max(killTimeMillis / 50, 1) / 20.0;
-			// For fancy display
-			long minutes = (long) Math.floor(killTimeSeconds / 60);
-			long seconds = Math.round(killTimeSeconds % 60);
-
-			long dpsTimeMillis = killTimeMillis - downTime;
-			double dpsTimeSeconds = (double) Math.max(dpsTimeMillis / 50, TICKS_PER_SECOND) / TICKS_PER_SECOND;
-
+			// gets time to 0.1s
+			double time = (timeNow - startTime) / 1000.0;
 			return Component.empty()
+				.append(Component.text("-".repeat(80), NamedTextColor.WHITE))
+				.appendNewline()
 				.append(Component.text("Damage Summary for ", NamedTextColor.GOLD)).append(bossName)
 				.appendNewline()
-				.append(Component.text("- Total Damage: ", NamedTextColor.RED)
+				.append(Component.text("Total Damage: ", NamedTextColor.RED)
 					.append(Component.text(FORMAT.format(damage).toLowerCase(Locale.ROOT), NamedTextColor.WHITE))
-					.append(Component.text(" (%,.1f)".formatted(damage), NamedTextColor.GRAY)))
+					.append(Component.text(" (%,.1f)".formatted(damage), NamedTextColor.GRAY))
+					.hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()), abilities))))
 				.appendNewline()
-				.append(Component.text("- Damage per Second: ", NamedTextColor.DARK_RED)
-					.append(Component.text(FORMAT.format(damage / dpsTimeSeconds).toLowerCase(Locale.ROOT), NamedTextColor.WHITE))
-					.append(Component.text(" (%,.1f)".formatted(damage / dpsTimeSeconds), NamedTextColor.GRAY)))
+				.append(Component.text("Damage per Second: ", NamedTextColor.DARK_RED)
+					.append(Component.text(FORMAT.format(damage / time).toLowerCase(Locale.ROOT), NamedTextColor.WHITE))
+					.append(Component.text(" (%,.1f)".formatted(damage / time), NamedTextColor.GRAY)))
 				.appendNewline()
-				.append(Component.text("- Kill Time: ", NamedTextColor.YELLOW)
-					.append(Component.text("%d min, %d s".formatted(minutes, seconds), NamedTextColor.WHITE))
-					.append(Component.text(" (%,.2fs)".formatted(killTimeSeconds), NamedTextColor.GRAY)))
-				.hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()), abilities)));
+				.append(Component.text("-".repeat(80), NamedTextColor.WHITE));
 		}
 	}
 
@@ -84,40 +67,17 @@ public class ShowMyDpsCommand {
 	public static void register() {
 		new CommandAPICommand("showmydps")
 			.withPermission("monumenta.command.showmydps")
-			.executes((sender, args) -> {
-				if (sender instanceof Player player) {
-					if (player.getScoreboardTags().contains(TAG)) {
-						player.sendMessage(
-							Component.text("Boss DPS Logging: ", NamedTextColor.GOLD)
-								.append(Component.text("Disabled", NamedTextColor.AQUA))
-						);
-						player.removeScoreboardTag(TAG);
-					} else {
-						player.sendMessage(
-							Component.text("Boss DPS Logging: ", NamedTextColor.GOLD)
-								.append(Component.text("Enabled", NamedTextColor.AQUA))
-						);
-						player.addScoreboardTag(TAG);
-					}
-				}
-			})
 			.withSubcommand(new CommandAPICommand("enable")
 				.executes((sender, args) -> {
 					if (sender instanceof Player player) {
-						player.sendMessage(
-							Component.text("Boss DPS Logging: ", NamedTextColor.GOLD)
-								.append(Component.text("Enabled", NamedTextColor.AQUA))
-						);
+						player.sendMessage("Started logging your dps against bosses.");
 						player.addScoreboardTag(TAG);
 					}
 				}))
 			.withSubcommand(new CommandAPICommand("disable")
 				.executes((sender, args) -> {
 					if (sender instanceof Player player) {
-						player.sendMessage(
-							Component.text("Boss DPS Logging: ", NamedTextColor.GOLD)
-								.append(Component.text("Disabled", NamedTextColor.AQUA))
-						);
+						player.sendMessage("Stopped logging your dps against bosses.");
 						player.removeScoreboardTag(TAG);
 					}
 				}))
@@ -126,41 +86,30 @@ public class ShowMyDpsCommand {
 
 	public static void onDamage(DamageEvent event) {
 		LivingEntity damagee = event.getDamagee();
-		if (EntityUtils.isBoss(damagee) && !EntityUtils.isVirtualMob(damagee) && event.getSource() instanceof Player player) {
+		if (EntityUtils.isBoss(damagee) && event.getSource() instanceof Player player) {
 			Map<UUID, DPS> playerDPS = PLAYER_DPS_MAP.computeIfAbsent(damagee.getUniqueId(), uuid -> new HashMap<>());
 			playerDPS.compute(player.getUniqueId(), (uuid, oldDps) -> {
 				double finalDamage = event.getFinalDamage(true);
-				// Likely is a taunt skill
-				if (finalDamage < 0.1) {
-					return oldDps;
-				}
-
-				DamageEvent.DamageType type = event.getType();
-				@Nullable ClassAbility ability = event.getAbility();
-				long currentTime = System.currentTimeMillis();
-
+				@Nullable
+				ClassAbility ability = event.getAbility();
 				if (oldDps == null) {
-					Map<DamageEvent.DamageType, Double> perTypeDamage = new EnumMap<>(DamageEvent.DamageType.class);
-					Map<ClassAbility, Double> perAbilityDamage = new EnumMap<>(ClassAbility.class);
+					HashMap<ClassAbility, Double> perAbilityDamage = new HashMap<>();
 					if (ability != null) {
 						perAbilityDamage.put(ability, finalDamage);
-					} else {
-						perTypeDamage.put(type, finalDamage);
 					}
-					return new DPS(finalDamage, perTypeDamage, perAbilityDamage, currentTime, 0, currentTime);
+					return new DPS(finalDamage, System.currentTimeMillis(), perAbilityDamage);
 				}
 
-				Map<DamageEvent.DamageType, Double> perTypeDamage = oldDps.perTypeDamage;
 				Map<ClassAbility, Double> perAbilityDamage = oldDps.perAbilityDamage;
 				if (ability != null) {
-					perAbilityDamage.merge(ability, finalDamage, Double::sum);
-				} else {
-					perTypeDamage.merge(type, finalDamage, Double::sum);
+					perAbilityDamage.compute(ability, (classAbility, previousDamage) -> {
+						if (previousDamage == null) {
+							return finalDamage;
+						}
+						return previousDamage + finalDamage;
+					});
 				}
-				long interval = currentTime - oldDps.lastHitTime;
-				// Record downtime exceeding 1 second
-				long newDownTime = oldDps.downTime + Math.max(interval - 1000, 0);
-				return new DPS(finalDamage + oldDps.damage, perTypeDamage, perAbilityDamage, oldDps.startTime, newDownTime, currentTime);
+				return new DPS(finalDamage + oldDps.damage, oldDps.startTime, perAbilityDamage);
 			});
 		}
 	}

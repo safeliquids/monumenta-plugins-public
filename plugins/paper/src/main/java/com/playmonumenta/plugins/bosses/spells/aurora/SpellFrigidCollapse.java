@@ -58,7 +58,7 @@ public class SpellFrigidCollapse extends Spell {
 		new PPCircle(Particle.REDSTONE, bossLoc, SIZE)
 			.data(new Particle.DustOptions(Color.fromRGB(0x15dfe4), 2.8f))
 			.countPerMeter(40)
-			.distanceFalloff(SIZE * 2)
+			.distanceFalloff(SIZE)
 			.anglePredicate(anglePredicate)
 			.ringMode(false)
 			.delta(0, 0.66, 0)
@@ -85,7 +85,7 @@ public class SpellFrigidCollapse extends Spell {
 
 				new PPCircle(Particle.DUST_COLOR_TRANSITION, bossLoc, SIZE * mTicks / TELEGRAPH_DURATION)
 					.countPerMeter(16)
-					.distanceFalloff(SIZE * 2)
+					.distanceFalloff(SIZE)
 					.data(new Particle.DustTransition(Color.AQUA, Color.BLUE, 2.0f))
 					.ringMode(false)
 					.anglePredicate(anglePredicate)
@@ -94,7 +94,7 @@ public class SpellFrigidCollapse extends Spell {
 
 				new PPCircle(Particle.END_ROD, bossLoc, SIZE * mTicks / TELEGRAPH_DURATION)
 					.countPerMeter(20)
-					.distanceFalloff(SIZE * 2)
+					.distanceFalloff(SIZE)
 					.ringMode(false)
 					.anglePredicate(anglePredicate)
 					.extra(0.01)

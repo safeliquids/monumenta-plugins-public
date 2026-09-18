@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
@@ -45,11 +44,6 @@ public class EarthAspect implements Enchantment {
 	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.EARTH_ASPECT;
-	}
-
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.ASPECTS;
 	}
 
 	@Override

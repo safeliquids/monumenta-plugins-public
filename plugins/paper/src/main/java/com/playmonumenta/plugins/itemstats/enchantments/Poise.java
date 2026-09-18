@@ -4,7 +4,6 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import org.bukkit.entity.Player;
 
@@ -20,11 +19,6 @@ public class Poise implements Enchantment {
 	@Override
 	public EnchantmentType getEnchantmentType() {
 		return EnchantmentType.POISE;
-	}
-
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DEFENSE_SITUATIONAL;
 	}
 
 	public static double applyPoise(DamageEvent event, Plugin plugin, Player player) {

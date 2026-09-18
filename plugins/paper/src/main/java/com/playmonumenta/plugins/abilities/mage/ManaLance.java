@@ -84,7 +84,7 @@ public class ManaLance extends MultipleChargeAbility {
 		}
 		mLastCastTicks = ticks;
 
-		double damage = SpellPower.getSpellDamage(mPlugin, mPlayer, mDamage);
+		float damage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mDamage);
 
 		Location startLoc = mPlayer.getEyeLocation();
 		World world = mPlayer.getWorld();

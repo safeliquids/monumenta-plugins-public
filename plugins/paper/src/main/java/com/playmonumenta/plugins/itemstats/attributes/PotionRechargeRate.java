@@ -13,4 +13,9 @@ public class PotionRechargeRate implements Attribute {
 	public AttributeType getAttributeType() {
 		return AttributeType.POTION_RECHARGE_RATE;
 	}
+
+	@Override
+	public double getPriorityAmount() {
+		return 1998;
+	}
 }

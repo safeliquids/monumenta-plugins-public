@@ -256,7 +256,7 @@ public class CleansingRain extends Ability implements AbilityWithDuration {
 				.statValues(
 					stat(a -> a.mRainHealing, CLEANSING_HEALING_INCREMENT),
 					stat(a -> a.mRainHealingMaxDebuffs, CLEANSING_HEALING_MAX_DEBUFFS))
-			.addStat("Radius: %r1u")
+			.addStat("Radius: %r1e_only")
 				.statValues(stat(a -> a.mRadius, CLEANSING_RADIUS))
 			.addStat("Duration: %t1")
 				.statValues(stat(a -> a.mRainDuration, CLEANSING_1_DURATION))

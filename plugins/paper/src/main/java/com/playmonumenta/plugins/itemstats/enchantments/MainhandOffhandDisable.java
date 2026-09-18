@@ -2,7 +2,6 @@ package com.playmonumenta.plugins.itemstats.enchantments;
 
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 
 public class MainhandOffhandDisable implements Enchantment {
 
@@ -17,8 +16,8 @@ public class MainhandOffhandDisable implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.FIRST;
+	public double getPriorityAmount() {
+		return -10000;
 	}
 
 }

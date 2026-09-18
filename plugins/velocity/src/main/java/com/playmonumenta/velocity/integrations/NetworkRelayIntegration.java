@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.playmonumenta.networkrelay.GatherRemotePlayerDataEventVelocity;
 import com.playmonumenta.networkrelay.NetworkRelayAPI;
 import com.playmonumenta.networkrelay.NetworkRelayMessageEventGeneric;
-import com.playmonumenta.networkrelay.util.MMLog;
 import com.playmonumenta.velocity.MonumentaVelocity;
 import com.playmonumenta.velocity.voting.VoteManager;
 import com.velocitypowered.api.event.Subscribe;
@@ -20,18 +19,6 @@ import org.slf4j.Logger;
 
 public class NetworkRelayIntegration {
 	public static final String VOTE_NOTIFY_CHANNEL = "Monumenta.Bungee.VoteNotify";
-	public static final String BAN_CHANNEL = "Monumenta.Velocity.BanOnLogout";
-	public static final String AUDIT_LOG_CHANNEL = "Monumenta.Automation.AuditLog";
-	public static final String AUDIT_LOG_SEVERE_CHANNEL = "Monumenta.Automation.AuditLogSevere";
-	public static final String AUDIT_LOG_CHAT_MOD_CHANNEL = "Monumenta.Automation.ChatModAuditLog";
-	public static final String AUDIT_LOG_DEATH_CHANNEL = "Monumenta.Automation.DeathAuditLog";
-	public static final String AUDIT_LOG_PLAYERS_CHANNEL = "Monumenta.Automation.PlayerAuditLog";
-	public static final String AUDIT_LOG_MAIL_CHANNEL = "Monumenta.Automation.MailAuditLog";
-	public static final String AUDIT_LOG_MARKET_CHANNEL = "Monumenta.Automation.MarketAuditLog";
-	public static final String AUDIT_LOG_REPORT_CHANNEL = "Monumenta.Automation.ReportAuditLog";
-	public static final String ADMIN_ALERT_CHANNEL = "Monumenta.Automation.AdminNotification";
-	private static final String BAN_LOGOUT_LISTEN = "logoutListen";
-	private static final String BAN_LOGOUT_ALERT = "logoutAlert";
 
 	private final MonumentaVelocity mMain;
 	private final Logger mLogger;
@@ -79,8 +66,7 @@ public class NetworkRelayIntegration {
 
 	@Subscribe(priority = Short.MAX_VALUE / 2)
 	public void networkRelayMessageEventVelocity(NetworkRelayMessageEventGeneric event) {
-		String channel = event.getChannel();
-		if (channel.equals(VOTE_NOTIFY_CHANNEL)) {
+		if (event.getChannel().equals(VOTE_NOTIFY_CHANNEL)) {
 			JsonObject data = event.getData();
 			if (!data.has("playerUUID") ||
 				!data.get("playerUUID").isJsonPrimitive() ||
@@ -97,8 +83,8 @@ public class NetworkRelayIntegration {
 			}
 
 			if (!data.has("cooldownMinutes") ||
-				!data.get("cooldownMinutes").isJsonPrimitive() ||
-				!data.getAsJsonPrimitive("cooldownMinutes").isNumber()) {
+					!data.get("cooldownMinutes").isJsonPrimitive() ||
+					!data.getAsJsonPrimitive("cooldownMinutes").isNumber()) {
 				mLogger.error("VOTE_NOTIFY_CHANNEL failed to parse required int field 'cooldownMinutes'");
 				return;
 			}
@@ -108,28 +94,6 @@ public class NetworkRelayIntegration {
 			long cooldownMinutes = data.get("cooldownMinutes").getAsLong();
 
 			VoteManager.gotVoteNotifyMessage(uuid, matchingSite, cooldownMinutes);
-		} else if (channel.equals(BAN_CHANNEL)) {
-			JsonObject data = event.getData();
-			if (!data.has("type") ||
-				!data.has("player")
-			) {
-				mLogger.error("BAN_CHANNEL gave an invalid message");
-				return;
-			}
-			if (mMain.mBanOnLogout == null || mMain.mJoinLeaveHandler == null) {
-				mLogger.error("mBanOnLogout or mJoinLeaveHandler was not initialised!");
-				return;
-			}
-
-			String type = data.get("type").getAsString();
-			String playerName = data.get("player").getAsString();
-			if (type.equals(BAN_LOGOUT_LISTEN) && !mMain.mBanOnLogout.isTracked(playerName)) {
-				// Failsafe: Don't send logouts to another proxy if the player is already going to be banned from this one
-				mMain.mJoinLeaveHandler.listenPlayerLogout(playerName);
-			} else if (type.equals(BAN_LOGOUT_ALERT) && !mMain.mJoinLeaveHandler.isTracked(playerName)) {
-				// Failsafe: Don't ban on this proxy if another proxy already requested this player
-				mMain.mBanOnLogout.onPlayerLogout(playerName);
-			}
 		}
 	}
 
@@ -181,70 +145,5 @@ public class NetworkRelayIntegration {
 			// ignored
 		}
 		return mCachedPlayerCount;
-	}
-
-	public static void setScore(String scoreHolder, String score, int value) {
-		if (INSTANCE == null) {
-			return;
-		}
-		try {
-			NetworkRelayAPI.sendBroadcastCommand("execute if entity %1$s run scoreboard players set %1$s %2$s %3$d".formatted(scoreHolder, score, value), NetworkRelayAPI.ServerType.MINECRAFT);
-		} catch (Exception e) {
-			MMLog.severe("Failed to set score \"%s\" to %d for %s".formatted(score, value, scoreHolder));
-		}
-	}
-
-	public static void sendAdminMessage(String message) {
-		sendAuditLogMessageImmediate(message, ADMIN_ALERT_CHANNEL);
-	}
-
-	public static void sendAuditLogSevereMessage(String message) {
-		sendAuditLogMessageImmediate(message, AUDIT_LOG_SEVERE_CHANNEL);
-	}
-
-	private static void sendAuditLogMessageImmediate(String message, String channel) {
-		if (INSTANCE == null) {
-			return;
-		}
-		JsonObject data = new JsonObject();
-		data.addProperty("message", message);
-		try {
-			NetworkRelayAPI.sendMessage("*", channel, data);
-		} catch (Exception ex) {
-			INSTANCE.mLogger.error("Failed to send audit log message to " + channel, ex);
-		}
-	}
-
-	public static void sendLogoutNotifyRequest(String playerName) {
-		if (INSTANCE == null) {
-			return;
-		}
-		JsonObject data = new JsonObject();
-		data.addProperty("type", BAN_LOGOUT_LISTEN);
-		data.addProperty("player", playerName);
-		try {
-			// See MonumentaNetworkRelayIntegration
-			NetworkRelayAPI.sendMessage("*", BAN_CHANNEL, data);
-		} catch (Exception ex) {
-			// TODO: pls use MMLog that paper can use
-			INSTANCE.mLogger.error("Failed to send logout notify request", ex);
-		}
-	}
-
-	public static void sendLogoutAlert(String playerName) {
-		if (INSTANCE == null) {
-			return;
-		}
-		JsonObject data = new JsonObject();
-		data.addProperty("type", BAN_LOGOUT_ALERT);
-		data.addProperty("player", playerName);
-		try {
-			// See MonumentaNetworkRelayIntegration
-			NetworkRelayAPI.sendMessage("*", BAN_CHANNEL, data);
-		} catch (Exception ex) {
-			// TODO: pls use MMLog that paper can use
-			MMLog.severe("Failed to send logout notify request");
-			MMLog.severe(String.valueOf(ex.getMessage()));
-		}
 	}
 }

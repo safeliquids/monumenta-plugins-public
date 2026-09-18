@@ -1157,7 +1157,7 @@ public class LoadoutManager implements Listener {
 				ItemStack item = ItemUtils.parseItemStack(json.getAsJsonPrimitive("displayItem").getAsString());
 				if (ItemStatUtils.isDirty(item)) {
 					ItemUtils.setPlainTag(item);
-					ItemUpdateHelper.generateItemStats(item, List.of("LoadoutManager displayItem"));
+					ItemUpdateHelper.generateItemStats(item);
 					ItemStatUtils.removeDirty(item);
 					item = VanityManager.cleanCopyForDisplay(item);
 				}
@@ -1213,7 +1213,7 @@ public class LoadoutManager implements Listener {
 				ItemStack item = ItemUtils.parseItemStack(entry.getValue().getAsString());
 				if (ItemStatUtils.isDirty(item)) {
 					ItemUtils.setPlainTag(item);
-					ItemUpdateHelper.generateItemStats(item, List.of("LoadoutManager vanityitem"));
+					ItemUpdateHelper.generateItemStats(item);
 					ItemStatUtils.removeDirty(item);
 					item = VanityManager.cleanCopyForDisplay(item);
 				}

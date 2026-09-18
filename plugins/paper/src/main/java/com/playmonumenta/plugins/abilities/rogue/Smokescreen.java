@@ -12,24 +12,20 @@ import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.cosmetics.skills.CosmeticSkills;
 import com.playmonumenta.plugins.cosmetics.skills.rogue.SmokescreenCS;
 import com.playmonumenta.plugins.events.DamageEvent;
-import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
 import com.playmonumenta.plugins.network.ClientModHandler;
 import com.playmonumenta.plugins.utils.AbilityUtils;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
+import com.playmonumenta.plugins.utils.LocationUtils;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.cooldown;
@@ -81,7 +77,6 @@ public class Smokescreen extends Ability implements AbilityWithDuration {
 
 	private final SmokescreenCS mCosmetic;
 
-	private final Map<Projectile, ItemStatManager.PlayerItemStats> mPlayerItemStatsMap = new WeakHashMap<>();
 	private int mCurrDuration = -1;
 
 	public Smokescreen(Plugin plugin, Player player) {
@@ -102,25 +97,34 @@ public class Smokescreen extends Ability implements AbilityWithDuration {
 		}
 		World world = mPlayer.getWorld();
 
-		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, VELOCITY, mCosmetic.getProjectileName(), null);
-		mPlayerItemStatsMap.put(proj, mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer));
+		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, VELOCITY, mCosmetic.getProjectileName(), null, LocationUtils.isLocationInWater(mPlayer.getLocation()));
+		int cd = getModifiedCooldown();
 		new BukkitRunnable() {
 			int mT = 0;
 
 			@Override
 			public void run() {
-				// Arbitrary large number, it's better not to tie this to the cooldown in case we make crazy charms
-				if (mT > 200) {
-					mPlayerItemStatsMap.remove(proj);
+				if (mT > cd) {
 					proj.remove();
 					this.cancel();
 				}
 
 				if (proj.isDead()) {
-					ItemStatManager.PlayerItemStats stats = mPlayerItemStatsMap.remove(proj);
-					if (stats != null) {
-						spawnSmokescreen(proj.getLocation(), world, stats);
+					Location loc = proj.getLocation();
+					applyEffects(loc);
+					mCosmetic.smokescreenEffects(mPlayer, world, loc, mRadius);
+
+					List<LivingEntity> mobs = new Hitbox.SphereHitbox(loc, mRadius).getHitMobs();
+					if (isEnhanced()) {
+						residualDebuffs(loc);
+						mobs.forEach(mob -> DamageUtils.damage(mPlayer, mob, DamageEvent.DamageType.MELEE_SKILL, mDamage, mInfo.getLinkedSpell(), true));
 					}
+
+					// Artifact Charm code for stun from smokescreen
+					if (mStunDuration > 0) {
+						mobs.forEach(mob -> EntityUtils.applyStun(mPlugin, mStunDuration, mob));
+					}
+
 					this.cancel();
 				}
 				mT++;
@@ -133,39 +137,8 @@ public class Smokescreen extends Ability implements AbilityWithDuration {
 		return true;
 	}
 
-	@Override
-	public void projectileHitEvent(ProjectileHitEvent event, Projectile proj) {
-		ItemStatManager.PlayerItemStats playerItemStats = mPlayerItemStatsMap.remove(proj);
-		if (playerItemStats != null) {
-			spawnSmokescreen(proj.getLocation(), proj.getWorld(), playerItemStats);
-			proj.remove();
-		}
-	}
-
-	private void spawnSmokescreen(Location loc, World world, ItemStatManager.PlayerItemStats stats) {
-		if (world != mPlayer.getWorld()) {
-			return;
-		}
-		applyEffects(loc);
-		mCosmetic.smokescreenEffects(mPlayer, world, loc, mRadius);
-
-		List<LivingEntity> mobs = new Hitbox.SphereHitbox(loc, mRadius).getHitMobs();
-		if (isEnhanced()) {
-			residualDebuffs(loc);
-			for (LivingEntity mob : mobs) {
-				DamageUtils.damage(mPlayer, mob, new DamageEvent.Metadata(DamageEvent.DamageType.MELEE_SKILL, mInfo.getLinkedSpell(), stats), mDamage, true, false, false);
-			}
-		}
-
-		// Artifact Charm code for stun from smokescreen
-		if (mStunDuration > 0) {
-			mobs.forEach(mob -> EntityUtils.applyStun(mPlugin, mStunDuration, mob));
-		}
-	}
-
 	private void residualDebuffs(Location loc) {
 		World world = loc.getWorld();
-		mCurrDuration = Math.max(mCurrDuration, 0);
 		new BukkitRunnable() {
 			int mT = 0;
 
@@ -179,7 +152,7 @@ public class Smokescreen extends Ability implements AbilityWithDuration {
 						applyEffects(loc);
 					}
 					mT += 20;
-					mCurrDuration = Math.max(mCurrDuration, mT);
+					mCurrDuration += 20;
 				}
 			}
 

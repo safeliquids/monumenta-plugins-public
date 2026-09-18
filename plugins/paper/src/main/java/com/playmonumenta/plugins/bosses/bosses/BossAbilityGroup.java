@@ -432,10 +432,6 @@ public abstract class BossAbilityGroup {
 
 	}
 
-	public void bossMountHurt(DamageEvent event) {
-
-	}
-
 	/*
 	 * Boss was stunned by a player. Mobs with the "Boss" tag can't be stunned
 	 */

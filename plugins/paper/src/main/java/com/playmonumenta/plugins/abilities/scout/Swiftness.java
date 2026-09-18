@@ -249,6 +249,10 @@ public class Swiftness extends Ability {
 	}
 
 	public boolean toggleJumpBoost() {
+		if (EntityUtils.isSilenced(mPlayer)) {
+			return false;
+		}
+
 		if (mJumpBoost) {
 			mJumpBoost = false;
 			mPlayer.addScoreboardTag(NO_JUMP_BOOST_TAG);
@@ -268,6 +272,10 @@ public class Swiftness extends Ability {
 	}
 
 	public boolean toggleDefaultTrigger() {
+		if (EntityUtils.isSilenced(mPlayer)) {
+			return false;
+		}
+
 		if (mDefaultTriggerDisabled) {
 			mDefaultTriggerDisabled = false;
 			mPlayer.removeScoreboardTag(NO_DEFAULT_TRIGGER_TAG);

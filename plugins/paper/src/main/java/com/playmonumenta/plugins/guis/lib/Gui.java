@@ -25,36 +25,7 @@ import org.jetbrains.annotations.Nullable;
  * This class manages inventory creation, updates, and basic state management.
  * </p>
  */
-public abstract class FloweyGui implements InventoryHolder {
-	private enum RateLimitState {
-		NONE(false, false),
-		SEND_MESSAGE(true, true),
-		FULL(true, false);
-
-		private final boolean mBlockInteraction;
-		private final boolean mSendMessage;
-
-		RateLimitState(boolean mBlockInteraction, boolean mSendMessage) {
-			this.mBlockInteraction = mBlockInteraction;
-			this.mSendMessage = mSendMessage;
-		}
-
-		boolean sendMessage() {
-			return mSendMessage;
-		}
-
-		boolean blockInteraction() {
-			return mBlockInteraction;
-		}
-
-		RateLimitState next() {
-			return switch (this) {
-				case NONE -> SEND_MESSAGE;
-				case SEND_MESSAGE, FULL -> FULL;
-			};
-		}
-	}
-
+public abstract class Gui implements InventoryHolder {
 	/**
 	 * The player interacting with this GUI instance.
 	 */
@@ -73,7 +44,7 @@ public abstract class FloweyGui implements InventoryHolder {
 	/**
 	 * List of GuiItems in the inventory, with null entries representing filler items.
 	 */
-	final List<@Nullable FloweyGuiItem> mItems = new ArrayList<>();
+	final List<@Nullable GuiItem> mItems = new ArrayList<>();
 
 	/**
 	 * The Bukkit inventory instance managed by this GUI.
@@ -91,12 +62,6 @@ public abstract class FloweyGui implements InventoryHolder {
 	 */
 	private boolean mIsRendering;
 
-	private int mRateLimitResetTicks = 1;
-
-	private RateLimitState mRateLimit = RateLimitState.NONE;
-
-	private int mRateLimitTick;
-
 	/**
 	 * Constructs a new GUI instance.
 	 *
@@ -105,7 +70,7 @@ public abstract class FloweyGui implements InventoryHolder {
 	 * @param title  The initial title of the inventory
 	 * @param size   The initial size of the inventory (must be multiple of 9)
 	 */
-	protected FloweyGui(Player player, ItemStack filler, Component title, int size) {
+	protected Gui(Player player, ItemStack filler, Component title, int size) {
 		Preconditions.checkState(Bukkit.isPrimaryThread(), "off-main gui creation is not allowed");
 		mFiller = filler;
 		mPlayer = player;
@@ -120,25 +85,8 @@ public abstract class FloweyGui implements InventoryHolder {
 	 * @param title  The initial title of the inventory
 	 * @param size   The initial size of the inventory (must be multiple of 9)
 	 */
-	protected FloweyGui(Player player, ItemStack filler, String title, int size) {
+	protected Gui(Player player, ItemStack filler, String title, int size) {
 		this(player, filler, MessagingUtils.MINIMESSAGE_ALL.deserialize(title), size);
-	}
-
-	boolean checkRateLimit() {
-		int currentTick = Bukkit.getCurrentTick();
-
-		if (currentTick - mRateLimitTick > mRateLimitResetTicks) {
-			mRateLimit = RateLimitState.NONE;
-			mRateLimitTick = currentTick;
-		}
-
-		if (mRateLimit.sendMessage()) {
-			MessagingUtils.sendError(mPlayer, "Please do not spam the GUI!");
-		}
-
-		boolean blocksInteraction = mRateLimit.blockInteraction();
-		mRateLimit = mRateLimit.next();
-		return blocksInteraction;
 	}
 
 	/**
@@ -162,23 +110,13 @@ public abstract class FloweyGui implements InventoryHolder {
 	}
 
 	/**
-	 * Specifies the number of ticks to wait before allowing new player input.
-	 *
-	 * @param ticks the tick delay
-	 */
-	protected final void setRateLimit(int ticks) {
-		Preconditions.checkArgument(ticks > 0, "rate limit must be at least one tick");
-		mRateLimitResetTicks = ticks;
-	}
-
-	/**
 	 * Updates the GUI if marked as dirty.
 	 * <p>
 	 * Recreates the inventory if size or title changed, triggers rendering,
 	 * and opens the updated inventory for the player if necessary.
 	 * </p>
 	 */
-	protected final void update() {
+	protected void update() {
 		if (mInventory == null || !mIsDirty) {
 			return;
 		}
@@ -223,7 +161,7 @@ public abstract class FloweyGui implements InventoryHolder {
 	 * @param item The GUI item to place in the slot
 	 * @throws IllegalStateException If called after inventory disposal or outside render()
 	 */
-	public final void setItem(int i, FloweyGuiItem item) {
+	public final void setItem(int i, GuiItem item) {
 		Preconditions.checkState(Bukkit.isPrimaryThread(), "off-main gui operation is not allowed");
 		Preconditions.checkState(mIsRendering, "setItem() called outside of render()");
 		Preconditions.checkState(mInventory != null, "setItem called after inventory was disposed");
@@ -231,7 +169,7 @@ public abstract class FloweyGui implements InventoryHolder {
 		mItems.set(i, item);
 	}
 
-	public final void setItem(int row, int col, FloweyGuiItem item) {
+	public final void setItem(int row, int col, GuiItem item) {
 		setItem(row * 9 + col, item);
 	}
 
@@ -285,7 +223,7 @@ public abstract class FloweyGui implements InventoryHolder {
 	/**
 	 * Called when the GUI needs to be rendered.
 	 * <p>
-	 * Implementations should use {@link #setItem(int, FloweyGuiItem)} to populate the inventory.
+	 * Implementations should use {@link #setItem(int, GuiItem)} to populate the inventory.
 	 * </p>
 	 */
 	@ApiStatus.OverrideOnly
@@ -295,7 +233,7 @@ public abstract class FloweyGui implements InventoryHolder {
 	 * Called when a click occurs within the GUI inventory.
 	 *
 	 * @param event The inventory click event
-	 * @return true if the event should continue to {@link FloweyGuiItem} processing, false otherwise
+	 * @return true if the event should continue to {@link GuiItem} processing, false otherwise
 	 */
 	@ApiStatus.OverrideOnly
 	protected boolean onGuiClick(InventoryClickEvent event) {

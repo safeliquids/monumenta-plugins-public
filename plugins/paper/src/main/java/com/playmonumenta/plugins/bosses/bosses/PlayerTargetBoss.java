@@ -4,7 +4,6 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.bosses.spells.Spell;
 import com.playmonumenta.plugins.bosses.spells.SpellRunAction;
 import com.playmonumenta.plugins.bosses.spells.SpellTargetVisiblePlayer;
-import com.playmonumenta.plugins.utils.EntityUtils;
 import org.bukkit.entity.Dolphin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Golem;
@@ -28,7 +27,7 @@ public class PlayerTargetBoss extends BossAbilityGroup {
 			throw new Exception(identityTag + " only works on mobs! Entity name='" + boss.getName() + "', tags=[" + String.join(",", boss.getScoreboardTags()) + "]");
 		}
 
-		boss.addScoreboardTag(EntityUtils.HOSTILE_TAG);
+		boss.addScoreboardTag("Hostile");
 
 		if (boss instanceof Wolf || boss instanceof Golem || boss instanceof Dolphin || boss instanceof Ocelot) {
 			boss.setRemoveWhenFarAway(true);

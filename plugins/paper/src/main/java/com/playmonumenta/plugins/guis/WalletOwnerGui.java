@@ -32,7 +32,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class WalletOwnerGui extends NjolGui {
+public class WalletOwnerGui extends Gui {
 	private static final int HEADER_Y = 0;
 	private static final int PAGE_START_X = 0;
 	private static final int PAGE_START_Y = 1;

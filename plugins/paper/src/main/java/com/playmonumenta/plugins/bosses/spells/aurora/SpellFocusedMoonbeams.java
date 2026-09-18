@@ -199,7 +199,7 @@ public class SpellFocusedMoonbeams extends Spell {
 			changingLoc.add(displacement);
 			Location current = Aurora.withSurfaceY(changingLoc, mCenter);
 			if (i % 2 == 0) {
-				blocks.addAll(BlockUtils.getBlocksInPillar(current.clone().subtract(0, 7, 0), 2, 10));
+				blocks.addAll(BlockUtils.getBlocksInPillar(current.clone().subtract(0, 4, 0), 2, 8));
 			}
 			if (i % 4 == 0) {
 				world.playSound(current, Sound.ENTITY_GENERIC_EXPLODE, SoundCategory.HOSTILE, 0.4f, 1.5f);

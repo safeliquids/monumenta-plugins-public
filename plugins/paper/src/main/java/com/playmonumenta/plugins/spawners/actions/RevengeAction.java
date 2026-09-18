@@ -9,7 +9,6 @@ import com.playmonumenta.plugins.spawners.SpawnerBreakAction;
 import com.playmonumenta.plugins.utils.AdvancementUtils;
 import com.playmonumenta.plugins.utils.BlockUtils;
 import com.playmonumenta.plugins.utils.FastUtils;
-import com.playmonumenta.plugins.utils.LocationUtils;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.Bukkit;
@@ -33,24 +32,6 @@ public class RevengeAction extends SpawnerBreakAction {
 	public RevengeAction() {
 		super(IDENTIFIER);
 		addParameter("spawn_count", 1);
-		addParameter("range", 0f);
-	}
-
-	private static Location generateSpawnLocation(Location spawnerLoc, double range) {
-		Location spawnLoc = spawnerLoc.clone();
-		for (int safety = 0; safety < 20; safety++) {
-			Location candidateLoc = LocationUtils.randomLocationInPrism(spawnerLoc, range, 1, range);
-			// If there is a better way to get entity dimensions in the future without temporarily spawning it,
-			// replace these arbitrary sizes.
-			if (BlockUtils.getBlocksInPillar(candidateLoc, 0.1, 1.1)
-				.stream()
-				.allMatch(Block::isPassable)
-			) {
-				spawnLoc = candidateLoc;
-				break;
-			}
-		}
-		return spawnLoc;
 	}
 
 	@Override
@@ -58,33 +39,22 @@ public class RevengeAction extends SpawnerBreakAction {
 		if (!AdvancementUtils.checkAdvancement(player, "monumenta:handbook/spawners_/revenge_spawner")) {
 			AdvancementUtils.grantAdvancement(player, "monumenta:handbook/spawners_/revenge_spawner");
 		}
-
 		int spawnCount = (int) getParameter(parameters, "spawn_count");
-		float range = (float) getParameter(parameters, "range");
 		Location spawnerLoc = BlockUtils.getCenteredBlockBaseLocation(spawner);
 
 		if (losPool != null) {
 			Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () -> {
 				for (int i = 0; i < spawnCount; i++) {
-					var entityData = LibraryOfSoulsIntegration.getPool(losPool)
-						.keySet()
-						.iterator()
-						.next()
-						.getNBT();
-					EntityNBT.fromEntityData(entityData)
-						.spawn(generateSpawnLocation(spawnerLoc, range));
+					EntityNBT.fromEntityData(LibraryOfSoulsIntegration.getPool(losPool).keySet().stream().toList().get(0).getNBT()).spawn(spawnerLoc);
 				}
 			}, TELEGRAPH_DELAY);
 		} else {
-			// Note: SpawnerNBTWrapper must be created on this tick, while the
-			// block is still valid!
 			SpawnerNBTWrapper wrapper = new SpawnerNBTWrapper(spawner);
 			List<SpawnerNBTWrapper.SpawnerEntity> entities = wrapper.getEntities();
+			EntityNBT entityNBT = FastUtils.getRandomElement(entities).entityNBT;
 			Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () -> {
 				for (int i = 0; i < spawnCount; i++) {
-					FastUtils.getRandomElement(entities)
-						.entityNBT
-						.spawn(generateSpawnLocation(spawnerLoc, range));
+					entityNBT.spawn(spawnerLoc);
 				}
 			}, TELEGRAPH_DELAY);
 		}

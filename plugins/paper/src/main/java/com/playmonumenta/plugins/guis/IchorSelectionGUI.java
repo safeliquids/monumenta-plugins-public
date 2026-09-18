@@ -20,7 +20,7 @@ import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class IchorSelectionGUI extends NjolGui {
+public class IchorSelectionGUI extends Gui {
 
 	public IchorSelectionGUI(Player player) {
 		super(player, 4 * 9, Component.text("Ichor Imbuement Selection"));

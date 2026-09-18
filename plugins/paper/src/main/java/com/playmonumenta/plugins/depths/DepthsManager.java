@@ -1,6 +1,5 @@
 package com.playmonumenta.plugins.depths;
 
-import com.destroystokyo.paper.entity.Pathfinder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.playmonumenta.plugins.Constants;
@@ -169,7 +168,6 @@ import com.playmonumenta.plugins.utils.FastUtils;
 import com.playmonumenta.plugins.utils.FileUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.InventoryUtils;
-import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.MMLog;
 import com.playmonumenta.plugins.utils.ScoreboardUtils;
 import com.playmonumenta.plugins.utils.StringUtils;
@@ -208,7 +206,6 @@ import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -1483,23 +1480,6 @@ public class DepthsManager {
 				Hitbox hitbox = Hitbox.approximateCylinderSegment(l.clone().add(0, -anticheeseRadius, 0), anticheeseRadius, anticheeseRadius, Math.PI / 2);
 				List<LivingEntity> mobs = hitbox.getHitMobs();
 				mobs.removeIf(mob -> ScoreboardUtils.checkTag(mob, AbilityUtils.IGNORE_TAG));
-				mobs.removeIf(mob -> {
-					if (LocationUtils.hasLineOfSight(mob.getEyeLocation(), l)) {
-						return false;
-					}
-					if (mob instanceof Mob hasAI) {
-						Pathfinder.PathResult pathResult = hasAI.getPathfinder().findPath(l);
-						if (pathResult == null) {
-							return true;
-						}
-						Location nearestLoc = pathResult.getFinalPoint();
-						if (nearestLoc == null) {
-							return true;
-						}
-						return !(LocationUtils.hasLineOfSight(nearestLoc, l) && nearestLoc.distanceSquared(l) < 5);
-					}
-					return true;
-				});
 				if (!mobs.isEmpty()) {
 					mobs.forEach(mob -> GlowingManager.startGlowing(mob, NamedTextColor.WHITE, 100, 0));
 					dp.sendMessage("There are enemies blocking you from opening the next room!");

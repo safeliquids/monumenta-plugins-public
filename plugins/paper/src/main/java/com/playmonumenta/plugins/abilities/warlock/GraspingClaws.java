@@ -23,6 +23,7 @@ import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.ItemUtils;
+import com.playmonumenta.plugins.utils.LocationUtils;
 import com.playmonumenta.plugins.utils.MovementUtils;
 import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.ArrayList;
@@ -132,7 +133,7 @@ public class GraspingClaws extends Ability implements AbilityWithDuration {
 		}
 		World world = mPlayer.getWorld();
 		double speed = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_PROJ_SPEED, 1.5);
-		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, speed, mCosmetic.getProjectileName(), mCosmetic.getProjectileParticle());
+		ThrowableProjectile proj = AbilityUtils.spawnAbilitySnowball(mPlugin, mPlayer, world, speed, mCosmetic.getProjectileName(), mCosmetic.getProjectileParticle(), LocationUtils.isLocationInWater(mPlayer.getLocation()));
 		mPlayerItemStatsMap.put(proj, mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer));
 		putOnCooldown();
 		return true;

@@ -9,7 +9,6 @@ import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.listeners.DamageListener;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.AbilityUtils;
@@ -62,9 +61,10 @@ public class Explosive implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGING_ENCHANTMENT;
+	public double getPriorityAmount() {
+		return 19;
 	}
+	// After Hex Eater, should be the last "flat" damage event
 
 	@Override
 	public void onDamage(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {

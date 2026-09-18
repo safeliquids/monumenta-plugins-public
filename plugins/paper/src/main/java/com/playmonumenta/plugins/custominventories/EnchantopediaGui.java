@@ -1,8 +1,8 @@
 package com.playmonumenta.plugins.custominventories;
 
 import com.comphenix.protocol.wrappers.Pair;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
@@ -33,7 +33,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class EnchantopediaGui extends NjolGui {
+public class EnchantopediaGui extends Gui {
 	private static final int INV_SIZE = 54;
 	private static final Component BASE_TITLE = Component.text("Enchantopedia");
 	private static final String ROOT_PATH = "monumenta:handbook/enchantments/root";
@@ -73,7 +73,7 @@ public class EnchantopediaGui extends NjolGui {
 		// Back arrow
 		if (mRow > 0) {
 			setItem(backArrowSlot,
-				new NjolGuiItem(GUIUtils.createBasicItem(
+				new GuiItem(GUIUtils.createBasicItem(
 					Material.ARROW,
 					"Scroll Up",
 					NamedTextColor.WHITE))
@@ -107,7 +107,7 @@ public class EnchantopediaGui extends NjolGui {
 
 
 		// Name filter
-		setItem(nameSearchSlot, new NjolGuiItem(GUIUtils.createBasicItem(
+		setItem(nameSearchSlot, new GuiItem(GUIUtils.createBasicItem(
 			Material.OAK_SIGN,
 			Component.text("Search By Name", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
 			List.of("Click to filter enchantments by name", "Shift-click to reset"), NamedTextColor.GRAY)).onClick((evt) -> {
@@ -159,7 +159,7 @@ public class EnchantopediaGui extends NjolGui {
 		// Next arrow
 		int rowCount = displayedEnchants.size() / 9 - (INV_SIZE - offset) / 9 + 1;
 		if (mRow < rowCount) {
-			setItem(nextArrowSlot, new NjolGuiItem(GUIUtils.createBasicItem(Material.ARROW, "Scroll Down", NamedTextColor.WHITE)).onClick((evt) -> {
+			setItem(nextArrowSlot, new GuiItem(GUIUtils.createBasicItem(Material.ARROW, "Scroll Down", NamedTextColor.WHITE)).onClick((evt) -> {
 				if (mRow < rowCount) {
 					mRow += 1;
 					update();
@@ -171,7 +171,7 @@ public class EnchantopediaGui extends NjolGui {
 			addCategories(offset);
 		} else {
 			// Reset filters button
-			setItem(resetFiltersSlot, new NjolGuiItem(GUIUtils.createBasicItem(
+			setItem(resetFiltersSlot, new GuiItem(GUIUtils.createBasicItem(
 				Material.BARRIER,
 				Component.text("Reset Filters", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
 				List.of("Click here to reset all filters"), NamedTextColor.GRAY)).onClick((evt) -> {
@@ -189,7 +189,7 @@ public class EnchantopediaGui extends NjolGui {
 	private void addItemFilter(int slot) {
 		if (mFilterItem == null) {
 			setItem(slot,
-				new NjolGuiItem(GUIUtils.createBasicItem(
+				new GuiItem(GUIUtils.createBasicItem(
 					Material.SPYGLASS,
 					Component.text("View Item Enchantments", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
 					List.of("Click an item in your inventory to view its enchantments",
@@ -315,7 +315,7 @@ public class EnchantopediaGui extends NjolGui {
 			}
 
 			int finalIndex = i;
-			var item = new NjolGuiItem(GUIUtils.createBasicItem(
+			var item = new GuiItem(GUIUtils.createBasicItem(
 				d.icon(),
 				1,
 				Component.text(name, nameColor, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false),
@@ -334,7 +334,7 @@ public class EnchantopediaGui extends NjolGui {
 			offset += 1;
 		}
 
-		var viewAll = new NjolGuiItem(GUIUtils.createBasicItem(
+		var viewAll = new GuiItem(GUIUtils.createBasicItem(
 			Material.ENDER_EYE,
 			Component.text("View All Enchantments")
 				.color(NamedTextColor.WHITE)

@@ -49,7 +49,7 @@ public class SurgeBoss extends BossAbilityGroup {
 		public float KB_Y = 0.3f;
 
 		@BossParam(help = "The entities to be targeted by the projectiles")
-		public EntityTargets TARGETS = new EntityTargets(EntityTargets.TARGETS.PLAYER, 10, EntityTargets.Limit.CLOSER_ONE, List.of(), EntityTargets.TagsListFiter.DEFAULT);
+		public EntityTargets TARGETS = EntityTargets.GENERIC_SELF_TARGET.clone();
 
 		@BossParam(help = "Delay between projectiles (0 means instant)")
 		public int PROJECTILE_INTERVAL = 1;

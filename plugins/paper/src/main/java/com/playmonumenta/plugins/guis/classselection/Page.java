@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.guis.classselection;
 
 import com.playmonumenta.plugins.classes.MonumentaClasses;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,7 +25,7 @@ public abstract class Page {
 		mGui.setItem(ClassSelectionGui.COMMON_HEADER_ROW, COMMON_SUMMARY_COLUMN, summaryItem);
 	}
 
-	protected NjolGuiItem setBackIcon(ItemStack backIcon) {
+	protected GuiItem setBackIcon(ItemStack backIcon) {
 		return mGui.setItem(ClassSelectionGui.COMMON_HEADER_ROW, COMMON_BACK_COLUMN, backIcon);
 	}
 

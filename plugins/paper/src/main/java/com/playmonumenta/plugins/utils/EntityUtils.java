@@ -221,12 +221,6 @@ public class EntityUtils {
 	 */
 	public static final String IGNORE_DEATH_TRIGGERS_TAG = "boss_no_death_triggers";
 	public static final String DONT_ENTER_BOATS_TAG = "boss_no_boat_riding";
-	public static final String HOSTILE_TAG = "Hostile";
-	public static final Set<String> VIRTUAL_ENTITY_BOSSTAGS = Set.of(
-		ImmortalPassengerBoss.identityTag,
-		ImmortalMountBoss.identityTag,
-		WormSegmentBoss.identityTag
-	);
 	private static final Map<LivingEntity, Integer> COOLING_MOBS = new HashMap<>();
 	private static final Map<LivingEntity, Integer> STUNNED_MOBS = new HashMap<>();
 	private static final Map<LivingEntity, Integer> FROZEN_MOBS = new HashMap<>(); // Frozen is just stun but without the visuals
@@ -397,15 +391,6 @@ public class EntityUtils {
 		return WATER_MOBS.contains(type);
 	}
 
-	public static boolean isVirtualMob(LivingEntity entity) {
-		for (String tag : VIRTUAL_ENTITY_BOSSTAGS) {
-			if (entity.getScoreboardTags().contains(tag)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	// Affected by Abyssal
 	public static boolean isInWater(Entity mob) {
 		return LocationUtils.isLocationInWater(mob.getLocation()) || LocationUtils.isLocationInWater(mob.getLocation().subtract(0, 1, 0));
@@ -470,7 +455,7 @@ public class EntityUtils {
 
 		if (mob.getTarget() instanceof Player) {
 			return true;
-		} else if (mob.getScoreboardTags().contains(HOSTILE_TAG)) {
+		} else if (mob.getScoreboardTags().contains("Hostile")) {
 			return true;
 		} else {
 			return checkingOnSpawn && (mob.getScoreboardTags().contains(PlayerTargetBoss.identityTag) || mob.getScoreboardTags().contains(HostileBoss.identityTag));
@@ -484,7 +469,7 @@ public class EntityUtils {
 
 	public static boolean isStillLoaded(Entity entity) {
 		Location loc = entity.getLocation();
-		if (!loc.isWorldLoaded() || !loc.isChunkLoaded()) {
+		if (!loc.isChunkLoaded()) {
 			return false;
 		}
 
@@ -892,6 +877,23 @@ public class EntityUtils {
 		return nearbyPlayers;
 	}
 
+	public static double vulnerabilityMult(LivingEntity target) {
+		if (target instanceof Player) {
+			PotionEffect unluck = target.getPotionEffect(PotionEffectType.UNLUCK);
+			if (unluck != null) {
+				double vulnLevel = 1 + unluck.getAmplifier();
+
+				if (isBoss(target)) {
+					vulnLevel = vulnLevel / 2;
+				}
+
+				return 1 + 0.05 * vulnLevel;
+			}
+		}
+
+		return 1;
+	}
+
 	public static @Nullable LivingEntity getNearestHostileTargetable(Location loc, double range) {
 		return loc.getNearbyEntitiesByType(LivingEntity.class, range, range, range)
 			.stream()
@@ -971,13 +973,13 @@ public class EntityUtils {
 	}
 
 	public static final String SLOW_EFFECT_NAME = "SlowEffect";
-	public static final String NEGATIVE_SLOW_EFFECT_NAME = "SlowEffectNegative";
 
 	public static void applySlow(Plugin plugin, int ticks, double amount, LivingEntity mob) {
-		applySlow(plugin, ticks, amount, mob, amount > 0 ? SLOW_EFFECT_NAME : NEGATIVE_SLOW_EFFECT_NAME);
+		if (!isCCImmuneMob(mob)) {
+			plugin.mEffectManager.addEffect(mob, SLOW_EFFECT_NAME, new PercentSpeed(ticks, -amount, SLOW_EFFECT_NAME));
+		}
 	}
 
-	// Don't use this method directly unless there is a reason the slow should stack with other slows
 	public static void applySlow(Plugin plugin, int ticks, double amount, LivingEntity mob, String effectString) {
 		if (!isCCImmuneMob(mob)) {
 			plugin.mEffectManager.addEffect(mob, SLOW_EFFECT_NAME, new PercentSpeed(ticks, -amount, effectString));
@@ -1025,7 +1027,6 @@ public class EntityUtils {
 	}
 
 	public static final String WEAKEN_EFFECT_NAME = "WeakenEffect";
-	public static final String NEGATIVE_WEAKEN_EFFECT_NAME = "WeakenEffectNegative";
 	private static final String WEAKEN_EFFECT_AESTHETICS_NAME = "WeakenEffectAesthetics";
 
 	private static final EnumSet<DamageType> WEAKEN_EFFECT_AFFECTED_DAMAGE_TYPES = EnumSet.of(
@@ -1034,14 +1035,13 @@ public class EntityUtils {
 	);
 
 	public static void applyWeaken(Plugin plugin, int ticks, double amount, LivingEntity mob) {
-		applyWeaken(plugin, ticks, amount, mob, WEAKEN_EFFECT_AFFECTED_DAMAGE_TYPES);
+		applyWeaken(plugin, ticks, amount, mob, WEAKEN_EFFECT_AFFECTED_DAMAGE_TYPES, WEAKEN_EFFECT_NAME);
 	}
 
 	public static void applyWeaken(Plugin plugin, int ticks, double amount, LivingEntity mob, @Nullable EnumSet<DamageType> affectedDamageTypes) {
-		applyWeaken(plugin, ticks, amount, mob, affectedDamageTypes, amount > 0 ? WEAKEN_EFFECT_NAME : NEGATIVE_WEAKEN_EFFECT_NAME);
+		applyWeaken(plugin, ticks, amount, mob, affectedDamageTypes, WEAKEN_EFFECT_NAME);
 	}
 
-	// Don't use this method directly unless there is a reason the weaken should stack with other weakens
 	public static void applyWeaken(Plugin plugin, int ticks, double amount, LivingEntity mob, @Nullable EnumSet<DamageType> affectedDamageTypes, String effectString) {
 		plugin.mEffectManager.addEffect(mob, effectString, new PercentDamageDealt(ticks, -amount).damageTypes(affectedDamageTypes));
 		plugin.mEffectManager.addEffect(mob, WEAKEN_EFFECT_AESTHETICS_NAME, new Aesthetics(ticks,
@@ -1566,7 +1566,7 @@ public class EntityUtils {
 		return getAdjustedBlastDamage(power, originalDamage, baseDamage);
 	}
 
-	public static double getAdjustedBlastDamage(double power, double originalDamage, double baseDamage) {
+	private static double getAdjustedBlastDamage(double power, double originalDamage, double baseDamage) {
 		//Vanilla formula for maximum damage taken
 		double maxOriginalDamage = 2 * 7 * power + 1;
 

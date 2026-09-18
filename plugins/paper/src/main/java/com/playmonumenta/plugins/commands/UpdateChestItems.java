@@ -6,7 +6,6 @@ import com.playmonumenta.plugins.utils.MMLog;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
-import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -42,7 +41,7 @@ public class UpdateChestItems extends GenericCommand {
 				try {
 					ItemUpdateHelper.fixLegacies(item);
 					String errorFound = ItemUpdateHelper.regenerateStats(item);
-					ItemUpdateHelper.generateItemStats(item, List.of("/updatechestitems"));
+					ItemUpdateHelper.generateItemStats(item);
 					// String errorFound = ItemUpdateHelper.checkForErrors(item);
 					if (errorFound != null) {
 						errorFound = "Chest: '" + ItemUtils.toPlainTagText(chest.customName()) + "' Slot: " + slot + " at: " + pos + " " + errorFound;

@@ -1,7 +1,6 @@
 package com.playmonumenta.velocity.handlers;
 
 import com.playmonumenta.velocity.MonumentaVelocity;
-import com.playmonumenta.velocity.integrations.NetworkRelayIntegration;
 import com.playmonumenta.velocity.integrations.PremiumVanishIntegration;
 import com.playmonumenta.velocity.network.VelocityClientModHandler;
 import com.velocitypowered.api.event.ResultedEvent;
@@ -9,7 +8,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent.LoginStatus;
 import com.velocitypowered.api.event.connection.LoginEvent;
-import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import java.util.Collection;
@@ -18,7 +16,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.slf4j.helpers.MessageFormatter;
 
 public class JoinLeaveHandler {
 	final boolean mVanishEnabled;
@@ -27,7 +24,6 @@ public class JoinLeaveHandler {
 
 	/* Keeps track of players that have had their join message sent */
 	private final Set<UUID> mOnlinePlayers = new ConcurrentSkipListSet<>();
-	private final Set<String> mBanLogoutListening = new ConcurrentSkipListSet<>();
 
 	public JoinLeaveHandler(MonumentaVelocity main) {
 		mPlugin = main;
@@ -82,14 +78,6 @@ public class JoinLeaveHandler {
 		}
 	}
 
-	public void listenPlayerLogout(String playerName) {
-		// if player name is not on the proxy at all
-		if (mPlugin.mServer.getPlayer(playerName).isEmpty()) {
-			return;
-		}
-		mBanLogoutListening.add(playerName);
-	}
-
 	@Subscribe(priority = Short.MAX_VALUE / 2)
 	public void loginEvent(LoginEvent event) {
 		String whitelistPermission = System.getenv("MONUMENTA_WHITELIST");
@@ -123,38 +111,16 @@ public class JoinLeaveHandler {
 			return;
 		}
 		Player player = event.getPlayer();
-		String username = player.getUsername();
 
 		if (mOnlinePlayers.contains(player.getUniqueId())) {
 			/* This player was online - send leave message */
 			mOnlinePlayers.remove(player.getUniqueId());
 			VelocityClientModHandler.onPlayerDisconnected(player);
-			if (mBanLogoutListening.contains(username)) {
-				NetworkRelayIntegration.sendLogoutAlert(username);
-			}
-			if (mPlugin.mBanOnLogout != null) {
-				mPlugin.mBanOnLogout.onPlayerLogout(username);
-			}
 
 			if (mPlugin.mConfig.mJoinMessagesEnabled) {
 				joinLeaveEvent(player, " left the game",
 					mVanishEnabled && PremiumVanishIntegration.isInvisible(player));
 			}
 		}
-	}
-
-	@Subscribe(priority = Short.MAX_VALUE / 2)
-	public void serverKickEvent(KickedFromServerEvent event) {
-		final var player = event.getPlayer();
-		final var component = event.getServerKickReason().orElse(null);
-		if (component != null && MonumentaVelocity.MINIMESSAGE_ALL.serialize(component).contains("disconnect.exceeded_packet_rate")) {
-			final var string = MessageFormatter.format("{} was disconnected from {} for exceeding packet ratelimit (suspicious)", player.getUsername(), event.getServer().getServerInfo().getName()).getMessage();
-			mPlugin.mLogger.warn(string);
-			NetworkRelayIntegration.sendAuditLogSevereMessage(string);
-		}
-	}
-
-	public boolean isTracked(String playerName) {
-		return mBanLogoutListening.contains(playerName);
 	}
 }

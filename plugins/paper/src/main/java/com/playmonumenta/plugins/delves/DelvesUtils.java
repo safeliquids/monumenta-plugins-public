@@ -143,8 +143,6 @@ public class DelvesUtils {
 			case 2902, 2903, 2904, 2905, 2906 -> List.of(experimentalMods.get(6), experimentalMods.get(7));
 			// week starting Friday, November 28, 2025
 			case 2918, 2919, 2920 -> List.of(experimentalMods.get(0), experimentalMods.get(1), experimentalMods.get(5), experimentalMods.get(8));
-			// week starting Friday, June 5, 2026
-			case 2945, 2946, 2947 -> List.of(DelvesModifier.HEALCUT, DelvesModifier.REGENERATING);
 			default -> Collections.emptyList();
 		};
 	}

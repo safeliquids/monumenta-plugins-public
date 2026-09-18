@@ -1,82 +1,65 @@
 package com.playmonumenta.plugins.abilities.warrior.guardian;
 
-import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.abilities.Ability;
 import com.playmonumenta.plugins.abilities.AbilityInfo;
 import com.playmonumenta.plugins.abilities.AbilityTrigger;
 import com.playmonumenta.plugins.abilities.AbilityTriggerInfo;
-import com.playmonumenta.plugins.abilities.AbilityWithChargesOrStacks;
+import com.playmonumenta.plugins.abilities.AbilityWithDuration;
 import com.playmonumenta.plugins.abilities.Description;
 import com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder;
-import com.playmonumenta.plugins.abilities.warrior.CounterStrike;
 import com.playmonumenta.plugins.classes.ClassAbility;
 import com.playmonumenta.plugins.cosmetics.skills.CosmeticSkills;
 import com.playmonumenta.plugins.cosmetics.skills.warrior.guardian.ShieldWallCS;
 import com.playmonumenta.plugins.effects.OnHitTimerEffect;
 import com.playmonumenta.plugins.events.DamageEvent;
+import com.playmonumenta.plugins.itemstats.ItemStatManager;
 import com.playmonumenta.plugins.itemstats.abilities.CharmManager;
-import com.playmonumenta.plugins.utils.AbilityUtils;
+import com.playmonumenta.plugins.network.ClientModHandler;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import com.playmonumenta.plugins.utils.Hitbox;
 import com.playmonumenta.plugins.utils.MovementUtils;
-import com.playmonumenta.plugins.utils.ZoneUtils;
-import it.unimi.dsi.fastutil.Pair;
+import com.playmonumenta.plugins.utils.PlayerUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
 
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.cooldown;
-import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.perRegion;
 import static com.playmonumenta.plugins.abilities.FormattedDescriptionBuilder.StatValue.stat;
 import static com.playmonumenta.plugins.utils.DescriptionUtils.UNDERLINED;
-import static com.playmonumenta.plugins.utils.DescriptionUtils.WHITE;
 
-public class ShieldWall extends Ability implements AbilityWithChargesOrStacks {
-	private static final AbilityTriggerInfo.TriggerRestriction RESTRICTION = new AbilityTriggerInfo.TriggerRestriction("Holding a Shield",
-		p -> p.getInventory().getItemInMainHand().getType().equals(Material.SHIELD)
-			|| p.getInventory().getItemInOffHand().getType().equals(Material.SHIELD));
+public class ShieldWall extends Ability implements AbilityWithDuration {
 
-	private static final String ON_HIT_EFFECT = "ShieldWallHitCooldownEffect";
-	private static final int BASH_DURATION = 15;
-	private static final double[] SHIELD_WALL_DAMAGE_L1 = {15, 20};
-	private static final double[] SHIELD_WALL_DAMAGE_L2 = {18, 24};
-	private static final int SHIELD_WALL_DURABILITY_L1 = 10;
-	private static final int SHIELD_WALL_DURABILITY_L2 = 14;
-	private static final int SHIELD_WALL_RECHARGE_COUNT = 1;
-	private static final int SHIELD_WALL_RECHARGE = Constants.TICKS_PER_SECOND;
-	private static final int SHIELD_WALL_COOLDOWN_L1 = 10 * Constants.TICKS_PER_SECOND;
-	private static final int SHIELD_WALL_COOLDOWN_L2 = 8 * Constants.TICKS_PER_SECOND;
+	private static final int SHIELD_WALL_1_DURATION = 6 * 20;
+	private static final int SHIELD_WALL_2_DURATION = 10 * 20;
+	private static final int SHIELD_WALL_DAMAGE = 3;
+	private static final int SHIELD_WALL_1_COOLDOWN = 20 * 25;
+	private static final int SHIELD_WALL_2_COOLDOWN = 20 * 18;
 	public static final int SHIELD_WALL_ANGLE = 180;
 	private static final float SHIELD_WALL_KNOCKBACK = 0.3f;
-	public static final double SHIELD_WALL_RADIUS_L1 = 2.75;
-	public static final double SHIELD_WALL_RADIUS_L2 = 3.25;
+	public static final double SHIELD_WALL_RADIUS = 2.75;
+	public static final double SHIELD_WALL_RADIUS_STATIONARY = 4;
 	private static final int SHIELD_WALL_HEIGHT = 5;
-	private static final double SHIELD_WALL_BASH_VELOCITY = 1;
-	private static final int SHIELD_WALL_BASH_STUN_DURATION = 30; // 1.5s
+	private static final String ON_HIT_EFFECT = "ShieldWallHitCooldownEffect";
 
+	public static final String CHARM_DURATION = "Shield Wall Duration";
 	public static final String CHARM_DAMAGE = "Shield Wall Damage";
+	public static final String CHARM_COOLDOWN = "Shield Wall Cooldown";
 	public static final String CHARM_ANGLE = "Shield Wall Angle";
 	public static final String CHARM_KNOCKBACK = "Shield Wall Knockback";
 	public static final String CHARM_HEIGHT = "Shield Wall Height";
 	public static final String CHARM_RADIUS = "Shield Wall Radius";
-	public static final String CHARM_DURABILITY = "Shield Wall Durability";
-	public static final String CHARM_DURABILITY_RECHARGE = "Shield Wall Durability Recharge";
 
-	public static final String CHARM_COOLDOWN = "Shield Wall Bash Cooldown";
-	public static final String CHARM_BASH_VELOCITY = "Shield Wall Bash Velocity";
-	public static final String CHARM_BASH_STUN_DURATION = "Shield Wall Bash Stun Duration";
+	private static final AbilityTriggerInfo.TriggerRestriction RESTRICTION = new AbilityTriggerInfo.TriggerRestriction("holding a shield in either hand",
+		player -> player.getInventory().getItemInMainHand().getType() == Material.SHIELD || player.getInventory().getItemInOffHand().getType() == Material.SHIELD);
 
 	public static final AbilityInfo<ShieldWall> INFO =
 		new AbilityInfo<>(ShieldWall.class, "Shield Wall", ShieldWall::new)
@@ -84,327 +67,175 @@ public class ShieldWall extends Ability implements AbilityWithChargesOrStacks {
 			.scoreboardId("ShieldWall")
 			.shorthandName("SW")
 			.descriptions(getDescription1(), getDescription2())
-			.simpleDescription("Block to generate wall that can block projectiles and mobs from entering.")
-			.addTrigger(new AbilityTriggerInfo<>("cast", "cast", ShieldWall::cast,
-				new AbilityTrigger(AbilityTrigger.Key.SWAP), RESTRICTION))
-			.addTrigger(new AbilityTriggerInfo<>("castbash", "cast bash", ShieldWall::shieldWallBash,
-				new AbilityTrigger(AbilityTrigger.Key.DROP), RESTRICTION))
-			.cooldown(SHIELD_WALL_COOLDOWN_L1, CHARM_COOLDOWN)
+			.simpleDescription("Deploy a wall that can block projectiles and mobs from entering.")
+			.cooldown(SHIELD_WALL_1_COOLDOWN, SHIELD_WALL_2_COOLDOWN, CHARM_COOLDOWN)
+			.addTrigger(new AbilityTriggerInfo<>("cast", "cast", "Moves after being cast, recasting will make it stationary.", shieldWall -> shieldWall.cast(false, true), new AbilityTrigger(AbilityTrigger.Key.SWAP), RESTRICTION))
+			.addTrigger(new AbilityTriggerInfo<>("castmoving", "cast moving", "Moves after being cast, does nothing when recast.", shieldWall -> shieldWall.cast(false, false), new AbilityTrigger(AbilityTrigger.Key.SWAP).enabled(false), RESTRICTION))
+			.addTrigger(new AbilityTriggerInfo<>("caststationary", "cast stationary", "Will never move when cast. If cast with a different trigger, using this trigger will make it stationary.", shieldWall -> shieldWall.cast(true, true), new AbilityTrigger(AbilityTrigger.Key.SWAP).enabled(false), RESTRICTION))
 			.displayItem(Material.STONE_BRICK_WALL);
 
+	private final int mDuration;
 	private final double mHeight;
 	private final float mKnockback;
 	private final double mDamage;
 	private final double mAngle;
 	private final double mRadius;
-	private final int mRecharge;
+	private final double mRadiusStationary;
 	private final ShieldWallCS mCosmetic;
-	private final double mBashVelocity;
-	private final int mStunDuration;
-	private final int mMaxDurability;
 
-	private boolean mBashing = false;
-	private @Nullable BukkitTask mRunnable;
-	private @Nullable CounterStrike mCounterStrike;
+	private int mCurrDuration = -1;
 
-	private int mShieldWallIframe = Bukkit.getCurrentTick();
-	private int mT = 0;
-	private int mCastTime = Bukkit.getCurrentTick();
-	private int mDurability;
-	private int mTimer = 0;
-
-	private final Set<LivingEntity> mMobsAlreadyHit = new HashSet<>();
-	private final Set<LivingEntity> mMobsAlreadyBashed = new HashSet<>();
+	private boolean mDeposited = false;
 
 	public ShieldWall(Plugin plugin, Player player) {
 		super(plugin, player, INFO);
-
+		mDuration = CharmManager.getDuration(mPlayer, CHARM_DURATION, (isLevelOne() ? SHIELD_WALL_1_DURATION : SHIELD_WALL_2_DURATION));
 		mHeight = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_HEIGHT, SHIELD_WALL_HEIGHT);
 		mKnockback = (float) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_KNOCKBACK, SHIELD_WALL_KNOCKBACK);
-		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE,
-			isLevelOne() ? AbilityUtils.getRegionScaled(mPlayer, SHIELD_WALL_DAMAGE_L1) :
-			AbilityUtils.getRegionScaled(mPlayer, SHIELD_WALL_DAMAGE_L2));
+		mDamage = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DAMAGE, SHIELD_WALL_DAMAGE);
 		mAngle = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_ANGLE, SHIELD_WALL_ANGLE);
-		mRadius = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RADIUS, isLevelOne() ? SHIELD_WALL_RADIUS_L1 : SHIELD_WALL_RADIUS_L2);
-		mRecharge = (int) (SHIELD_WALL_RECHARGE_COUNT + CharmManager.getLevel(mPlayer, CHARM_DURABILITY_RECHARGE));
-		mMaxDurability = (int) CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_DURABILITY,
-			isLevelOne() ? SHIELD_WALL_DURABILITY_L1 : SHIELD_WALL_DURABILITY_L2);
-		mBashVelocity = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_BASH_VELOCITY, SHIELD_WALL_BASH_VELOCITY);
-		mStunDuration = CharmManager.getDuration(mPlayer, CHARM_BASH_STUN_DURATION, SHIELD_WALL_BASH_STUN_DURATION);
+		mRadius = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RADIUS, SHIELD_WALL_RADIUS);
+		mRadiusStationary = CharmManager.calculateFlatAndPercentValue(mPlayer, CHARM_RADIUS, SHIELD_WALL_RADIUS_STATIONARY);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(player, new ShieldWallCS());
-		mDurability = mMaxDurability;
-
-
-		Bukkit.getScheduler().runTask(mPlugin, () ->
-			mCounterStrike = mPlugin.mAbilityManager.getPlayerAbilityIgnoringSilence(mPlayer, CounterStrike.class));
 	}
 
-	public boolean cast() {
-		int currTick = Bukkit.getCurrentTick();
-		if (currTick - mCastTime < 5) {
-			return false;
-		}
-
-		mCastTime = currTick;
-
-		if (mRunnable != null) {
-			disableShieldWall();
-
+	public boolean cast(boolean deposit, boolean canRecast) {
+		if (isOnCooldown()) {
+			if (mDeposited || !canRecast) {
+				return false;
+			}
+			mDeposited = true;
 			return true;
-		} else if (mDurability <= 0) {
-			return false;
 		}
+		mDeposited = deposit;
 
-		enableShieldWall();
-
-		cancelOnDeath(
-			mRunnable = new BukkitRunnable() {
-				@Override
-				public void run() {
-					if (!mPlayer.isOnline()
-						|| AbilityUtils.isSilenced(mPlayer)
-						|| !RESTRICTION.test(mPlayer)
-						|| (mDurability <= 0 && !mBashing)) {
-						disableShieldWall();
-						return;
-					}
-
-					shieldWallTick();
-				}
-			}.runTaskTimer(mPlugin, 0, 1));
-		return true;
-	}
-
-	@Override
-	public void invalidate() {
-		if (mRunnable != null) {
-			mRunnable.cancel();
-		}
-	}
-
-	public void shieldWallTick() {
+		World world = mPlayer.getWorld();
 		Location loc = mPlayer.getLocation();
-		Hitbox hitbox = Hitbox.approximateHollowCylinderSegment(loc.clone().add(0, -1, 0), mHeight + 1, mBashing ? 0 : 0.7 * mRadius - 0.5, 1.15 * mRadius, Math.toRadians(mAngle) / 2);
-		List<Pair<Float, Double>> mArcHeights = mCosmetic.wallParticles(mPlayer, loc, mRadius, mAngle, mHeight, mT++);
+		mCosmetic.shieldStartEffect(world, mPlayer, loc, SHIELD_WALL_RADIUS);
+		putOnCooldown();
 
-		List<Projectile> projectiles = hitbox.getHitEntitiesByClass(Projectile.class);
-		for (Projectile proj : projectiles) {
-			if (proj.getShooter() instanceof LivingEntity shooter && !(shooter instanceof Player)) {
-				proj.remove();
-				mCosmetic.shieldOnBlock(mPlayer, loc, proj.getLocation(), mRadius);
-			}
+		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
-			if (breakShield()) {
-				return;
-			}
-		}
-
-		List<LivingEntity> entities = hitbox.getHitMobs();
-		for (LivingEntity le : entities) {
-
-			boolean shouldBreak = false;
-			boolean enteredWall = !mMobsAlreadyHit.contains(le);
-			if (enteredWall) {
-				if (mBashing) {
-					if (!mMobsAlreadyBashed.contains(le)) {
-						shieldWallBash(le);
-					}
-				} else {
-					shouldBreak = breakShield();
-				}
-			}
-
-			if (!mPlugin.mEffectManager.hasEffect(le, ON_HIT_EFFECT + mPlayer.getName())) {
-				if (mKnockback > 0 && !EntityUtils.isCCImmuneMob(le)) {
-					float y = 0.4f;
-					if (!le.isOnGround()) {
-						y -= 0.2f;
-					}
-					if (!enteredWall) {
-						y -= 0.15f;
-					}
-					mCosmetic.shieldOnHit(mPlayer, loc, mArcHeights, le, mRadius, enteredWall ? 1 : 0.25f);
-					MovementUtils.knockAway(loc, le, mKnockback, y, true);
-				} else {
-					mCosmetic.shieldOnHit(mPlayer, loc, mArcHeights, le, mRadius, enteredWall ? 1 : 0.2f);
-				}
-				mPlugin.mEffectManager.addEffect(le, ON_HIT_EFFECT + mPlayer.getName(), new OnHitTimerEffect(5));
-			}
-
-			mMobsAlreadyHit.add(le);
-
-			if (shouldBreak) {
-				return;
-			}
-		}
-
-		mMobsAlreadyHit.removeIf(mob -> !entities.contains(mob));
-	}
-
-	private void shieldWallBash(LivingEntity le) {
-		DamageUtils.damage(mPlayer, le, DamageEvent.DamageType.MELEE_SKILL, mDamage, ClassAbility.SHIELD_WALL, false);
-
-		if (EntityUtils.isBoss(le) || EntityUtils.isElite(le)) {
-			EntityUtils.applySlow(mPlugin, mStunDuration, .99, le);
-		} else {
-			EntityUtils.applyStun(mPlugin, mStunDuration, le);
-		}
-		mMobsAlreadyBashed.add(le);
-
-		if (mCounterStrike != null) {
-			mCounterStrike.onTaunt(le);
-		}
-
-		new BukkitRunnable() {
-			int mT = 0;
+		mCurrDuration = 0;
+		cancelOnDeath(new BukkitRunnable() {
+			final Set<LivingEntity> mMobsAlreadyHit = new HashSet<>();
+			Location mLoc = loc;
 
 			@Override
 			public void run() {
-				if (le.isDead() || !le.isValid() || mT > mStunDuration * 2) {
-					this.cancel();
-				} else if (!EntityUtils.isStunned(le)) {
-					EntityUtils.applyTaunt(le, mPlayer, false);
-					this.cancel();
+				mCurrDuration++;
+
+				if (!mDeposited) {
+					double lastY = mLoc.getY();
+					mLoc = mPlayer.getLocation();
+					if (!PlayerUtils.isOnGround(mPlayer)) {
+						mLoc.setY(lastY);
+					}
 				}
 
-				mT++;
+				double radius = mDeposited ? mRadiusStationary : mRadius;
+
+				Hitbox hitbox = Hitbox.approximateHollowCylinderSegment(mLoc.clone().add(0, -1, 0), mHeight + 1, 0.7 * radius - 0.5, 1.15 * radius, Math.toRadians(mAngle) / 2);
+
+				mCosmetic.wallParticles(mPlayer, mLoc, radius, mAngle, mHeight);
+
+				List<Projectile> projectiles = hitbox.getHitEntitiesByClass(Projectile.class);
+				for (Projectile proj : projectiles) {
+					if (proj.getShooter() instanceof LivingEntity shooter && !(shooter instanceof Player)) {
+						proj.remove();
+						mCosmetic.shieldOnBlock(world, proj.getLocation(), mPlayer);
+					}
+				}
+
+				List<LivingEntity> entities = hitbox.getHitMobs();
+				for (LivingEntity le : entities) {
+					boolean enteredWall = !mMobsAlreadyHit.contains(le);
+					if (enteredWall) {
+						DamageUtils.damage(mPlayer, le, new DamageEvent.Metadata(DamageEvent.DamageType.MELEE_SKILL, mInfo.getLinkedSpell(), playerItemStats), mDamage, false, true, false);
+					}
+
+					if (mKnockback > 0 && !EntityUtils.isCCImmuneMob(le) && !mPlugin.mEffectManager.hasEffect(le, ON_HIT_EFFECT + mPlayer.getName())) {
+						float y = 0.4f;
+						if (!le.isOnGround()) {
+							y -= 0.2f;
+						}
+						if (!enteredWall) {
+							y -= 0.15f;
+						}
+						mCosmetic.shieldOnHit(world, le.getLocation(), mPlayer, enteredWall ? 1 : 0.5f);
+						MovementUtils.knockAway(mLoc, le, mKnockback, y, true);
+						mPlugin.mEffectManager.addEffect(le, ON_HIT_EFFECT + mPlayer.getName(), new OnHitTimerEffect(5));
+					}
+
+					mMobsAlreadyHit.add(le);
+				}
+
+				mMobsAlreadyHit.removeIf(mob -> !entities.contains(mob));
+
+				if (mCurrDuration >= mDuration) {
+					this.cancel();
+				}
 			}
-		}.runTaskTimer(mPlugin, 0, 1);
 
-		mCosmetic.shieldWallBash(mPlayer, le.getWorld(), le.getLocation().add(0, 1, 0));
-	}
+			@Override
+			public synchronized void cancel() {
+				super.cancel();
+				mCurrDuration = -1;
+				ClientModHandler.updateAbility(mPlayer, ShieldWall.this);
+			}
+		}.runTaskTimer(mPlugin, 0, 1));
 
-	public boolean shieldWallBash() {
-		if (isOnCooldown() || mRunnable == null) {
-			return false;
-		}
-
-		mBashing = true;
-		mMobsAlreadyHit.clear();
-
-		mCosmetic.shieldStartEffect(mPlayer.getWorld(), mPlayer, mPlayer.getLocation(), mRadius, mAngle, mHeight);
-
-		if (!ZoneUtils.hasZoneProperty(mPlayer, ZoneUtils.ZoneProperty.NO_MOBILITY_ABILITIES)) {
-			Vector dir = mPlayer.getLocation().getDirection();
-			dir.setY(0);
-			dir.normalize().multiply(mBashVelocity);
-			mPlayer.setVelocity(dir);
-		}
-
-		Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () -> {
-			mBashing = false;
-			mMobsAlreadyBashed.clear();
-		}, BASH_DURATION);
-
-		putOnCooldown();
 		return true;
 	}
 
-	public void enableShieldWall() {
-		mCosmetic.shieldToggleOn(mPlayer.getWorld(), mPlayer.getLocation(), mPlayer);
-	}
-
-	public void disableShieldWall() {
-		if (mRunnable != null) {
-			mRunnable.cancel();
-		}
-		mRunnable = null;
-		mCosmetic.shieldToggleOff(mPlayer.getWorld(), mPlayer.getLocation(), mPlayer);
-	}
-
-	private boolean breakShield() {
-		int tick = Bukkit.getCurrentTick();
-		if (tick - mShieldWallIframe < 10) {
-			return false;
-		}
-
-		mShieldWallIframe = tick;
-
-		consumeCharge();
-
-		return mDurability <= 0;
-	}
-
-	private void consumeCharge() {
-		mDurability = Math.max(0, mDurability - 1);
-		updateAbility();
+	@Override
+	public int getInitialAbilityDuration() {
+		return mDuration;
 	}
 
 	@Override
-	public void periodicTrigger(boolean twoHertz, boolean oneSecond, int ticks) {
-		if (mRunnable != null) {
-			mTimer = 0;
-			return;
-		}
-		mTimer += 5;
-
-		if (mTimer % SHIELD_WALL_RECHARGE == 0) {
-			addDurability(mRecharge);
-		}
-	}
-
-	public void addDurability(int count) {
-		mDurability = Math.min(mMaxDurability, mDurability + count);
-		updateAbility();
+	public int getRemainingAbilityDuration() {
+		return this.mCurrDuration >= 0 ? getInitialAbilityDuration() - this.mCurrDuration : 0;
 	}
 
 	private static Description<ShieldWall> getDescription1() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 1)
 			.addTrigger()
 			.addDashedLine()
-			.addLine("Toggle a shield in front of you that blocks mobs and")
-			.addLine("enemy projectiles at the cost of *1* durability.").styles(WHITE)
-			.addLine("Recharge durability when *Shield Wall* is down.").styles(UNDERLINED)
+			.addLine("Create a shield in front of you that blocks")
+			.addLine("enemy projectiles. Mobs that touch the shield")
+			.addLine("take damage and are knocked back.")
 			.addLine()
-			.addStat("Radius: %r1")
-				.statValues(stat(a -> a.mRadius, SHIELD_WALL_RADIUS_L1))
+			.addStat("Damage: %d (m)")
+				.statValues(stat(a -> a.mDamage, SHIELD_WALL_DAMAGE))
+			.addStat("Radius: %r")
+				.statValues(stat(a -> a.mRadius, SHIELD_WALL_RADIUS))
 			.addStat("Height: %r")
-				.statValues(stat(a -> a.mHeight, SHIELD_WALL_HEIGHT))
-			.addStat("Max Durability: %d1")
-				.statValues(stat(a -> a.mMaxDurability, SHIELD_WALL_DURABILITY_L1))
-			.addStat("Recharge: +%d every %t")
-				.statValues(stat(a -> a.mRecharge, SHIELD_WALL_RECHARGE_COUNT),
-				stat(SHIELD_WALL_RECHARGE))
-			.addLine()
-			.addTrigger(1)
-			.addLine("While *Shield Wall* is up, perform a forward").styles(UNDERLINED)
-			.addLine("bash that taunts, damages, and stuns mobs.")
-			.addLine("(Elites/Bosses are rooted instead)")
-			.addLine()
-			.addStat("Damage: %d1R (m)")
-				.statValues(perRegion(a -> a.mDamage, SHIELD_WALL_DAMAGE_L1[0], SHIELD_WALL_DAMAGE_L1[1]))
-			.addStat("Effect: Stun for %t")
-				.statValues(stat(a -> a.mStunDuration, SHIELD_WALL_BASH_STUN_DURATION))
+			.statValues(stat(a -> a.mHeight, SHIELD_WALL_HEIGHT))
+			.addStat("Duration: %t1")
+				.statValues(stat(a -> a.mDuration, SHIELD_WALL_1_DURATION))
 			.addStat("Cooldown: %t1")
-				.statValues(cooldown(SHIELD_WALL_COOLDOWN_L1))
+				.statValues(cooldown(SHIELD_WALL_1_COOLDOWN))
+			.addLine()
+			.addLine("You may recast *Shield Wall* to place the").styles(UNDERLINED)
+			.addLine("shield at its current location and increase")
+			.addLine("its radius.")
+			.addLine()
+			.addStatComparison("Radius: %r1 -> %r2")
+				.statValues(stat(SHIELD_WALL_RADIUS), stat(a -> a.mRadiusStationary, SHIELD_WALL_RADIUS_STATIONARY))
 			.addDashedLine();
 	}
 
 	private static Description<ShieldWall> getDescription2() {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
-			.addLine("Increase *Shield Wall*'s radius, durability,").styles(UNDERLINED)
-			.addLine("damage, and reduce its cooldown.")
+			.addLine("Increase *Shield Wall*'s duration").styles(UNDERLINED)
+			.addLine("and reduce its cooldown.")
 			.addLine()
-			.addStatComparison("Radius: %r1 -> %r2")
-				.statValues(stat(SHIELD_WALL_RADIUS_L1), stat(a -> a.mRadius, SHIELD_WALL_RADIUS_L2))
-			.addStatComparison("Max Durability: %d1 -> %d2")
-				.statValues(stat(SHIELD_WALL_DURABILITY_L1), stat(a -> a.mMaxDurability, SHIELD_WALL_DURABILITY_L2))
-			.addStatComparison("Damage: %d1 -> %d2R (m)")
-				.statValues(perRegion(SHIELD_WALL_DAMAGE_L1[0], SHIELD_WALL_DAMAGE_L1[1]),
-					perRegion(a -> a.mDamage, SHIELD_WALL_DAMAGE_L2[0], SHIELD_WALL_DAMAGE_L2[1]))
+			.addStatComparison("Duration: %t1 -> %t2")
+				.statValues(stat(SHIELD_WALL_1_DURATION), stat(a -> a.mDuration, SHIELD_WALL_2_DURATION))
 			.addStatComparison("Cooldown: %t1 -> %t2")
-				.statValues(cooldown(SHIELD_WALL_COOLDOWN_L1), cooldown(SHIELD_WALL_COOLDOWN_L2))
+				.statValues(cooldown(SHIELD_WALL_1_COOLDOWN), cooldown(SHIELD_WALL_2_COOLDOWN))
 			.addDashedLine();
-	}
-
-	@Override
-	public int getCharges() {
-		return mDurability;
-	}
-
-	@Override
-	public int getMaxCharges() {
-		return mMaxDurability;
 	}
 }

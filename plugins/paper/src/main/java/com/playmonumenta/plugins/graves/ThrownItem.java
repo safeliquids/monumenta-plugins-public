@@ -9,7 +9,6 @@ import com.playmonumenta.plugins.utils.MMLog;
 import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import de.tr7zw.nbtapi.iface.ReadableNBT;
-import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.bukkit.Chunk;
@@ -111,15 +110,6 @@ public class ThrownItem {
 			mManager.addItem(mEntity, this);
 			mManager.removeUnloadedItem(Chunk.getChunkKey(mLocation), this);
 			startTracking();
-			MMLog.info("[GraveManager] Spawned item %s (%s) for %s at %s, %s, %s in world %s".formatted(
-				mItem.getType().toString().toLowerCase(Locale.ROOT),
-				ItemUtils.getPlainNameOrDefault(mItem),
-				mPlayer.getName(),
-				mLocation.getBlockX(),
-				mLocation.getBlockY(),
-				mLocation.getBlockZ(),
-				mPlayer.getWorld()
-			));
 		}
 	}
 

@@ -23,9 +23,6 @@ public final class AuraEffectBoss extends BossAbilityGroup {
 		@BossParam(help = "Radius in blocks where players receive effects")
 		public int RADIUS = 35;
 
-		@BossParam(help = "Whether the boss has to be able to see the player to apply effects")
-		public boolean LINE_OF_SIGHT = false;
-
 		@BossParam(help = "Height clamp in blocks specifically for vertical distance between the launcher and players")
 		public int HEIGHT = 20;
 
@@ -67,11 +64,7 @@ public final class AuraEffectBoss extends BossAbilityGroup {
 					p.PARTICLE_ENTITY.spawn(mBoss, LocationUtils.getEntityCenter(entity));
 				},
 				// Apply effects to players in range
-				(p.EFFECTS.equals(EffectsList.EMPTY) ? null : (Player player) -> {
-					if (!p.LINE_OF_SIGHT || boss.hasLineOfSight(player)) {
-						p.EFFECTS.apply(player, mBoss);
-					}
-				}),
+				(p.EFFECTS.equals(EffectsList.EMPTY) ? null : (Player player) -> p.EFFECTS.apply(player, mBoss)),
 				p.CANCELABLE
 			)
 		);

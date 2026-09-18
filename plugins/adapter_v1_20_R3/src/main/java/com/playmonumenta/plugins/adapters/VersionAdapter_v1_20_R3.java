@@ -7,7 +7,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.papermc.paper.adventure.PaperAdventure;
-import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import io.papermc.paper.util.CollisionUtil;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -20,9 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -30,7 +27,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -55,7 +51,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.commands.ReloadCommand;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
@@ -83,26 +78,14 @@ import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.level.storage.loot.LootDataType;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.entries.LootTableReference;
-import net.minecraft.world.level.storage.loot.functions.SetNbtFunction;
-import net.minecraft.world.level.storage.loot.providers.number.BinomialDistributionGenerator;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
-import net.minecraft.world.level.storage.loot.providers.number.ScoreboardValue;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-import net.minecraft.world.level.storage.loot.providers.score.ScoreboardNameProvider;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_20_R3.CraftLootTable;
 import org.bukkit.craftbukkit.v1_20_R3.CraftParticle;
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
@@ -144,7 +127,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -1104,91 +1086,5 @@ public class VersionAdapter_v1_20_R3 implements VersionAdapter {
 	@Override
 	public float getEntityHeadRotation(Entity entity) {
 		return ((CraftEntity) entity).getHandle().getYRot();
-	}
-
-	@Override
-	public CompletableFuture<Void> reloadAsync(ServerResourcesReloadedEvent.Cause cause, Executor async,
-											   boolean rescan) {
-		final var server = MinecraftServer.getServer();
-		final var packs = server.getPackRepository();
-		final var selectedPacks = packs.getSelectedIds();
-
-		final var dataPacks = rescan ?
-			ReloadCommand.discoverNewPacks(packs, server.getWorldData(), selectedPacks) :
-			selectedPacks;
-
-		return CompletableFuture
-			.supplyAsync(() -> server.reloadResources(dataPacks, cause), async)
-			.thenCompose(s -> s);
-	}
-
-	private boolean isNonZero(NumberProvider np) {
-		if (np instanceof ConstantValue(float value)) {
-			return value > 0.001;
-		} else if (np instanceof UniformGenerator(NumberProvider min, NumberProvider max)) {
-			return isNonZero(min) || isNonZero(max);
-		} else if (np instanceof BinomialDistributionGenerator(NumberProvider n, NumberProvider p)) {
-			// if n == 0, then no rolls => 0
-			// if p == 0, then P(X != 0) = 0
-			return isNonZero(n) && isNonZero(p);
-		} else if (np instanceof ScoreboardValue(ScoreboardNameProvider target, String score, float scale)) {
-			return scale > 0.001;
-		}
-
-		// unknown, bail and assume it's true
-		return true;
-	}
-
-	@Override
-	public boolean hasBonusRolls(LootTable table) {
-		return ((CraftLootTable) table).getHandle().pools
-			.stream()
-			.anyMatch(pool -> isNonZero(pool.bonusRolls));
-	}
-
-	@Override
-	public Stream<NamespacedKey> lootTableChildren(LootTable table) {
-		return ((CraftLootTable) table).getHandle().pools
-			.stream()
-			.flatMap(pool -> pool.entries.stream())
-			.map(entry -> entry instanceof LootTableReference ref ? ref : null)
-			.filter(Objects::nonNull)
-			.map(entry -> CraftNamespacedKey.fromMinecraft(entry.name));
-	}
-
-	@Override
-	public Stream<NamespacedKey> allLootTables() {
-		return MinecraftServer.getServer().getLootData()
-			.getKeys(LootDataType.TABLE)
-			.stream()
-			.map(CraftNamespacedKey::fromMinecraft);
-	}
-
-	@Override
-	public Optional<ItemStack> materializeItemLikeLootTable(LootTable table) {
-		final var pools = ((CraftLootTable) table).getHandle().pools;
-
-		if (pools.size() != 1) {
-			return Optional.empty();
-		}
-
-		final var pool = pools.getFirst();
-
-		if (!(pool.rolls instanceof ConstantValue(float value)) || value != 1) {
-			return Optional.empty();
-		}
-
-		if (pool.entries.size() != 1 || !(pool.entries.getFirst() instanceof LootItem lootItem)) {
-			return Optional.empty();
-		}
-
-		if (lootItem.functions.size() != 1 ||
-			!(lootItem.functions.getFirst() instanceof SetNbtFunction nbtFunction)) {
-			return Optional.empty();
-		}
-
-		final var item = lootItem.item.value();
-
-		return Optional.of(nbtFunction.run(item.getDefaultInstance(), null).asBukkitCopy());
 	}
 }

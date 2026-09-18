@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.adapters.VersionAdapter;
-import com.playmonumenta.plugins.overrides.LucidityOverride;
 import com.playmonumenta.plugins.player.activity.ActivityManager;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.BlockUtils;
@@ -40,7 +39,6 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -56,7 +54,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
@@ -225,15 +222,6 @@ public class WorldListener implements Listener {
 		for (Entity entity : entities) {
 			saveEntityScores(entity, true, "world unload");
 		}
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onWorldUnloadClearTracked(WorldUnloadEvent event) {
-		World world = event.getWorld();
-		mPlugin.mTrackingManager.mBoats.clearWorld(world);
-		mPlugin.mTrackingManager.mCreepers.clearWorld(world);
-		mPlugin.mTrackingManager.mMinecarts.clearWorld(world);
-		mPlugin.mTrackingManager.mSilverfish.clearWorld(world);
 	}
 
 	private void saveEntityScores(Entity entity, boolean deleteFromScoreboard, String reason) {
@@ -494,7 +482,6 @@ public class WorldListener implements Listener {
 	public void spawnerBreakEvent(BlockBreakEvent event) {
 		Block spawner = event.getBlock();
 		if (spawner.getType() == Material.SPAWNER) {
-			LucidityOverride.removeDisplay(spawner);
 			playerBrokeSpawner(event.getPlayer(), spawner);
 		}
 	}
@@ -509,20 +496,10 @@ public class WorldListener implements Listener {
 			Material mat = b.getType();
 			Location loc = b.getLocation();
 			if (mat == Material.SPAWNER) {
-				LucidityOverride.removeDisplay(b);
 				Player p = EntityUtils.getNearestPlayer(loc, 100);
 				if (p != null) {
 					playerBrokeSpawner(p, b);
 				}
-			}
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	public void blockExplodeEvent(BlockExplodeEvent event) {
-		for (Block b : event.blockList()) {
-			if (b.getType() == Material.SPAWNER) {
-				LucidityOverride.removeDisplay(b);
 			}
 		}
 	}

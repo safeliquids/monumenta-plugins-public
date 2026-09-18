@@ -270,7 +270,7 @@ public class DepthsListener implements Listener {
 			}
 			double adaptiveMultiplier = DepthsUtils.getAdaptiveDamageMultiplier(playerItemStats, type);
 			if (adaptiveMultiplier > 0) {
-				event.updateGearDamageWithMultiplier(adaptiveMultiplier, DamageEvent.DamageType.getScalableDamageTypes());
+				event.updateGearDamageWithMultiplier(adaptiveMultiplier, DamageEvent.DamageType.getScalableDamageType());
 			}
 		}
 

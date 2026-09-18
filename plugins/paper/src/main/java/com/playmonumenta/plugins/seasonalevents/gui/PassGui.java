@@ -4,8 +4,8 @@ import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Constants.Keybind;
 import com.playmonumenta.plugins.cosmetics.CosmeticType;
 import com.playmonumenta.plugins.cosmetics.CosmeticsManager;
-import com.playmonumenta.plugins.guis.NjolGui;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.Gui;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.listeners.AuditListener;
 import com.playmonumenta.plugins.seasonalevents.LongMission;
 import com.playmonumenta.plugins.seasonalevents.PlayerProgress;
@@ -48,7 +48,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class PassGui extends NjolGui {
+public class PassGui extends Gui {
 	protected static final int MAX_X = 8;
 
 	private static final Set<PassGui> mOpenGuis = new HashSet<>();
@@ -856,7 +856,7 @@ public class PassGui extends NjolGui {
 		}
 		meta.lore(lore);
 		item.setItemMeta(meta);
-		NjolGuiItem guiItem = setItem(y, x, item);
+		GuiItem guiItem = setItem(y, x, item);
 		if (mIsModerator) {
 			guiItem.onClick((InventoryClickEvent event) -> {
 				switch (event.getClick()) {
@@ -1046,7 +1046,7 @@ public class PassGui extends NjolGui {
 		}
 		meta.lore(lore);
 		item.setItemMeta(meta);
-		NjolGuiItem guiItem = setItem(y, x, item);
+		GuiItem guiItem = setItem(y, x, item);
 		if (mIsModerator) {
 			guiItem.onClick((InventoryClickEvent event) -> {
 				switch (event.getClick()) {

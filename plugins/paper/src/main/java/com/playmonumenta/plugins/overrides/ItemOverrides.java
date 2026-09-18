@@ -14,7 +14,6 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -57,7 +56,6 @@ public final class ItemOverrides {
 		BaseOverride monsterEggOverride = new MonsterEggOverride();
 		BaseOverride minecartOverride = new MinecartOverride();
 		BaseOverride bucketOverride = new BucketOverride();
-		BaseOverride waterloggedOverride = new WaterloggedOverride();
 		// This is inefficient but it's only done once
 		for (Material mat : Material.values()) {
 			if (mat.name().contains("SPAWN_EGG")) {
@@ -68,13 +66,6 @@ public final class ItemOverrides {
 			}
 			if (mat.name().contains("BUCKET")) {
 				mItems.put(mat, bucketOverride);
-			}
-			if (
-				mat.isBlock() &&
-				mat.isItem() &&
-				mat.createBlockData() instanceof Waterlogged
-			) {
-				mItems.put(mat, waterloggedOverride);
 			}
 		}
 
@@ -350,7 +341,7 @@ public final class ItemOverrides {
 		if (item.hasItemMeta()
 			&& item.getItemMeta().hasLore()
 			&& player.getGameMode() != GameMode.CREATIVE
-			&& !(EXCEPTION_LORED_MATERIALS.contains(item.getType()) || WaterloggedOverride.mayPlaceWaterloggable(item))
+			&& !EXCEPTION_LORED_MATERIALS.contains(item.getType())
 			&& !ItemUtils.isNullOrAir(item)
 			&& !Objects.equals(NBT.get(item, nbt -> {
 				return nbt.getByte("Placeable");

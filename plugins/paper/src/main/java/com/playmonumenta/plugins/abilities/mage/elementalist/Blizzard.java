@@ -102,7 +102,7 @@ public class Blizzard extends Ability {
 		mCosmetic.onCast(mPlayer, world, mPlayer.getLocation());
 
 		ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
-		double spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
+		float spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
 
 		cancelOnDeath(new BukkitRunnable() {
 			int mTicks = 0;
@@ -120,10 +120,8 @@ public class Blizzard extends Ability {
 						}
 
 						// Artifact Charm code for magic res
-						if (mMagicResistanceModifier != 0) {
-							mPlugin.mEffectManager.addEffect(p, CHARM_ARTIFACT_BLIZZARD_MAGIC_RES,
-								new PercentDamageReceived(SLOW_INTERVAL * 2, -mMagicResistanceModifier, EnumSet.of(DamageEvent.DamageType.MAGIC)).deleteOnAbilityUpdate(true));
-						}
+						mPlugin.mEffectManager.addEffect(p, CHARM_ARTIFACT_BLIZZARD_MAGIC_RES,
+							new PercentDamageReceived(SLOW_INTERVAL * 2, -mMagicResistanceModifier, EnumSet.of(DamageEvent.DamageType.MAGIC)).deleteOnAbilityUpdate(true));
 					}
 
 					for (LivingEntity mob : mobs) {

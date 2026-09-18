@@ -1,7 +1,7 @@
 package com.playmonumenta.plugins.market.gui;
 
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.guis.NjolGuiItem;
+import com.playmonumenta.plugins.guis.GuiItem;
 import com.playmonumenta.plugins.market.MarketListingStatus;
 import com.playmonumenta.plugins.market.MarketManager;
 import com.playmonumenta.plugins.market.MarketRedisManager;
@@ -96,7 +96,7 @@ public class TabBuyListing implements MarketGuiTab {
 			listingItemStack.setAmount(mGui.mFocusedListing.getBundleSize());
 			ItemUtils.setPlainName(listingItemStack, ItemUtils.getPlainName(mGui.mFocusedListing.getItemToSell()));
 		}
-		mGui.setItem(2, 6, new NjolGuiItem(listingItemStack, false));
+		mGui.setItem(2, 6, new GuiItem(listingItemStack, false));
 
 
 		// cancel button
@@ -177,7 +177,7 @@ public class TabBuyListing implements MarketGuiTab {
 					}
 				});
 		} else {
-			mGui.setItem(4, 5, new NjolGuiItem(GUIUtils.createExclamation(errorLoreLines), false));
+			mGui.setItem(4, 5, new GuiItem(GUIUtils.createExclamation(errorLoreLines), false));
 		}
 
 		if (mGui.mIsOp) {

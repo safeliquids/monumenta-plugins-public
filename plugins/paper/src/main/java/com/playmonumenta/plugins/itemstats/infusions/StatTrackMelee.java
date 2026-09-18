@@ -4,7 +4,6 @@ import com.playmonumenta.plugins.Plugin;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.EnumSet;
 import org.bukkit.entity.LivingEntity;
@@ -26,8 +25,8 @@ public class StatTrackMelee implements Infusion {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.LAST;
+	public double getPriorityAmount() {
+		return 6000; // after all damage modifiers
 	}
 
 	@Override

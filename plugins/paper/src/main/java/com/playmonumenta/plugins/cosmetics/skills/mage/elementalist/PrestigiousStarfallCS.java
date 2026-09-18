@@ -95,17 +95,8 @@ public class PrestigiousStarfallCS extends StarfallCS implements PrestigeCS {
 
 	@Override
 	public void starfallCastTrail(Location loc, Player player) {
-		new PPLine(Particle.FLAME, player.getEyeLocation(), loc)
-			.countPerMeter(1)
-			.delta(0)
-			.delay(3)
-			.spawnAsPlayerActive(player);
-		new PPLine(Particle.REDSTONE, player.getEyeLocation(), loc)
-			.countPerMeter(6)
-			.delta(0.1)
-			.delay(3)
-			.data(GOLD_COLOR)
-			.spawnAsPlayerActive(player);
+		new PartialParticle(Particle.FLAME, loc, 1, 0, 0, 0, 0).spawnAsPlayerActive(player);
+		new PartialParticle(Particle.REDSTONE, loc, 6, 0.1, 0.1, 0.1, 0, GOLD_COLOR).spawnAsPlayerActive(player);
 	}
 
 	@Override

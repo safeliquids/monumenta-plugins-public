@@ -12,7 +12,6 @@ import com.playmonumenta.plugins.itemstats.enchantments.Steadfast;
 import com.playmonumenta.plugins.itemstats.enums.AttributeType;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Region;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import com.playmonumenta.plugins.utils.DamageUtils;
 import org.bukkit.entity.Entity;
@@ -30,11 +29,6 @@ public class Armor implements Attribute {
 	@Override
 	public AttributeType getAttributeType() {
 		return AttributeType.ARMOR;
-	}
-
-	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.GEAR_DEFENSE; // after other damage reduction enchants
 	}
 
 	@Override

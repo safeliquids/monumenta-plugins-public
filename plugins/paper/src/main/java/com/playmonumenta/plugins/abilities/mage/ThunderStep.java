@@ -116,7 +116,7 @@ public class ThunderStep extends Ability {
 			return false;
 		}
 
-		double spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
+		float spellDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
 
 		// if enhanced, can teleport back within a short time frame (regardless of if on cooldown or not)
 		if (isEnhanced()
@@ -137,7 +137,7 @@ public class ThunderStep extends Ability {
 			doDamage(mLastCastLocation, spellDamage * ENHANCEMENT_DAMAGE_RATIO, false);
 			if (mRewindTrailDamage > 0) {
 				Hitbox trail = Hitbox.approximateCylinder(recastStartLocation, mLastCastLocation, 2, true);
-				double trailDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, mRewindTrailDamage);
+				float trailDamage = SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mRewindTrailDamage);
 				int mobParticles = Math.max(
 					1, 20 / Math.max(1, trail.getHitMobs().size()) // Never divide by 0. Always maximum 20 particles for <= 1 enemy
 				);
@@ -201,7 +201,7 @@ public class ThunderStep extends Ability {
 		return true;
 	}
 
-	public void doDamage(Location location, double spellDamage, boolean enhancementParalyze) {
+	public void doDamage(Location location, float spellDamage, boolean enhancementParalyze) {
 		double ratio = mRadius / SIZE;
 		mCosmetic.castEffect(mPlayer, ratio, mRadius);
 

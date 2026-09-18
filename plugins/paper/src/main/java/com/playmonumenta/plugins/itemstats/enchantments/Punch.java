@@ -37,6 +37,11 @@ public class Punch implements Enchantment {
 	}
 
 	@Override
+	public double getPriorityAmount() {
+		return 31;
+	}
+
+	@Override
 	public void onDamage(Plugin plugin, Player player, double value, DamageEvent event, LivingEntity enemy) {
 		if (event.getDamager() instanceof Projectile projectile) {
 			applyPunch(plugin, value, event.getDamagee(), projectile.getVelocity());

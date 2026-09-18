@@ -5,7 +5,6 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.itemstats.Enchantment;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.itemupdater.ItemUpdateHelper;
 import com.playmonumenta.plugins.server.reset.DailyReset;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
@@ -35,8 +34,8 @@ public class AshesOfEternity implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.ASHES_OF_ETERNITY; // before Resurrection
+	public double getPriorityAmount() {
+		return 9980; // before Resurrection
 	}
 
 	public static final String ASHES_OF_ETERNITY_DAILY_VERSION_OBJECTIVE = "AshesofEternityDailyVersion";

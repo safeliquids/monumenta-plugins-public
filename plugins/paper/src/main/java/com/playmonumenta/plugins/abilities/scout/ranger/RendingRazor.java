@@ -251,7 +251,6 @@ public class RendingRazor extends Ability {
 			.addDashedLine()
 			.addLine("Throw a spinning razor that rends through mobs before returning.")
 			.addLine("Each hit grants faster cooldown recharge rate.")
-			.addLine("(Doesn't reduce this ability's cooldown)")
 			.addLine()
 			.addStat("Damage: %d0R (p)")
 			.statValues(perRegion(a -> a.mDamage, DAMAGE[0], DAMAGE[1]))

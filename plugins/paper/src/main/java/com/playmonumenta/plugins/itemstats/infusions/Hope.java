@@ -45,7 +45,7 @@ public class Hope implements Infusion {
 			public void run() {
 				Location loc = item.getLocation();
 
-				if (!loc.isWorldLoaded() || !loc.isChunkLoaded() || item.isDead() || !item.isValid()) {
+				if (!loc.isChunkLoaded() || item.isDead() || !item.isValid()) {
 					this.cancel();
 					return;
 				}

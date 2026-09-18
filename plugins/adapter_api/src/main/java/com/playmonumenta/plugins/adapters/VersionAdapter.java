@@ -1,15 +1,10 @@
 package com.playmonumenta.plugins.adapters;
 
 import com.google.gson.JsonObject;
-import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,7 +21,6 @@ import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.BoundingBox;
@@ -227,14 +221,4 @@ public interface VersionAdapter {
 	void setSelectionHint(InventoryView view, int index);
 
 	float getEntityHeadRotation(Entity entity);
-
-	CompletableFuture<Void> reloadAsync(ServerResourcesReloadedEvent.Cause cause, Executor async, boolean rescan);
-
-	boolean hasBonusRolls(LootTable table);
-
-	Stream<NamespacedKey> lootTableChildren(LootTable table);
-
-	Stream<NamespacedKey> allLootTables();
-
-	Optional<ItemStack> materializeItemLikeLootTable(LootTable table);
 }

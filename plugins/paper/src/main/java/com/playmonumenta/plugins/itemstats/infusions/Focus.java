@@ -5,7 +5,6 @@ import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.events.DamageEvent.DamageType;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.server.properties.ServerProperties;
 import java.util.EnumSet;
 import org.bukkit.entity.LivingEntity;
@@ -27,8 +26,8 @@ public class Focus implements Infusion {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.DAMAGE_MULTIPLY;
+	public double getPriorityAmount() {
+		return 24;
 	}
 
 	@Override

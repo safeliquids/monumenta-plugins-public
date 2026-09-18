@@ -20,11 +20,3 @@ accessible field net/minecraft/world/entity/ai/behavior/CrossbowAttack attackDel
 accessible method net/minecraft/world/entity/monster/piglin/PiglinAi findNearestValidAttackTarget (Lnet/minecraft/world/entity/monster/piglin/Piglin;)Ljava/util/Optional;
 accessible method net/minecraft/world/entity/monster/piglin/PiglinAi createIdleLookBehaviors ()Lnet/minecraft/world/entity/ai/behavior/RunOne;
 accessible method net/minecraft/world/entity/monster/piglin/PiglinAi createIdleMovementBehaviors ()Lnet/minecraft/world/entity/ai/behavior/RunOne;
-accessible method net/minecraft/server/commands/ReloadCommand discoverNewPacks (Lnet/minecraft/server/packs/repository/PackRepository;Lnet/minecraft/world/level/storage/WorldData;Ljava/util/Collection;)Ljava/util/Collection;
-accessible field net/minecraft/world/level/storage/loot/LootTable pools Ljava/util/List;
-accessible field net/minecraft/world/level/storage/loot/LootPool bonusRolls Lnet/minecraft/world/level/storage/loot/providers/number/NumberProvider;
-accessible field net/minecraft/world/level/storage/loot/LootPool entries Ljava/util/List;
-accessible field net/minecraft/world/level/storage/loot/entries/LootTableReference name Lnet/minecraft/resources/ResourceLocation;
-accessible field net/minecraft/world/level/storage/loot/LootPool rolls Lnet/minecraft/world/level/storage/loot/providers/number/NumberProvider;
-accessible field net/minecraft/world/level/storage/loot/entries/LootPoolSingletonContainer functions Ljava/util/List;
-accessible field net/minecraft/world/level/storage/loot/entries/LootItem item Lnet/minecraft/core/Holder;

@@ -2,7 +2,6 @@ package com.playmonumenta.plugins.itemstats.enchantments;
 
 import com.playmonumenta.plugins.Constants;
 import com.playmonumenta.plugins.Plugin;
-import com.playmonumenta.plugins.abilities.scout.Sharpshooter;
 import com.playmonumenta.plugins.effects.Effect;
 import com.playmonumenta.plugins.effects.GrapplingFallDR;
 import com.playmonumenta.plugins.effects.ItemCooldown;
@@ -47,7 +46,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -107,8 +105,6 @@ public class Grappling implements Enchantment {
 			event.setCancelled(true);
 			return;
 		}
-
-		projectile.setMetadata(Sharpshooter.NO_TRACKING_METADATA, new FixedMetadataValue(Plugin.getInstance(), 0));
 
 		if (player.getGameMode() != GameMode.CREATIVE) {
 			// Decrement charges

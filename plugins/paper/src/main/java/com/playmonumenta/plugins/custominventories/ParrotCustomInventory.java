@@ -5,7 +5,7 @@ import com.playmonumenta.libraryofsouls.SoulEntry;
 import com.playmonumenta.libraryofsouls.SoulsDatabase;
 import com.playmonumenta.libraryofsouls.bestiary.BestiaryManager;
 import com.playmonumenta.plugins.Constants;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.parrots.ParrotManager;
 import com.playmonumenta.plugins.parrots.ParrotManager.ParrotVariant;
 import com.playmonumenta.plugins.parrots.ParrotManager.PlayerShoulder;
@@ -37,7 +37,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public final class ParrotCustomInventory extends NjolGui {
+public final class ParrotCustomInventory extends Gui {
 
 	private enum ParrotGUIPage {
 		R1(0),

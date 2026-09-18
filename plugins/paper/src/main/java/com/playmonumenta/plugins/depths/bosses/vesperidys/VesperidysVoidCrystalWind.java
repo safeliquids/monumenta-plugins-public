@@ -94,7 +94,7 @@ public class VesperidysVoidCrystalWind extends BossAbilityGroup {
 		}
 
 		final double currentRadius = p.TARGETS.getRange();
-		SpellForce forceSpell = new SpellForce(plugin, boss, currentRadius, p.DURATION, p.COOLDOWN, p.NEED_PLAYERS) {
+		SpellForce forceSpell = new SpellForce(plugin, boss, (int) currentRadius, p.DURATION, p.COOLDOWN, p.NEED_PLAYERS) {
 
 			@Override
 			protected void chargeAuraAction(Location loc) {

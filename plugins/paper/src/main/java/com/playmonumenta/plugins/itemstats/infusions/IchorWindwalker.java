@@ -5,7 +5,6 @@ import com.playmonumenta.plugins.effects.IchorCooldown;
 import com.playmonumenta.plugins.effects.PercentSpeed;
 import com.playmonumenta.plugins.itemstats.Infusion;
 import com.playmonumenta.plugins.itemstats.enums.InfusionType;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.listeners.IchorListener;
 import com.playmonumenta.plugins.particle.PartialParticle;
 import com.playmonumenta.plugins.utils.StringUtils;
@@ -44,8 +43,8 @@ public class IchorWindwalker implements Infusion {
 
 	// Want it to run before other cdr, e.g. Temporal Bender
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.BEFORE_DEFAULT;
+	public double getPriorityAmount() {
+		return 999;
 	}
 
 	@Override

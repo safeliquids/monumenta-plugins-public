@@ -34,7 +34,7 @@ public final class TpBehindBoss extends BossAbilityGroup {
 		public int INIT_DELAY = 100;
 
 		@BossParam(help = "Distance after teleporting behind the target (in blocks)")
-		public double DISTANCE = 4;
+		public int DISTANCE = 4;
 
 		@BossParam(help = "Sound telegraph before teleport")
 		public SoundsList SOUND_TEL = SoundsList.builder()

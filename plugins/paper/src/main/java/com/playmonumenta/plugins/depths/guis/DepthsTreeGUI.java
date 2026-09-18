@@ -3,7 +3,7 @@ package com.playmonumenta.plugins.depths.guis;
 import com.playmonumenta.plugins.depths.DepthsManager;
 import com.playmonumenta.plugins.depths.DepthsPlayer;
 import com.playmonumenta.plugins.depths.DepthsTree;
-import com.playmonumenta.plugins.guis.NjolGui;
+import com.playmonumenta.plugins.guis.Gui;
 import com.playmonumenta.plugins.utils.GUIUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class DepthsTreeGUI extends NjolGui {
+public class DepthsTreeGUI extends Gui {
 
 	private final List<DepthsTree> mChoices;
 	private final int mTreasureIndex;

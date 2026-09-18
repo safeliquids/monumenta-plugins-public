@@ -32,7 +32,7 @@ public interface ReactiveValue<T> {
 		};
 	}
 
-	static <T> ReactiveValue<T> of(FloweyGui gui, T initial) {
+	static <T> ReactiveValue<T> of(Gui gui, T initial) {
 		return new ReactiveValue<>() {
 			private T mValue = initial;
 
@@ -49,11 +49,11 @@ public interface ReactiveValue<T> {
 		};
 	}
 
-	static ReactiveValue<Integer> scoreboard(FloweyGui gui, String score, int fallback) {
+	static ReactiveValue<Integer> scoreboard(Gui gui, String score, int fallback) {
 		return scoreboard(gui, gui.mPlayer, score, fallback);
 	}
 
-	static ReactiveValue<Integer> scoreboard(FloweyGui gui, Player player, String score, int fallback) {
+	static ReactiveValue<Integer> scoreboard(Gui gui, Player player, String score, int fallback) {
 		return new ReactiveValue<>() {
 			@Override
 			public Integer get() {
@@ -68,16 +68,16 @@ public interface ReactiveValue<T> {
 		};
 	}
 
-	static ReactiveValue<Boolean> binaryScoreboard(FloweyGui gui, String score, boolean fallback) {
+	static ReactiveValue<Boolean> binaryScoreboard(Gui gui, String score, boolean fallback) {
 		return scoreboard(gui, gui.mPlayer, score, fallback ? 1 : 0)
 			.xmap(f -> f != 0, f -> f ? 1 : 0);
 	}
 
-	static ReactiveValue<Boolean> tag(FloweyGui gui, String tag) {
+	static ReactiveValue<Boolean> tag(Gui gui, String tag) {
 		return tag(gui, gui.mPlayer, tag);
 	}
 
-	static ReactiveValue<Boolean> tag(FloweyGui gui, Player player, String tag) {
+	static ReactiveValue<Boolean> tag(Gui gui, Player player, String tag) {
 		return new ReactiveValue<>() {
 			@Override
 			public Boolean get() {
@@ -96,7 +96,7 @@ public interface ReactiveValue<T> {
 		};
 	}
 
-	static ReactiveValue<Boolean> permission(FloweyGui gui, Player player, String key) {
+	static ReactiveValue<Boolean> permission(Gui gui, Player player, String key) {
 		return new ReactiveValue<>() {
 			@Override
 			public Boolean get() {
@@ -111,11 +111,11 @@ public interface ReactiveValue<T> {
 		};
 	}
 
-	static ReactiveValue<Boolean> permission(FloweyGui gui, String key) {
+	static ReactiveValue<Boolean> permission(Gui gui, String key) {
 		return permission(gui, gui.mPlayer, key);
 	}
 
-	static ReactiveValue<Boolean> togglePermission(FloweyGui gui, Player player, String key) {
+	static ReactiveValue<Boolean> togglePermission(Gui gui, Player player, String key) {
 		return new ReactiveValue<>() {
 			@Override
 			public Boolean get() {
@@ -134,13 +134,13 @@ public interface ReactiveValue<T> {
 		};
 	}
 
-	static ReactiveValue<Boolean> togglePermission(FloweyGui gui, String key) {
+	static ReactiveValue<Boolean> togglePermission(Gui gui, String key) {
 		return togglePermission(gui, gui.mPlayer, key);
 	}
 
 	@SuppressWarnings("EnumOrdinal")
 	static <T extends Enum<T>> ReactiveValue<Integer> fromEnum(
-		FloweyGui gui, Player player, Class<T> clazz, Function<Player, T> getter, BiConsumer<T, Player> setter
+		Gui gui, Player player, Class<T> clazz, Function<Player, T> getter, BiConsumer<T, Player> setter
 	) {
 		final var entries = clazz.getEnumConstants();
 
@@ -160,7 +160,7 @@ public interface ReactiveValue<T> {
 
 	@SuppressWarnings("EnumOrdinal")
 	static <T extends Enum<T>> ReactiveValue<Integer> fromEnum(
-		FloweyGui gui, Class<T> clazz, Function<Player, T> getter, BiConsumer<T, Player> setter
+		Gui gui, Class<T> clazz, Function<Player, T> getter, BiConsumer<T, Player> setter
 	) {
 		return fromEnum(gui, gui.mPlayer, clazz, getter, setter);
 	}

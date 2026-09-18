@@ -234,13 +234,10 @@ public class FormattedDescriptionBuilder<T extends Ability> extends DescriptionB
 				hasSign = true;
 				placeholder = placeholder.substring(1);
 			}
-			boolean regionScaled = placeholder.contains("R");
-			if (regionScaled) {
-				placeholder = placeholder.replace("R", "");
-			}
 
 			String formatOption = (placeholder.length() >= 2) ? placeholder.substring(1, 2) : "d";
-			String levelOption = (placeholder.length() >= 3) ? placeholder.substring(2) : "0";
+			String levelOption = (placeholder.length() >= 3) ? placeholder.substring(2, 3) : "0";
+			boolean regionScaled = placeholder.length() >= 4 && placeholder.charAt(3) == 'R';
 
 			Function<Double, String> valueFormat = switch (formatOption) {
 				case "r" -> value -> StringUtils.to2DP(value) + " Blocks";
@@ -252,7 +249,7 @@ public class FormattedDescriptionBuilder<T extends Ability> extends DescriptionB
 			StatLevel level = switch (descriptionLevel) {
 				case 1 -> switch (levelOption) {
 					case "1" -> StatLevel.LEVEL_1; // this stat gets upgraded by L2
-					case "1u" -> StatLevel.LEVEL_1_E; // this stat gets upgraded by ONLY the enhance
+					case "1e_only" -> StatLevel.LEVEL_1_E; // this stat gets upgraded by ONLY the enhance
 					case "1e" -> StatLevel.NOT_ENHANCED_1; // this stat gets upgraded by both L2 and enhance
 					default -> StatLevel.ENABLED;
 				};
@@ -262,7 +259,7 @@ public class FormattedDescriptionBuilder<T extends Ability> extends DescriptionB
 					default -> StatLevel.LEVEL_2;
 				};
 				case 3 -> switch (levelOption) {
-					case "1e", "2e", "1u" -> StatLevel.DISABLED; // this L1/L2 stat should appear disabled since it's replaced by enhance
+					case "1e", "2e" -> StatLevel.DISABLED; // this L1/L2 stat should appear disabled since it's replaced by enhance
 					default -> StatLevel.ENHANCED;
 				};
 				default -> StatLevel.ENABLED;

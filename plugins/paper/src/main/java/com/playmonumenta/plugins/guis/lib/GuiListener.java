@@ -7,24 +7,19 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
-public class FloweyGuiListener implements Listener {
+public class GuiListener implements Listener {
 	@EventHandler(ignoreCancelled = false)
 	protected void inventoryClick(InventoryClickEvent event) {
-		if (!(event.getInventory().getHolder(false) instanceof FloweyGui gui)) {
+		if (!(event.getInventory().getHolder(false) instanceof Gui gui)) {
 			return;
 		}
 
 		event.setCancelled(true);
-
-		if (gui.checkRateLimit()) {
-			return;
-		}
-
 		GUIUtils.refreshOffhand(event);
 
 		if (event.getClickedInventory() == gui.getInventory()) {
 			if (gui.onGuiClick(event) && event.getSlot() < gui.mItems.size()) {
-				FloweyGuiItem item = gui.mItems.get(event.getSlot());
+				GuiItem item = gui.mItems.get(event.getSlot());
 				if (item != null) {
 					item.handleClicked(event);
 				}
@@ -40,16 +35,11 @@ public class FloweyGuiListener implements Listener {
 
 	@EventHandler(ignoreCancelled = false)
 	protected void inventoryDrag(InventoryDragEvent event) {
-		if (!(event.getInventory().getHolder(false) instanceof FloweyGui gui)) {
+		if (!(event.getInventory().getHolder(false) instanceof Gui gui)) {
 			return;
 		}
 
 		event.setCancelled(true);
-
-		if (gui.checkRateLimit()) {
-			return;
-		}
-
 		gui.onInventoryDrag(event);
 
 		gui.update();
@@ -57,7 +47,7 @@ public class FloweyGuiListener implements Listener {
 
 	@EventHandler(ignoreCancelled = false)
 	protected void inventoryClose(InventoryCloseEvent event) {
-		if (!(event.getInventory().getHolder(false) instanceof FloweyGui gui)) {
+		if (!(event.getInventory().getHolder(false) instanceof Gui gui)) {
 			return;
 		}
 

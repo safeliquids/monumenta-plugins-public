@@ -7,7 +7,6 @@ import com.playmonumenta.plugins.itemstats.enums.AttributeType;
 import com.playmonumenta.plugins.itemstats.enums.EnchantmentType;
 import com.playmonumenta.plugins.itemstats.enums.Operation;
 import com.playmonumenta.plugins.itemstats.enums.Slot;
-import com.playmonumenta.plugins.itemstats.enums.StatPriority;
 import com.playmonumenta.plugins.potion.PotionManager;
 import com.playmonumenta.plugins.utils.ItemStatUtils;
 import com.playmonumenta.plugins.utils.ItemUtils;
@@ -37,8 +36,8 @@ public class RegionScalingDamageDealt implements Enchantment {
 	}
 
 	@Override
-	public StatPriority getPriorityAmount() {
-		return StatPriority.REGION_SCALING;
+	public double getPriorityAmount() {
+		return 5000; // should be the final damage dealt modifier
 	}
 
 	@Override

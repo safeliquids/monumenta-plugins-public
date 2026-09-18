@@ -69,7 +69,7 @@ public class Combustion implements Enchantment {
 	}
 
 	@Override
-	public void onDamageDelayed(Plugin plugin, Player player, double level, DamageEvent event, LivingEntity enemy) {
+	public void onDamage(Plugin plugin, Player player, double level, DamageEvent event, LivingEntity enemy) {
 		if (ACTIVATION_DAMAGE_TYPES.contains(event.getType())) {
 			//Store the highest damage dealt with a combustion weapon this tick
 			double damage = event.getDamage();

@@ -48,8 +48,6 @@ public class Challenge extends Ability {
 	private static final double PERCENT_DAMAGE_DEALT_PER_1 = 0.05;
 	private static final double PERCENT_DAMAGE_DEALT_EFFECT_2 = 0.3;
 	private static final double PERCENT_DAMAGE_DEALT_PER_2 = 0.075;
-	private static final double SPEED_PER = 0.03;
-	private static final double SPEED_EFFECT_CAP = 0.18;
 	private static final EnumSet<DamageType> AFFECTED_DAMAGE_TYPES = DamageType.getAllMeleeTypes();
 
 	private static final int ABSORPTION_PER_MOB_1 = 1;
@@ -59,6 +57,7 @@ public class Challenge extends Ability {
 	private static final int CHALLENGE_RANGE = 14;
 	private static final int COOLDOWN = Constants.TICKS_PER_SECOND * 20;
 	private static final int KILLED_MOBS_CAP = 6;
+	private static final double SPEED_PER = 0.04;
 	private static final int CDR_PER = 10;
 
 	public static final String CHARM_DURATION = "Challenge Duration";
@@ -67,7 +66,6 @@ public class Challenge extends Ability {
 	public static final String CHARM_ABSORPTION_PER = "Challenge Absorption Health Per Mob";
 	public static final String CHARM_ABSORPTION_MAX = "Challenge Max Absorption Health";
 	public static final String CHARM_SPEED_PER = "Challenge Speed Per Mob";
-	public static final String CHARM_SPEED_MAX = "Challenge Max Speed Amplifier";
 	public static final String CHARM_CDR_PER = "Challenge Cooldown Reduction Per Mob";
 	public static final String CHARM_RANGE = "Challenge Range";
 	public static final String CHARM_COOLDOWN = "Challenge Cooldown";
@@ -87,7 +85,6 @@ public class Challenge extends Ability {
 	private final double mRadius;
 	private final double mPercentDamageDealtPerMob;
 	private final double mPercentDamageDealtEffect;
-	private final double mSpeedEffect;
 	private final double mAbsorptionPerMob;
 	private final double mMaxAbsorption;
 	private final int mKilledMobsCap;
@@ -114,7 +111,6 @@ public class Challenge extends Ability {
 			isLevelOne() ? MAX_ABSORPTION_1 : MAX_ABSORPTION_2);
 		mKilledMobsCap = KILLED_MOBS_CAP + (int) CharmManager.getLevel(mPlayer, CHARM_MAX_MOBS);
 		mSpeedPerMob = SPEED_PER + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_SPEED_PER);
-		mSpeedEffect = SPEED_EFFECT_CAP + CharmManager.getLevelPercentDecimal(mPlayer, CHARM_SPEED_MAX);
 		mCDRPerMob = CharmManager.getDuration(mPlayer, CHARM_CDR_PER, CDR_PER);
 		mDuration = CharmManager.getDuration(mPlayer, CHARM_DURATION, DURATION);
 		mCosmetic = CosmeticSkills.getPlayerCosmeticSkill(mPlayer, new ChallengeCS());
@@ -135,15 +131,10 @@ public class Challenge extends Ability {
 		}
 
 		AbsorptionUtils.addAbsorption(mPlayer, mAbsorptionPerMob * mobs.size(), mMaxAbsorption, mDuration);
-
 		mPlugin.mEffectManager.addEffect(mPlayer, PERCENT_DAMAGE_DEALT_EFFECT_NAME,
 			new PercentDamageDealt(mDuration, Math.min(mobs.size() * mPercentDamageDealtPerMob, mPercentDamageDealtEffect))
 				.damageTypes(AFFECTED_DAMAGE_TYPES).deleteOnAbilityUpdate(true));
 
-		if (isLevelTwo()) {
-			mPlugin.mEffectManager.addEffect(mPlayer, SPEED_EFFECT_NAME,
-				new PercentSpeed(mDuration, Math.min(mobs.size() * mSpeedPerMob, mSpeedEffect), SPEED_EFFECT_NAME).deleteOnAbilityUpdate(true));
-		}
 		mobs.stream().filter(mob -> mob instanceof Mob).forEach(mob -> {
 			EntityUtils.applyTaunt(mob, mPlayer);
 			if (mCounterStrike != null) {
@@ -175,6 +166,8 @@ public class Challenge extends Ability {
 			return;
 		}
 
+		mPlugin.mEffectManager.addEffect(mPlayer, SPEED_EFFECT_NAME,
+			new PercentSpeed(mDuration, mKillCount * mSpeedPerMob, SPEED_EFFECT_NAME).deleteOnAbilityUpdate(true));
 		EnumSet.of(ClassAbility.CHALLENGE, ClassAbility.BODYGUARD, ClassAbility.SHIELD_WALL)
 			.forEach(ca -> mPlugin.mTimers.updateCooldown(mPlayer, ca, mCDRPerMob));
 
@@ -214,24 +207,25 @@ public class Challenge extends Ability {
 		return new FormattedDescriptionBuilder<>(() -> INFO, 2)
 			.addDashedLine()
 			.addLine("Increase *Challenge*'s damage boost and absorption").styles(UNDERLINED)
-			.addLine("granted per mob. *Challenge* provides speed for").styles(UNDERLINED)
-			.addLine("each taunted mob.")
+			.addLine("granted per mob.")
 			.addLine()
 			.addStatComparison("Effect: +%p1 -> +%p2 Melee Damage (max +%p2)")
 				.statValues(stat(PERCENT_DAMAGE_DEALT_PER_1),
 					stat(a -> a.mPercentDamageDealtPerMob, PERCENT_DAMAGE_DEALT_PER_2),
 					stat(a -> a.mPercentDamageDealtEffect, PERCENT_DAMAGE_DEALT_EFFECT_2))
 			.addStatComparison("Effect: +%d1 -> +%d2 Absorption (max +%d2)")
-				.statValues(stat(ABSORPTION_PER_MOB_1),
+			.statValues(stat(ABSORPTION_PER_MOB_1),
 					stat(a -> a.mAbsorptionPerMob, ABSORPTION_PER_MOB_2),
 					stat(a -> a.mMaxAbsorption, MAX_ABSORPTION_2))
-			.addStat("Effect: +%p Speed per mob (max +%p)")
+			.addLine()
+			.addLine("When a mob taunted by *Challenge* is killed, gain").styles(UNDERLINED)
+			.addLine("speed and reduce the cooldown of your Guardian")
+			.addLine("abilities.")
+			.addLine()
+			.addStat("Effect: +%p Speed per kill, for %t (max +%p)")
 				.statValues(stat(a -> a.mSpeedPerMob, SPEED_PER),
-					stat(a -> a.mSpeedEffect, SPEED_EFFECT_CAP))
-			.addLine()
-			.addLine("When a mob taunted by *Challenge* is killed, reduce").styles(UNDERLINED)
-			.addLine("the cooldown of your Guardian abilities.")
-			.addLine()
+					stat(a -> a.mDuration, DURATION),
+					stat(a -> a.mSpeedPerMob * a.mKilledMobsCap, SPEED_PER * KILLED_MOBS_CAP))
 			.addStat("Cooldown Reduction: %t (max %t)")
 				.statValues(stat(a -> a.mCDRPerMob, CDR_PER),
 					stat(a -> a.mCDRPerMob * a.mKilledMobsCap, CDR_PER * KILLED_MOBS_CAP))

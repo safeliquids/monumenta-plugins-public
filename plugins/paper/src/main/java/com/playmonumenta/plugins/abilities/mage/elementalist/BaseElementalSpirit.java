@@ -61,7 +61,7 @@ public abstract class BaseElementalSpirit extends Ability {
 			if (mEnemiesAffectedProcessor == null) {
 
 				boolean isElementalArrows = ability == ClassAbility.ELEMENTAL_ARROWS_FIRE || ability == ClassAbility.ELEMENTAL_ARROWS_ICE;
-				double spellDamage = isElementalArrows ? (float) mLevelDamage : SpellPower.getSpellDamage(mPlugin, mPlayer, mLevelDamage);
+				float spellDamage = isElementalArrows ? (float) mLevelDamage : SpellPower.getSpellDamage(mPlugin, mPlayer, (float) mLevelDamage);
 				ItemStatManager.PlayerItemStats playerItemStats = mPlugin.mItemStatManager.getPlayerItemStatsCopy(mPlayer);
 
 				mEnemiesAffectedProcessor = new BukkitRunnable() {

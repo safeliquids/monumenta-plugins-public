@@ -37,7 +37,6 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -614,7 +613,7 @@ public class Xenotopsis extends SerializedLocationBossAbilityGroup {
 
 				// boss appearance changes
 				if (mTicks == 150) {
-					mBossBar.setTitle(Component.text("Xenotopsis, Captain of Death", NamedTextColor.DARK_RED, TextDecoration.BOLD));
+					mBossBar.setTitle("§4§lXenotopsis, Captain of Death"); // magic strings are evil, but are the only way to preserve the formatting
 				}
 
 				if (mTicks == 180) {
