@@ -72,7 +72,7 @@ public class SoundBoss extends BossAbilityGroup {
 
 		List<Spell> spellList;
 		spellList = List.of(new Spell() {
-			final boolean mHasLegs = !(EntityUtils.isFlyingMob(mBoss) || EntityUtils.isWaterMob(mBoss));
+			final boolean mHasLegs = EntityUtils.isWaterMobWithFootsteps(mBoss) || (!EntityUtils.isFlyingMob(mBoss) && !EntityUtils.isWaterMob(mBoss));
 			int mHalfSecondTimer = 0;
 			int mAmbientTimer = 0;
 			int mAmethystChimeTimer = 0;

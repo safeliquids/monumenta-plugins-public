@@ -211,6 +211,12 @@ public class EntityUtils {
 		EntityType.FROG
 	);
 
+	private static final EnumSet<EntityType> WATER_MOBS_WITH_FOOTSTEPS = EnumSet.of(
+		EntityType.DROWNED,
+		EntityType.TURTLE,
+		EntityType.FROG
+	);
+
 	private static final String COOLING_ATTR_NAME = "CoolingSlownessAttr";
 	private static final String STUN_ATTR_NAME = "StunSlownessAttr";
 	private static final String STAGGER_ATTR_NAME = "StaggerSlownessAttr";
@@ -395,6 +401,14 @@ public class EntityUtils {
 
 	public static boolean isWaterMob(EntityType type) {
 		return WATER_MOBS.contains(type);
+	}
+
+	public static boolean isWaterMobWithFootsteps(Entity mob) {
+		return isWaterMobWithFootsteps(mob.getType());
+	}
+
+	public static boolean isWaterMobWithFootsteps(EntityType type) {
+		return WATER_MOBS_WITH_FOOTSTEPS.contains(type);
 	}
 
 	public static boolean isVirtualMob(LivingEntity entity) {
