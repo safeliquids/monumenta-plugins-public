@@ -8,6 +8,11 @@ import com.playmonumenta.plugins.bosses.spells.Spell;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.utils.EntityUtils;
 import java.util.List;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -42,6 +47,9 @@ public class SoundBoss extends BossAbilityGroup {
 
 		@BossParam(help = "distance the mobs must travel to play a footstep")
 		public double STEP_SOUND_DISTANCE = 1F;
+
+		@BossParam(help = "emit step sounds based on surface material")
+		public boolean STEP_ON_BLOCKS = false;
 
 		@BossParam(help = "sounds played when the mob dies")
 		public SoundsList DEATH_SOUND = SoundsList.EMPTY;
@@ -86,7 +94,7 @@ public class SoundBoss extends BossAbilityGroup {
 
 			private void playStepSoundsIfApplicable() {
 				// If the entity should not make any sounds, skip this section.
-				if (!mHasLegs || mParams.STEP_SOUND.isEmpty()) {
+				if (!mHasLegs || (mParams.STEP_SOUND.isEmpty() && !mParams.STEP_ON_BLOCKS)) {
 					return;
 				}
 
@@ -110,6 +118,26 @@ public class SoundBoss extends BossAbilityGroup {
 				}
 				mNextStepSoundDistance = mDistanceTraveled + mParams.STEP_SOUND_DISTANCE;
 				mParams.STEP_SOUND.play(mBoss.getLocation(), 0.15F);
+
+				// block step sounds
+				if (!mParams.STEP_ON_BLOCKS) {
+					return;
+				}
+				final Location loc = mBoss.getLocation();
+				final Block entityBlock = loc.getBlock();
+				Block blockForStepSound = entityBlock;
+				Block belowEntityBlock;
+				if (isOnGround
+						&& loc.getY() - Math.floor(loc.getY()) <= 0.2D
+						&& !(belowEntityBlock = entityBlock.getRelative(BlockFace.DOWN)).getType().isAir()) {
+					blockForStepSound = belowEntityBlock;
+				}
+				if (blockForStepSound.getType().isAir()) {
+					return;
+				}
+				Sound steppingSound = blockForStepSound.getBlockSoundGroup().getStepSound();
+				loc.getWorld().playSound(loc, steppingSound, SoundCategory.HOSTILE, 0.15F, 1.0F);
+				// TODO: Amethyst chime
 			}
 
 			@Override
