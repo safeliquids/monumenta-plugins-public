@@ -7,10 +7,12 @@ import com.playmonumenta.plugins.bosses.parameters.SoundsList;
 import com.playmonumenta.plugins.bosses.spells.Spell;
 import com.playmonumenta.plugins.events.DamageEvent;
 import com.playmonumenta.plugins.utils.EntityUtils;
+import com.playmonumenta.plugins.utils.FastUtils;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
@@ -58,6 +60,8 @@ public class SoundBoss extends BossAbilityGroup {
 	private final Parameters mParams;
 
 	private final double DISTANCE_TRAVELED_FACTOR = 0.6;
+	// minimum number of ticks between subsequent amethyst chimes
+	private final int AMETHYST_CHIME_DELAY = 20;
 
 	public SoundBoss(Plugin plugin, LivingEntity boss) {
 		super(plugin, identityTag, boss);
@@ -71,6 +75,7 @@ public class SoundBoss extends BossAbilityGroup {
 			final boolean mHasLegs = !(EntityUtils.isFlyingMob(mBoss) || EntityUtils.isWaterMob(mBoss));
 			int mHalfSecondTimer = 0;
 			int mAmbientTimer = 0;
+			int mAmethystChimeTimer = 0;
 			double mDistanceTraveled = 0;
 			double mNextStepSoundDistance = mParams.STEP_SOUND_DISTANCE;
 			Vector mPreviousPosition = mBoss.getLocation().toVector();
@@ -96,6 +101,10 @@ public class SoundBoss extends BossAbilityGroup {
 				// If the entity should not make any sounds, skip this section.
 				if (!mHasLegs || (mParams.STEP_SOUND.isEmpty() && !mParams.STEP_ON_BLOCKS)) {
 					return;
+				}
+
+				if (mParams.STEP_ON_BLOCKS) {
+					mAmethystChimeTimer++;
 				}
 
 				// Get horizontal velocity and add its magnitude to distance traveled.
@@ -137,7 +146,14 @@ public class SoundBoss extends BossAbilityGroup {
 				}
 				Sound steppingSound = blockForStepSound.getBlockSoundGroup().getStepSound();
 				loc.getWorld().playSound(loc, steppingSound, SoundCategory.HOSTILE, 0.15F, 1.0F);
-				// TODO: Amethyst chime
+				// amethyst chime (very important)
+				if (mAmethystChimeTimer >= AMETHYST_CHIME_DELAY && Tag.CRYSTAL_SOUND_BLOCKS.isTagged(blockForStepSound.getType())) {
+					// in Vanilla, the volume slowly increases from 0.5 to 1.3 as the entity takes more steps
+					// on amethyst, but maybe we don't need to go that far. Taking 0.66 because it is a constant
+					// somewhere in the middle.
+					loc.getWorld().playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.66F, FastUtils.randomFloatInRange(0.5F, 1.7F));
+					mAmethystChimeTimer = 0;
+				}
 			}
 
 			@Override
