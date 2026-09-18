@@ -107,11 +107,12 @@ public class SoundBoss extends BossAbilityGroup {
 					mAmethystChimeTimer++;
 				}
 
-				// Get horizontal velocity and add its magnitude to distance traveled.
+				// Get change in position (only horizontal if on ground), and add its length to mDistanceTraveled.
 				// The vanilla code multiplies this number by 0.6 for some reason.
 				final boolean isOnGround = mBoss.isOnGround();
 				final boolean isClimbing = mBoss.isClimbing();
-				final Vector newPosition = mBoss.getLocation().toVector();
+				final Location entityLocation = mBoss.getLocation();
+				final Vector newPosition = entityLocation.toVector();
 				final Vector delta = newPosition.clone().subtract(mPreviousPosition);
 				mPreviousPosition = newPosition;
 				if (isOnGround || !isClimbing) {
@@ -120,24 +121,24 @@ public class SoundBoss extends BossAbilityGroup {
 				mDistanceTraveled += delta.length() * DISTANCE_TRAVELED_FACTOR;
 
 				// If the entity has traveled far enough and is on ground, make a sound and advance
-				// nextStepSound. (Vanilla logic is a bit more complicated. Sound is only played if the
-				// 'landing block' is not air.)
+				// nextStepSound.
 				if (mDistanceTraveled < mNextStepSoundDistance || (!isOnGround && !isClimbing)) {
 					return;
 				}
 				mNextStepSoundDistance = mDistanceTraveled + mParams.STEP_SOUND_DISTANCE;
-				mParams.STEP_SOUND.play(mBoss.getLocation(), 0.15F);
+				if (!mParams.STEP_SOUND.isEmpty()) {
+					mParams.STEP_SOUND.play(entityLocation, 0.15F);
+				}
 
 				// block step sounds
 				if (!mParams.STEP_ON_BLOCKS) {
 					return;
 				}
-				final Location loc = mBoss.getLocation();
-				final Block entityBlock = loc.getBlock();
+				final Block entityBlock = entityLocation.getBlock();
 				Block blockForStepSound = entityBlock;
 				Block belowEntityBlock;
 				if (isOnGround
-						&& loc.getY() - Math.floor(loc.getY()) <= 0.2D
+						&& entityLocation.getY() - Math.floor(entityLocation.getY()) <= 0.2D
 						&& !(belowEntityBlock = entityBlock.getRelative(BlockFace.DOWN)).getType().isAir()) {
 					blockForStepSound = belowEntityBlock;
 				}
@@ -145,13 +146,13 @@ public class SoundBoss extends BossAbilityGroup {
 					return;
 				}
 				Sound steppingSound = blockForStepSound.getBlockSoundGroup().getStepSound();
-				loc.getWorld().playSound(loc, steppingSound, SoundCategory.HOSTILE, 0.15F, 1.0F);
+				entityLocation.getWorld().playSound(entityLocation, steppingSound, SoundCategory.HOSTILE, 0.15F, 1.0F);
 				// amethyst chime (very important)
 				if (mAmethystChimeTimer >= AMETHYST_CHIME_DELAY && Tag.CRYSTAL_SOUND_BLOCKS.isTagged(blockForStepSound.getType())) {
 					// in Vanilla, the volume slowly increases from 0.5 to 1.3 as the entity takes more steps
 					// on amethyst, but maybe we don't need to go that far. Taking 0.66 because it is a constant
 					// somewhere in the middle.
-					loc.getWorld().playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.66F, FastUtils.randomFloatInRange(0.5F, 1.7F));
+					entityLocation.getWorld().playSound(entityLocation, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.66F, FastUtils.randomFloatInRange(0.5F, 1.7F));
 					mAmethystChimeTimer = 0;
 				}
 			}
